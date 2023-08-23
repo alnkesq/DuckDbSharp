@@ -1,0 +1,6 @@
+﻿
+obj/
+bin/
+
+tests/DuckDbSharp.Benchmarks/BenchmarkDotNet.Artifacts
+.vs/

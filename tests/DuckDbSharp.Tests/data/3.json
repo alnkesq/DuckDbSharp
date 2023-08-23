@@ -1,0 +1,740 @@
+[
+  {
+    "A": null,
+    "B": "a",
+    "NeverSetStr": null,
+    "Number": 3,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 0,
+    "SomeDate": "2023-10-05T00:00:00Z",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      4,
+      5,
+      6
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val0",
+    "B": "f2-0",
+    "NeverSetStr": null,
+    "Number": 0,
+    "IsMultipleOfThree": true,
+    "Kind": 0,
+    "SplitFlags": 0,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val1",
+    "B": "f2-1",
+    "NeverSetStr": null,
+    "Number": 1,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 1,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val2",
+    "B": "f2-2",
+    "NeverSetStr": null,
+    "Number": 2,
+    "IsMultipleOfThree": false,
+    "Kind": 2,
+    "SplitFlags": 2,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val3",
+    "B": "f2-3",
+    "NeverSetStr": null,
+    "Number": 3,
+    "IsMultipleOfThree": true,
+    "Kind": 0,
+    "SplitFlags": 3,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1,
+      2
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val4",
+    "B": "f2-4",
+    "NeverSetStr": null,
+    "Number": 4,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 0,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": null,
+    "B": "a",
+    "NeverSetStr": null,
+    "Number": 3,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 0,
+    "SomeDate": "2023-10-05T00:00:00Z",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      4,
+      5,
+      6
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val0",
+    "B": "f2-0",
+    "NeverSetStr": null,
+    "Number": 0,
+    "IsMultipleOfThree": true,
+    "Kind": 0,
+    "SplitFlags": 0,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val1",
+    "B": "f2-1",
+    "NeverSetStr": null,
+    "Number": 1,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 1,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val2",
+    "B": "f2-2",
+    "NeverSetStr": null,
+    "Number": 2,
+    "IsMultipleOfThree": false,
+    "Kind": 2,
+    "SplitFlags": 2,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val3",
+    "B": "f2-3",
+    "NeverSetStr": null,
+    "Number": 3,
+    "IsMultipleOfThree": true,
+    "Kind": 0,
+    "SplitFlags": 3,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1,
+      2
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val4",
+    "B": "f2-4",
+    "NeverSetStr": null,
+    "Number": 4,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 0,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": null,
+    "B": "a",
+    "NeverSetStr": null,
+    "Number": 3,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 0,
+    "SomeDate": "2023-10-05T00:00:00Z",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      4,
+      5,
+      6
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val0",
+    "B": "f2-0",
+    "NeverSetStr": null,
+    "Number": 0,
+    "IsMultipleOfThree": true,
+    "Kind": 0,
+    "SplitFlags": 0,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val1",
+    "B": "f2-1",
+    "NeverSetStr": null,
+    "Number": 1,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 1,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val2",
+    "B": "f2-2",
+    "NeverSetStr": null,
+    "Number": 2,
+    "IsMultipleOfThree": false,
+    "Kind": 2,
+    "SplitFlags": 2,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val3",
+    "B": "f2-3",
+    "NeverSetStr": null,
+    "Number": 3,
+    "IsMultipleOfThree": true,
+    "Kind": 0,
+    "SplitFlags": 3,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1,
+      2
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  },
+  {
+    "A": "val4",
+    "B": "f2-4",
+    "NeverSetStr": null,
+    "Number": 4,
+    "IsMultipleOfThree": false,
+    "Kind": 1,
+    "SplitFlags": 0,
+    "SomeDate": "0001-01-01T00:00:00",
+    "SomeOptionalDate": null,
+    "FListInt": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  }
+]

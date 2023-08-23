@@ -1,0 +1,8 @@
+RootSql(select 1 as TeamId, [ { EmployeeId: 6::long, FirstName: 'Susan', LastName: 'Smith' }, { EmployeeId: 7::long, FirstName: 'John', LastName: 'Doe' }, ] as Members union select 2 as TeamId, [] as Members) -> StructField(Members) -> ListElement|EmployeeId|1
+RootSql(select 1 as TeamId, [ { EmployeeId: 6::long, FirstName: 'Susan', LastName: 'Smith' }, { EmployeeId: 7::long, FirstName: 'John', LastName: 'Doe' }, ] as Members union select 2 as TeamId, [] as Members) -> StructField(Members) -> ListElement|FirstName|1
+RootSql(select 1 as TeamId, [ { EmployeeId: 6::long, FirstName: 'Susan', LastName: 'Smith' }, { EmployeeId: 7::long, FirstName: 'John', LastName: 'Doe' }, ] as Members union select 2 as TeamId, [] as Members) -> StructField(Members) -> ListElement|LastName|1
+RootSqlHash(GetEmployeeById, d5yu0BPOWroArX1Ck9Y6xvXTx/Mmxkd8FhKJ8mSnDYs=)|EmployeeId|1
+RootSqlHash(GetEmployeeById, d5yu0BPOWroArX1Ck9Y6xvXTx/Mmxkd8FhKJ8mSnDYs=)|FirstName|1
+RootSqlHash(GetEmployeeById, d5yu0BPOWroArX1Ck9Y6xvXTx/Mmxkd8FhKJ8mSnDYs=)|LastName|1
+RootSqlHash(teams_with_employees, yOCj7pXNZmXLB2my6sbXkzGmkR48L/VJAxsT4c1V2W4=)|Members|1
+RootSqlHash(teams_with_employees, yOCj7pXNZmXLB2my6sbXkzGmkR48L/VJAxsT4c1V2W4=)|TeamId|1

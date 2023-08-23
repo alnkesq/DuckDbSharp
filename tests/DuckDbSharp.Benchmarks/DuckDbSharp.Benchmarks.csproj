@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="BenchmarkDotNet" Version="0.13.7" />
+	  <PackageReference Include="DuckDB.NET.Data.Full" Version="0.8.1" />
+	  <PackageReference Include="protobuf-net" Version="3.2.26" />
+	  <PackageReference Include="Dapper" Version="2.0.151" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DuckDbSharp\DuckDbSharp.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\DuckDbSharp.snk</AssemblyOriginatorKeyFile>
+    <!--<PublishAot>true</PublishAot>--> <!-- Setting PublishAot to true causes ClrHosting to not find our entrypoints.  -->
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AgileObjects.ReadableExpressions" Version="4.0.0" />
+    <PackageReference Include="Lokad.ILPack" Version="0.2.0" />
+  </ItemGroup>
+</Project>

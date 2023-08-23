@@ -1,0 +1,47 @@
+[
+  {
+    "A": null,
+    "B": null,
+    "NeverSetStr": null,
+    "Number": 0,
+    "IsMultipleOfThree": false,
+    "Kind": 0,
+    "SplitFlags": {
+      "RemoveEmptyEntries": false,
+      "TrimEntries": false
+    },
+    "SomeDate": null,
+    "SomeOptionalDate": null,
+    "FListInt": [
+      4,
+      5,
+      6
+    ],
+    "FListListInt": [
+      [
+        33,
+        44
+      ],
+      [
+        56
+      ]
+    ],
+    "FListSub": [
+      {
+        "Sub1": 67,
+        "Sub2": 68,
+        "Sub3": 0
+      },
+      {
+        "Sub1": 6,
+        "Sub2": 99,
+        "Sub3": 0
+      }
+    ],
+    "FSub": {
+      "Sub1": 6,
+      "Sub2": 44,
+      "Sub3": 0
+    }
+  }
+]

@@ -1,0 +1,190 @@
+{
+  "Queries": [
+    {
+      "Sql": "select * from myfunc()",
+      "JsonStructuralTypeReference": "8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91"
+    }
+  ],
+  "Types": [
+    {
+      "Id": "0000000000000000000000000000000004000000000000000000000000000000",
+      "Kind": "DUCKDB_TYPE_INTEGER"
+    },
+    {
+      "Id": "0000000000000000000000000000000005000000000000000000000000000000",
+      "Kind": "DUCKDB_TYPE_BIGINT"
+    },
+    {
+      "Id": "0000000000000000000000000000000011000000000000000000000000000000",
+      "Kind": "DUCKDB_TYPE_VARCHAR"
+    },
+    {
+      "Id": "6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5",
+      "Kind": "DUCKDB_TYPE_STRUCT",
+      "StructureFields": [
+        {
+          "Name": "Num",
+          "FieldTypeId": "0000000000000000000000000000000005000000000000000000000000000000"
+        },
+        {
+          "Name": "Str",
+          "FieldTypeId": "0000000000000000000000000000000011000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "Id": "ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f",
+      "Kind": "DUCKDB_TYPE_STRUCT",
+      "StructureFields": [
+        {
+          "Name": "Num",
+          "FieldTypeId": "0000000000000000000000000000000005000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "Id": "1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76",
+      "Kind": "DUCKDB_TYPE_STRUCT",
+      "StructureFields": [
+        {
+          "Name": "Q",
+          "FieldTypeId": "0000000000000000000000000000000004000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "Id": "5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297",
+      "Kind": "DUCKDB_TYPE_LIST",
+      "ElementTypeId": "0000000000000000000000000000000004000000000000000000000000000000"
+    },
+    {
+      "Id": "eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514",
+      "Kind": "DUCKDB_TYPE_LIST",
+      "ElementTypeId": "1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76"
+    },
+    {
+      "Id": "8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a",
+      "Kind": "DUCKDB_TYPE_STRUCT",
+      "StructureFields": [
+        {
+          "Name": "TheVal",
+          "FieldTypeId": "0000000000000000000000000000000004000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "Id": "2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d",
+      "Kind": "DUCKDB_TYPE_LIST",
+      "ElementTypeId": "8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a"
+    },
+    {
+      "Id": "e6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7",
+      "Kind": "DUCKDB_TYPE_STRUCT",
+      "StructureFields": [
+        {
+          "Name": "TheVal",
+          "FieldTypeId": "0000000000000000000000000000000004000000000000000000000000000000"
+        },
+        {
+          "Name": "Val2",
+          "FieldTypeId": "0000000000000000000000000000000004000000000000000000000000000000"
+        },
+        {
+          "Name": "B",
+          "FieldTypeId": "0000000000000000000000000000000011000000000000000000000000000000"
+        },
+        {
+          "Name": "EvenInner",
+          "FieldTypeId": "1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76"
+        },
+        {
+          "Name": "ListOfIntInner",
+          "FieldTypeId": "5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297"
+        },
+        {
+          "Name": "ListOfOptIntInner",
+          "FieldTypeId": "5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297"
+        },
+        {
+          "Name": "ListOfObjs",
+          "FieldTypeId": "eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514"
+        },
+        {
+          "Name": "ListOfNonNullStructs",
+          "FieldTypeId": "2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d"
+        },
+        {
+          "Name": "ListOfOptionalStructs",
+          "FieldTypeId": "2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d"
+        }
+      ]
+    },
+    {
+      "Id": "0000000000000000000000000000000012000000000000000000000000000000",
+      "Kind": "DUCKDB_TYPE_BLOB"
+    },
+    {
+      "Id": "9a993835d690bcd8edadd882bd59e0a1877932ae6fc5319893e7fa6930728082",
+      "Kind": "DUCKDB_TYPE_LIST",
+      "ElementTypeId": "6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5"
+    },
+    {
+      "Id": "8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91",
+      "Kind": "DUCKDB_TYPE_STRUCT",
+      "StructureFields": [
+        {
+          "Name": "Id",
+          "FieldTypeId": "0000000000000000000000000000000004000000000000000000000000000000"
+        },
+        {
+          "Name": "WithNullishDefault",
+          "FieldTypeId": "6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5"
+        },
+        {
+          "Name": "SomeStruct",
+          "FieldTypeId": "ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f"
+        },
+        {
+          "Name": "SomeOptionalStruct",
+          "FieldTypeId": "ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f"
+        },
+        {
+          "Name": "InnerObj",
+          "FieldTypeId": "e6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7"
+        },
+        {
+          "Name": "C",
+          "FieldTypeId": "0000000000000000000000000000000011000000000000000000000000000000"
+        },
+        {
+          "Name": "ListOfInt",
+          "FieldTypeId": "5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297"
+        },
+        {
+          "Name": "ListOfOptInt",
+          "FieldTypeId": "5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297"
+        },
+        {
+          "Name": "Bytes",
+          "FieldTypeId": "0000000000000000000000000000000012000000000000000000000000000000"
+        },
+        {
+          "Name": "ListOfObjs",
+          "FieldTypeId": "eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514"
+        },
+        {
+          "Name": "ListOfNonNullStructs",
+          "FieldTypeId": "2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d"
+        },
+        {
+          "Name": "ListOfOptionalStructs",
+          "FieldTypeId": "2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d"
+        },
+        {
+          "Name": "ListWithNullishDefault",
+          "FieldTypeId": "9a993835d690bcd8edadd882bd59e0a1877932ae6fc5319893e7fa6930728082"
+        }
+      ]
+    }
+  ]
+}

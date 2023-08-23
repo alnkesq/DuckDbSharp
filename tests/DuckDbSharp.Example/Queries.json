@@ -1,0 +1,66 @@
+{
+  "Queries": [
+    {
+      "Sql": "select \r\n    ? as EmployeeId,\r\n    \u0027first\u0027 as FirstName,\r\n    \u0027last\u0027 as LastName,",
+      "ParameterTypes": [
+        "System.Int64"
+      ],
+      "JsonStructuralTypeReference": "94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870"
+    },
+    {
+      "Sql": "select\r\n    1 as TeamId,\r\n    [\r\n        { EmployeeId: 6::long, FirstName: \u0027Susan\u0027, LastName: \u0027Smith\u0027 },\r\n        { EmployeeId: 7::long, FirstName: \u0027John\u0027, LastName: \u0027Doe\u0027 },\r\n    ] as Members\r\nunion\r\nselect\r\n    2 as TeamId,\r\n    [] as Members",
+      "JsonStructuralTypeReference": "93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488"
+    }
+  ],
+  "Types": [
+    {
+      "Id": "0000000000000000000000000000000005000000000000000000000000000000",
+      "Kind": "DUCKDB_TYPE_BIGINT"
+    },
+    {
+      "Id": "0000000000000000000000000000000011000000000000000000000000000000",
+      "Kind": "DUCKDB_TYPE_VARCHAR"
+    },
+    {
+      "Id": "94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870",
+      "Kind": "DUCKDB_TYPE_STRUCT",
+      "StructureFields": [
+        {
+          "Name": "EmployeeId",
+          "FieldTypeId": "0000000000000000000000000000000005000000000000000000000000000000"
+        },
+        {
+          "Name": "FirstName",
+          "FieldTypeId": "0000000000000000000000000000000011000000000000000000000000000000"
+        },
+        {
+          "Name": "LastName",
+          "FieldTypeId": "0000000000000000000000000000000011000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "Id": "0000000000000000000000000000000004000000000000000000000000000000",
+      "Kind": "DUCKDB_TYPE_INTEGER"
+    },
+    {
+      "Id": "a7242c7e964cbcb6328de874bf0fab4ca7899d37caf4d0b8edf050935781d997",
+      "Kind": "DUCKDB_TYPE_LIST",
+      "ElementTypeId": "94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870"
+    },
+    {
+      "Id": "93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488",
+      "Kind": "DUCKDB_TYPE_STRUCT",
+      "StructureFields": [
+        {
+          "Name": "TeamId",
+          "FieldTypeId": "0000000000000000000000000000000004000000000000000000000000000000"
+        },
+        {
+          "Name": "Members",
+          "FieldTypeId": "a7242c7e964cbcb6328de874bf0fab4ca7899d37caf4d0b8edf050935781d997"
+        }
+      ]
+    }
+  ]
+}
