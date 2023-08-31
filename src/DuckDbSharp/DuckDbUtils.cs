@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -435,7 +436,9 @@ namespace DuckDbSharp
             options.QueryTypeCachePath ??= Path.ChangeExtension(options.DestinationPath, ".json");
             if (File.Exists(options.QueryTypeCachePath))
             {
-                options.QueryTypeCache = JsonSerializer.Deserialize<QueryTypeCache>(File.ReadAllText(options.QueryTypeCachePath));
+                var settings = new JsonSerializerOptions();
+                settings.Converters.Add(new JsonStringEnumConverter());
+                options.QueryTypeCache = JsonSerializer.Deserialize<QueryTypeCache>(File.ReadAllText(options.QueryTypeCachePath), settings);
             }
             else
                 options.QueryTypeCache = new();
@@ -622,7 +625,9 @@ namespace DuckDbSharp
             writer.Write(ctx2.ModuleBuilder.GetTypes());
             writer.Complete();
             File.WriteAllText(options.DestinationPath, sw.ToString());
-            File.WriteAllText(options.QueryTypeCachePath, JsonSerializer.Serialize(options.QueryTypeCache, new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, WriteIndented = true }));
+            var jsonSettings = new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, WriteIndented = true };
+            jsonSettings.Converters.Add(new JsonStringEnumConverter());
+            File.WriteAllText(options.QueryTypeCachePath, JsonSerializer.Serialize(options.QueryTypeCache, jsonSettings).Replace("\r", null));
         }
 
 
