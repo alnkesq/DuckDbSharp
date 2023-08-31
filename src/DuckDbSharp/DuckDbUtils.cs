@@ -543,7 +543,7 @@ namespace DuckDbSharp
                     }
                 }
                 alwaysNonNullFields = NullabilityDetection.FindAlwaysNonNullFields(conn, ctx, neverNullCache, options);
-                File.WriteAllLines(cacheFile, neverNullCache.Select(x => $"{x.Key.Path}|{x.Key.FieldName}|{(x.Value ? 1 : 0)}").Order(StringComparer.OrdinalIgnoreCase));
+                File.WriteAllText(cacheFile, string.Join(null, neverNullCache.Select(x => $"{x.Key.Path}|{x.Key.FieldName}|{(x.Value ? 1 : 0)}\n").Order(StringComparer.OrdinalIgnoreCase)));
                 specToGeneratedType.Clear();
             }
 
@@ -553,7 +553,7 @@ namespace DuckDbSharp
 
             if (destinationPathForSerializers != null)
             {
-                File.WriteAllText(destinationPathForSerializers, GenerateCSharpSerializationMethods(conn, GetNamespaceAndName(options.FullTypeNameForAotSerializers ?? "AotSerializers", options.Namespace), options.Specifications, specToGeneratedType, options));
+                File.WriteAllText(destinationPathForSerializers, GenerateCSharpSerializationMethods(conn, GetNamespaceAndName(options.FullTypeNameForAotSerializers ?? "AotSerializers", options.Namespace), options.Specifications, specToGeneratedType, options).Replace("\r", null));
             }
             var typeForQueries = GetNamespaceAndName(options.FullTypeNameForQueries ?? "Queries", options.Namespace);
             var sw = new StringWriter();
@@ -624,7 +624,7 @@ namespace DuckDbSharp
             writer.WriteLine("    }");
             writer.Write(ctx2.ModuleBuilder.GetTypes());
             writer.Complete();
-            File.WriteAllText(options.DestinationPath, sw.ToString());
+            File.WriteAllText(options.DestinationPath, sw.ToString().Replace("\r", null));
             var jsonSettings = new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, WriteIndented = true };
             jsonSettings.Converters.Add(new JsonStringEnumConverter());
             File.WriteAllText(options.QueryTypeCachePath, JsonSerializer.Serialize(options.QueryTypeCache, jsonSettings).Replace("\r", null));
