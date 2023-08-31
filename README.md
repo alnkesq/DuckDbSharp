@@ -21,7 +21,7 @@ Notes:
   - Additionally, ADO.NET is very unergonomic to use unless you add an ORM on top of it. Most existing ORMs however don't work well with sublists/subfields. This library deserializes/serializes directly on top of CLR POCO objects, and can generate (and keep up to date) the type definitions for a better IDE experience.
 
 - Exporting methods as scalar functions is not supported, only as table functions (DuckDB doesn't currently provide C APIs for that)
-- Until a small patch is upstreamed to DuckDB, you'll have to compile your own DuckDB binary.
+- Until a [small patch](https://github.com/alnkesq/DuckDbSharp/blob/main/src/duckdb.patch) is upstreamed to DuckDB, you'll have to compile your own DuckDB binary.
 
 ## Usage
 
