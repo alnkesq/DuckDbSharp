@@ -9,7 +9,16 @@
     <!--<PublishAot>true</PublishAot>--> <!-- Setting PublishAot to true causes ClrHosting to not find our entrypoints.  -->
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	  
+	<!--
+	    We fetch the native duckdb library from another project's NuGet package.
+		  Note however that this dependency doesn't include duckdb_create_struct_type() and duckdb_create_enum_type(),
+		  so some tests will fail and returning structs/enums from C# will throw "Unable to find an entry point named 'duckdb_create_struct_type' in DLL 'duckdb'".
+		
+		  Alternatively, you can compile your own duckdb.dll with the provided patch (duckdb.patch), comment out this dependency, and set the DUCKDBSHARP_DUCKDB_DLL to the path
+		  of your newly compiled duckdb.dll.
+	-->
+	<PackageReference Include="DuckDB.NET.Bindings.Full" Version="0.8.1" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AgileObjects.ReadableExpressions" Version="4.0.0" />
