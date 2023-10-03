@@ -79,8 +79,8 @@ SELECT * FROM GetUsers('US')
 Time to read ~100,000 rows of Northwind customers. In all 4 cases, the final result is a `List<Customer>`.
 |                        Library |     Mean |   Error |  StdDev | Description
 |------------------------------ |---------:|--------:|--------:|--------------
-| **DuckDbSharp (this project)** | **144.1 ms** | 1.61 ms | 1.26 ms |SELECT * FROM customer
-| DuckDB.NET + Dapper | 434.2 ms | 4.72 ms | 3.94 ms | SELECT * FROM customer
+| **DuckDbSharp (this project)** | **145.4 ms** | 2.63 ms | 2.46 ms |SELECT * FROM customer
+| DuckDB.NET + Dapper | 177.2 ms | 2.88 ms | 2.69 ms | SELECT * FROM customer
 | Protobuf-net | **131.3 ms** | 2.52 ms | 2.81 ms | Deserialize from MemoryStream of protos
 | Newtonsoft JSON | 241.7 ms | 2.93 ms | 2.60 ms | Deserialize from MemoryStream of JSON
 
