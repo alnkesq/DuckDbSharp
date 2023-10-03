@@ -45,13 +45,13 @@ See [detailed instructions](#getting-started) below.
 ### Calling DuckDB from .NET (inline sql)
 ```csharp
 using var db = ThreadSafeTypedDuckDbConnection.CreateInMemory();
-foreach (var user in db.ExecuteQuery<User>("select * from user"))
+foreach (var user in db.Execute<User>("select * from user"))
 {
     
 }
 ```
 
-You can also use value tuples (`ExecuteQuery<(string A, int B)>("select 'a', 42")`), but keep in mind that only column order matters, since tuple member names are erased at runtime.
+You can also use value tuples (`Execute<(string A, int B)>("select 'a', 42")`), but keep in mind that only column order matters, since tuple member names are erased at runtime.
 
 ### Calling .NET from DuckDB
 ```csharp
