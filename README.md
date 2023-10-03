@@ -21,7 +21,7 @@ Notes:
   - Additionally, ADO.NET is very unergonomic to use unless you add an ORM on top of it. Most existing ORMs however don't work well with sublists/subfields. This library deserializes/serializes directly on top of CLR POCO objects, and can generate (and keep up to date) the type definitions for a better IDE experience.
 
 - Exporting methods as scalar functions is not supported, only as table functions (DuckDB doesn't currently provide C APIs for that)
-- Until a [small patch](https://github.com/alnkesq/DuckDbSharp/blob/main/src/duckdb.patch) is upstreamed to DuckDB, you'll have to compile your own DuckDB binary.
+- Until a [small patch](https://github.com/duckdb/duckdb/pull/8788) is upstreamed to DuckDB, you'll have to compile your own DuckDB binary if you want to pass enums from C# to DuckDB.
 
 ## Usage
 
@@ -85,9 +85,6 @@ Time to read ~100,000 rows of Northwind customers. In all 4 cases, the final res
 | Newtonsoft JSON | 241.7 ms | 2.93 ms | 2.60 ms | Deserialize from MemoryStream of JSON
 
 Note: while protobuf-net is slightly faster, its use cases is very different (serialization/deserialization only, with no query support)
-
-## Compiling
-This library currently requires a [patch](https://github.com/alnkesq/DuckDbSharp/blob/main/src/duckdb.patch) on top of the official DuckDB repository, which adds `duckdb_create_struct_type()` and `duckdb_create_enum_type()`.
 
 ## Advanced features
 ### Customizing (de)serialization
