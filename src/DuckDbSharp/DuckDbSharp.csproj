@@ -18,7 +18,7 @@
 		  Alternatively, you can compile your own duckdb.dll with the provided patch (duckdb.patch), comment out this dependency, and set the DUCKDBSHARP_DUCKDB_DLL to the path
 		  of your newly compiled duckdb.dll.
 	-->
-	<PackageReference Include="DuckDB.NET.Bindings.Full" Version="0.8.1" />
+	<PackageReference Include="DuckDB.NET.Bindings.Full" Version="0.9.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AgileObjects.ReadableExpressions" Version="4.0.0" />
