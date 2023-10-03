@@ -10,17 +10,19 @@
     <RepositoryUrl>https://github.com/alnkesq/DuckDbSharp</RepositoryUrl>
     <PackageProjectUrl>https://github.com/alnkesq/DuckDbSharp</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-	  <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
-	  <Version>0.9.0.1</Version>
-	  <PackageIcon>DuckDB.jpg</PackageIcon>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+    <Version>0.9.0.1</Version>
+    <PackageIcon>DuckDB.jpg</PackageIcon>
+    <Copyright>(c) 2023 Alnkesq</Copyright>
+    <Authors>Alnkesq</Authors>
+    <PackageTags>DuckDB; OLAP; SQL; columnar storage</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyOriginatorKeyFile>..\DuckDbSharp.snk</AssemblyOriginatorKeyFile>
     <!--<PublishAot>true</PublishAot>--> <!-- Setting PublishAot to true causes ClrHosting to not find our entrypoints.  -->
   </PropertyGroup>
   <ItemGroup>
-    <None Include="DuckDB.jpg">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="DuckDB.jpg" Pack="true" PackagePath="\" />
 	<!--
 	    We fetch the native duckdb library from another project's NuGet package.
 		  Note however that this dependency doesn't include duckdb_create_enum_type(),
