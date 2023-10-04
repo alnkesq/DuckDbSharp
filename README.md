@@ -1,3 +1,5 @@
+[![protobuf-net](https://img.shields.io/nuget/v/DuckDbSharp.svg)](https://www.nuget.org/packages/DuckDbSharp/)
+
 # DuckDbSharp
 
 DuckDbSharp is a bidirectional interoperability layer between [DuckDB](https://github.com/duckdb/duckdb) and .NET.
