@@ -1,6 +1,8 @@
 using DuckDbSharp.Bindings;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 
 namespace DuckDbSharp
 {
@@ -19,13 +21,28 @@ namespace DuckDbSharp
 
         internal Dictionary<string, object> RegisteredFunctions = new();
 
-        internal unsafe static OwnedDuckDbConnection AcquireConnection(string? path, out DuckDbDatabase ownerDb)
+
+
+        internal unsafe static OwnedDuckDbConnection AcquireConnection(string? path, out DuckDbDatabase ownerDb, int timeoutMs = 30000)
         {
             lock (dbs)
             {
                 if (path == null || !dbs.TryGetValue(path, out var db))
                 {
-                    db = new DuckDbDatabase(DuckDbUtils.OpenDatabase(path));
+                    var sw = Stopwatch.StartNew();
+                    while (true)
+                    {
+                        try
+                        {
+                            db = new DuckDbDatabase(DuckDbUtils.OpenDatabase(path));
+                            break;
+                        }
+                        catch (DuckDbException) when (sw.ElapsedMilliseconds < timeoutMs)
+                        {
+                            Console.Error.WriteLine($"[DataIO] Database {path} is locked, waiting...");
+                            Thread.Sleep(2000);
+                        }
+                    }
                     if (path != null)
                         dbs.Add(path, db);
                 }
