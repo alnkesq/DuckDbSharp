@@ -113,5 +113,14 @@ namespace DuckDbSharp.Types
             return ((Guid)this).ToString();
         }
 #endif
+
+        public ulong GetLower()
+        {
+            return lower;
+        }
+        public long GetUpper()
+        {
+            return upper;
+        }
     }
 }
