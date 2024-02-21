@@ -71,7 +71,7 @@ namespace DuckDbSharp.Functions
                     var enumInfo = primitiveType.EnumInfo;
                     fixed (byte** a = BindingUtils.ToPointerArray<ScopedString, byte>(enumInfo.Members, x => x.Pointer))
                     {
-                        return Methods.duckdb_create_enum_type(enumInfo.EnumName, a, (ulong)enumInfo.Members.Length);
+                        return Methods.duckdb_create_enum_type(a, (ulong)enumInfo.Members.Length);
                     }
                 }
                 else

@@ -1,5 +1,6 @@
 using DuckDbSharp.Bindings;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
@@ -14,13 +15,32 @@ namespace DuckDbSharp.Reflection
 
         internal static StructuralTypeHash Hash(DUCKDB_TYPE type)
         {
-            return new StructuralTypeHash(0, (uint)type);
+            return new StructuralTypeHash(0, (uint)DuckDbTypeToDuckDbStableType(type));
         }
+
+        public static DUCKDB_TYPE_STABLE DuckDbTypeToDuckDbStableType(DUCKDB_TYPE type)
+        {
+            return DuckDbTypeToDuckDbTypeStable[(int)type];
+        }
+
+        static StructuralTypeHash()
+        {
+            var nonStableValues = Enum.GetValues<DUCKDB_TYPE>();
+            var nonStableToStable = new DUCKDB_TYPE_STABLE[nonStableValues.Max(x => (int)x) + 1];
+            foreach (var nonStable in nonStableValues)
+            {
+                var stable = Enum.Parse<DUCKDB_TYPE_STABLE>(nonStable.ToString());
+                nonStableToStable[(int)nonStable] = stable;
+            }
+            DuckDbTypeToDuckDbTypeStable = nonStableToStable;
+        }
+
+        private readonly static DUCKDB_TYPE_STABLE[] DuckDbTypeToDuckDbTypeStable;
 
         internal static StructuralTypeHash Hash(ReadOnlySpan<byte> span, DUCKDB_TYPE type)
         {
             var h = MemoryMarshal.Cast<byte, UInt128>(SHA256.HashData(span));
-            return new StructuralTypeHash(h[0], h[1] + (uint)type);
+            return new StructuralTypeHash(h[0], h[1] + (uint)DuckDbTypeToDuckDbStableType(type));
         }
 
         internal static StructuralTypeHash Parse(string hash)
