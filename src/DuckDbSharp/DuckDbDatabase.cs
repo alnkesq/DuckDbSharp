@@ -11,6 +11,7 @@ namespace DuckDbSharp
         internal List<IDisposable>? ToDispose;
         private OwnedDuckDbDatabase database;
         private int usageCount;
+        public List<string>? _attachedFiles;
         private DuckDbDatabase(OwnedDuckDbDatabase database)
         {
             this.database = database;

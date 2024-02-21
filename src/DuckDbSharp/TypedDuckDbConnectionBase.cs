@@ -17,7 +17,7 @@ namespace DuckDbSharp
 
         internal protected List<EnumerableParameterSlot> EnumerableParameterSlots => database.EnumerableParameterSlots;
 
-        private DuckDbDatabase database;
+        protected DuckDbDatabase database;
         public OwnedDuckDbConnection Handle => conn;
 
         protected TypedDuckDbConnectionBase(OwnedDuckDbConnection conn, DuckDbDatabase database)
@@ -140,7 +140,7 @@ namespace DuckDbSharp
 
         public bool LogQueries { get; set; }
 
-        protected void MaybeLog(string sql)
+        protected virtual void MaybeLog(string sql)
         {
             if (LogQueries)
                 Console.Error.WriteLine("[DuckDB] " + DuckDbUtils.ToSingleLineSql(sql));
