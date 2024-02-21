@@ -17,7 +17,14 @@ namespace DuckDbSharp.Types
     [SuppressMessage("Design", "CA1036:Override methods on comparable types")]
     public readonly struct DuckDbUuid : IEquatable<DuckDbUuid>, IComparable<DuckDbUuid>
     {
-        
+        private DuckDbUuid(long upper, ulong lower)
+        {
+            this.upper = upper;
+            this.lower = lower;
+        }
+
+        public static DuckDbUuid FromUpperLower(long upper, ulong lower) => new DuckDbUuid(upper, lower);
+
         public DuckDbUuid(ReadOnlySpan<byte> uuidBigEndian)
         {
             if (uuidBigEndian.Length != 16) throw new ArgumentException();
@@ -29,6 +36,8 @@ namespace DuckDbSharp.Types
             upper ^= (1L << 63);
 
         }
+
+
 
         [FieldOffset(0)]
         private readonly ulong lower;
