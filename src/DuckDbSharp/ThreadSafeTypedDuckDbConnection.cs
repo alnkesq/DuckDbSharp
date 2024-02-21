@@ -40,7 +40,7 @@ namespace DuckDbSharp
             }
         }
 
-        public override IEnumerable<T> Execute<T>(string sql, params object[]? parameters)
+        public override IEnumerable<T> Execute<T>(string sql, params object?[]? parameters)
         {
             IEnumerator<T[]> enumerator;
             lock (this)
