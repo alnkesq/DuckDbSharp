@@ -11,9 +11,9 @@
     <PackageProjectUrl>https://github.com/alnkesq/DuckDbSharp</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
-    <Version>0.9.0.1</Version>
+    <Version>0.10.0.1</Version>
     <PackageIcon>DuckDB.jpg</PackageIcon>
-    <Copyright>(c) 2023 Alnkesq</Copyright>
+    <Copyright>(c) 2023-2024 Alnkesq</Copyright>
     <Authors>Alnkesq</Authors>
     <PackageTags>DuckDB; OLAP; SQL; columnar storage</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -23,15 +23,8 @@
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     <None Include="DuckDB.jpg" Pack="true" PackagePath="\" />
-	<!--
-	    We fetch the native duckdb library from another project's NuGet package.
-		  Note however that this dependency doesn't include duckdb_create_enum_type(),
-		  so some tests will fail and returning structs/enums from C# will throw "Unable to find an entry point named 'duckdb_create_enum_type' in DLL 'duckdb'".
-		
-		  Alternatively, you can compile your own duckdb.dll with the provided patch (duckdb.patch), comment out this dependency, and set the DUCKDBSHARP_DUCKDB_DLL to the path
-		  of your newly compiled duckdb.dll.
-	-->
-	<PackageReference Include="DuckDB.NET.Bindings.Full" Version="0.9.0" />
+	<!--TODO: Reference DuckDB.NET.Bindings.Full 0.10.0 once it's published-->
+	<!--<PackageReference Include="DuckDB.NET.Bindings.Full" Version="0.9.0" />-->
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AgileObjects.ReadableExpressions" Version="4.0.0" />
