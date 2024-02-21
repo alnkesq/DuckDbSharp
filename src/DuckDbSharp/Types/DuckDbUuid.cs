@@ -46,7 +46,7 @@ namespace DuckDbSharp.Types
 
         public override int GetHashCode()
         {
-            return lower.GetHashCode();
+            return HashCode.Combine(lower, upper);
         }
 
         public bool Equals(DuckDbUuid other)
