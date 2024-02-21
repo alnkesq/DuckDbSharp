@@ -116,13 +116,19 @@ namespace DuckDbSharp.Reflection
             if (isNullish == null)
             {
                 var innerType = getValue.Type;
-                if (innerType.IsValueType && innerType.GetCustomAttribute<DuckDbDefaultValueIsNullishAttribute>() != null)
+                if (IsDefaultIsNullishValueType(innerType))
                     isNullish = IsDefaultStructValueMethod.MakeGenericMethod(innerType);
             }
 
             return (getValue, AndConditions(hasParent, hasOuter, hasInner, isNullish != null ? Expression.Not(Expression.Call(null, isNullish, getValue)) : null));
         }
 
+        internal static bool IsDefaultIsNullishValueType(Type innerType)
+        {
+            return innerType.IsValueType &&
+                (innerType.GetCustomAttribute<DuckDbDefaultValueIsNullishAttribute>() != null) ||
+                false;
+        }
 
         public static (Expression GetValue, Expression HasValue) UnwrapNullableCore(Expression maybeNullable)
         {

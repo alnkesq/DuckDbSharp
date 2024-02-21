@@ -110,7 +110,7 @@ namespace DuckDbSharp.Reflection
                 if (!IsValidCSharpIdentifier(name)) throw new NotSupportedException($"Detected column or field with an invalid name: '{name}'. Consider adding column aliases.");
                 var couldBeNull = neverNullFields == null || !neverNullFields.Contains(name);
                 var type = CreateClrType(member.FieldType, name, new TypePath { Parent = path, StructField = name });
-                if (couldBeNull && type.IsValueType && type.GetCustomAttribute<DuckDbDefaultValueIsNullishAttribute>() == null)
+                if (couldBeNull && type.IsValueType && !SerializerCreationContext.IsDefaultIsNullishValueType(type))
                 {
                     type = typeof(Nullable<>).MakeGenericType(type);
                 }
