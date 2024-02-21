@@ -54,6 +54,7 @@ namespace DuckDbSharp.Reflection
         private static Type? ParsePrimitiveType(string name, bool throwOnError)
         {
             name = name.Trim();
+            if (name == "blob") return typeof(byte[]);
             var type = CSharpCodeWriter.PrimitiveTypes.FirstOrDefault(x => x.CSharp == name).Type;
             if (type != null) return type;
             type = typeof(object).Assembly.GetType("System." + name, throwOnError: throwOnError);
