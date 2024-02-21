@@ -119,11 +119,11 @@ namespace DuckDbSharp
             }
         }
 
-        public override void CreateTable<T>(string name, bool replaceIfExisting = false)
+        public override void CreateTable<T>(string name, bool replaceIfExisting = false, string[]? primaryKey = null)
         {
             lock (this)
             {
-                base.CreateTable<T>(name, replaceIfExisting);
+                base.CreateTable<T>(name, replaceIfExisting, primaryKey);
             }
         }
 

@@ -4,6 +4,8 @@ using DuckDbSharp.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -133,7 +135,7 @@ namespace DuckDbSharp
                 Console.Error.WriteLine("[DuckDB] " + DuckDbUtils.ToSingleLineSql(sql));
         }
 
-        public virtual unsafe void CreateTable<T>(string name, bool replaceIfExisting = false)
+        public virtual unsafe void CreateTable<T>(string name, bool replaceIfExisting = false, string[]? primaryKey = null)
         {
             var sb = new StringBuilder(replaceIfExisting ? "CREATE OR REPLACE TABLE " : "CREATE TABLE ");
             sb.Append(name);
@@ -149,6 +151,15 @@ namespace DuckDbSharp
                 sb.Append(' ');
                 var structural = DuckDbStructuralType.CreateStructuralType(col.FieldType);
                 sb.Append(structural.ToSql());
+            }
+            if (primaryKey == null)
+            {
+                primaryKey = structureFields.Where(x => x.ClrField.GetCustomAttribute<KeyAttribute>() != null).Select(x => x.DuckDbFieldName).ToArray();
+                if (primaryKey.Length == 0) primaryKey = null;
+            }
+            if (primaryKey != null)
+            {
+                sb.Append($", PRIMARY KEY ({string.Join(", ", primaryKey)})");
             }
             sb.Append(')');
             ExecuteNonQuery(sb.ToString());

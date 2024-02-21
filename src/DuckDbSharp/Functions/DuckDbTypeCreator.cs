@@ -222,7 +222,7 @@ DuckDbStructuralType.BooleanStructuralType,
                         var ored = Expression.Or(Expression.Convert(Expression.ArrayIndex(destArr, destIdx), clrUnderlyingType), Expression.Constant(flagAsUnderlyingType));
                         return Expression.IfThen(val, Expression.Assign(dest, Expression.Convert(ored, nonNullableFlagsEnumType)));
                     },
-                    new GetterKey(null, asulong))
+                    new GetterKey(null, asulong), null)
                 {
                     FlagEnumShift = shift
                 });
@@ -351,7 +351,7 @@ DuckDbStructuralType.BooleanStructuralType,
                     return Expression.Property(obj, p);
                 }
                 else throw new ArgumentException();
-            }, (destArr, destIdx, val, ctx) => ctx.CreateFieldSetter(destArr, destIdx, x, val), new GetterKey(x.Member, 0));
+            }, (destArr, destIdx, val, ctx) => ctx.CreateFieldSetter(destArr, destIdx, x, val), new GetterKey(x.Member, 0), x.Member);
         }
 
 
