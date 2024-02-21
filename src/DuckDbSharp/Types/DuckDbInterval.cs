@@ -11,7 +11,7 @@ namespace DuckDbSharp.Types
         public static DuckDbInterval FromTimeSpan(TimeSpan d)
         {
             var totalMicros = d.Ticks / TimeSpan.TicksPerMicrosecond;
-            return new DuckDbInterval(0, (int)(totalMicros / MicrosPerDay), (int)(totalMicros % MicrosPerDay));
+            return new DuckDbInterval(0, (int)(totalMicros / MicrosPerDay), totalMicros % MicrosPerDay);
         }
 
         public TimeSpan ToTimeSpan()
