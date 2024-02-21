@@ -78,6 +78,9 @@ namespace DuckDbSharp.Types
         }
 
 #if NET8_0_OR_GREATER
+
+        public static DuckDbUuid Parse(string str) => Guid.Parse(str);
+
         [SkipLocalsInit]
         public static implicit operator Guid(DuckDbUuid uuid)
         {
