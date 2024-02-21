@@ -86,8 +86,6 @@ namespace DuckDbSharp.Types
             return result;
         }
 
-#if NET8_0_OR_GREATER
-
 
         public static DuckDbUuid Parse(string str) => Guid.Parse(str);
 
@@ -118,8 +116,6 @@ namespace DuckDbSharp.Types
             return ((Guid)this).ToString(format);
         }
 
-#endif
-
         public ulong GetLower()
         {
             return lower;
@@ -128,11 +124,6 @@ namespace DuckDbSharp.Types
         {
             return upper;
         }
-#if NET8_0_OR_GREATER
-        public string ToGuidString()
-        {
-            return ((Guid)this).ToString();
-        }
-#endif
+
     }
 }

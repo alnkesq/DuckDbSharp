@@ -37,9 +37,7 @@ namespace DuckDbSharp.Reflection
 
             new(typeof(Int128), DUCKDB_TYPE.DUCKDB_TYPE_HUGEINT),
             new(typeof(DuckDbUuid), DUCKDB_TYPE.DUCKDB_TYPE_UUID),
-#if NET8_0_OR_GREATER
             new(typeof(Guid), DUCKDB_TYPE.DUCKDB_TYPE_UUID, nameof(SerializationHelpers.SerializeGuid), nameof(SerializationHelpers.DeserializeGuid)),
-#endif
             new(typeof(double), DUCKDB_TYPE.DUCKDB_TYPE_DOUBLE),
             new(typeof(float), DUCKDB_TYPE.DUCKDB_TYPE_FLOAT),
 
