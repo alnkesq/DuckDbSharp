@@ -12,7 +12,7 @@ namespace DuckDbSharp.Example
             SerializationHelpers.RegisterDeserializer(typeof(DuckDbSharp.Example.Employee), DeserializeColumns_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870, "94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870");
             SerializationHelpers.RegisterDeserializer(typeof(DuckDbSharp.Example.TeamsWithEmployees), DeserializeColumns_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488, "93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488");
         }
-        private static void DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_EmployeeId_0000000000000000000000000000000005000000000000000000000000000000(nint vectorPtr, DuckDbSharp.Example.Employee[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_EmployeeId_0000000000000000000000000000000005000000000000000000000000000000(nint vectorPtr, DuckDbSharp.Example.Employee[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<long>(vectorPtr, objectsLength);
@@ -33,7 +33,7 @@ namespace DuckDbSharp.Example
             }
         }
 
-        private static void DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_FirstName_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.Example.Employee[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_FirstName_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.Example.Employee[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<DuckDbSharp.Types.DuckString>(vectorPtr, objectsLength);
@@ -48,13 +48,13 @@ namespace DuckDbSharp.Example
             
                 if (SerializationHelpers.IsPresent(validityVector, i))
                 {
-                    objects[i].FirstName = SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i));
+                    objects[i].FirstName = SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i), deserializationCtx);
                 }
                 i++;
             }
         }
 
-        private static void DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_LastName_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.Example.Employee[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_LastName_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.Example.Employee[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<DuckDbSharp.Types.DuckString>(vectorPtr, objectsLength);
@@ -69,13 +69,13 @@ namespace DuckDbSharp.Example
             
                 if (SerializationHelpers.IsPresent(validityVector, i))
                 {
-                    objects[i].LastName = SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i));
+                    objects[i].LastName = SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i), deserializationCtx);
                 }
                 i++;
             }
         }
 
-        private static System.Array DeserializeColumns_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870(nint chunk)
+        private static System.Array DeserializeColumns_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870(nint chunk, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationContext)
         {
             var rowCount = SerializationHelpers.GetChunkSize(chunk);
             var result = new DuckDbSharp.Example.Employee[rowCount];
@@ -90,14 +90,14 @@ namespace DuckDbSharp.Example
                 result[i] = new DuckDbSharp.Example.Employee();
                 i++;
             }
-            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_EmployeeId_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 0), result, rowCount);
-            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_FirstName_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 1), result, rowCount);
-            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_LastName_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 2), result, rowCount);
+            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_EmployeeId_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 0), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_FirstName_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 1), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_LastName_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 2), result, rowCount, deserializationContext);
             
             return result;
         }
 
-        private static void DeserializeField_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488_TeamId_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.Example.TeamsWithEmployees[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488_TeamId_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.Example.TeamsWithEmployees[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -118,14 +118,14 @@ namespace DuckDbSharp.Example
             }
         }
 
-        private static void DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870(nint vectorPtr, DuckDbSharp.Example.Employee[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870(nint vectorPtr, DuckDbSharp.Example.Employee[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
-            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_EmployeeId_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength);
-            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_FirstName_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 1), objects, objectsLength);
-            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_LastName_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 2), objects, objectsLength);
+            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_EmployeeId_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_FirstName_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 1), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870_LastName_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 2), objects, objectsLength, deserializationCtx);
         }
 
-        private static void DeserializeField_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488_Members_a7242c7e964cbcb6328de874bf0fab4ca7899d37caf4d0b8edf050935781d997(nint vectorPtr, DuckDbSharp.Example.TeamsWithEmployees[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488_Members_a7242c7e964cbcb6328de874bf0fab4ca7899d37caf4d0b8edf050935781d997(nint vectorPtr, DuckDbSharp.Example.TeamsWithEmployees[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             DuckDbSharp.Example.Employee[] sublist;
             int j, absIdx, sublistSize;
@@ -149,7 +149,7 @@ namespace DuckDbSharp.Example
             
                 rowId++;
             }
-            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_DuckDbSharp_Example_Employee94ff1bff6aa28b7ba407b6e2361836e178ecb0f682ff5bece61371e8ec489870(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -182,7 +182,7 @@ namespace DuckDbSharp.Example
             SerializationHelpers.ReleaseArray<DuckDbSharp.Example.Employee>(allSubItems);
         }
 
-        private static System.Array DeserializeColumns_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488(nint chunk)
+        private static System.Array DeserializeColumns_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488(nint chunk, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationContext)
         {
             var rowCount = SerializationHelpers.GetChunkSize(chunk);
             var result = new DuckDbSharp.Example.TeamsWithEmployees[rowCount];
@@ -197,8 +197,8 @@ namespace DuckDbSharp.Example
                 result[i] = new DuckDbSharp.Example.TeamsWithEmployees();
                 i++;
             }
-            DeserializeField_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488_TeamId_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 0), result, rowCount);
-            DeserializeField_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488_Members_a7242c7e964cbcb6328de874bf0fab4ca7899d37caf4d0b8edf050935781d997(SerializationHelpers.GetDataChunkVector(chunk, 1), result, rowCount);
+            DeserializeField_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488_TeamId_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 0), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_Example_TeamsWithEmployees93a3e2d7c2915a92eeb006194c788ece8ebc0c75c62a027fc8577bcd3c8f6488_Members_a7242c7e964cbcb6328de874bf0fab4ca7899d37caf4d0b8edf050935781d997(SerializationHelpers.GetDataChunkVector(chunk, 1), result, rowCount, deserializationContext);
             
             return result;
         }
