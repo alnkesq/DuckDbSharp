@@ -127,8 +127,8 @@ namespace DuckDbSharp.Reflection
         internal static bool IsDefaultIsNullishValueType(Type innerType)
         {
             return innerType.IsValueType &&
-                (innerType.GetCustomAttribute<DuckDbDefaultValueIsNullishAttribute>() != null) ||
-                false;
+                (innerType.GetCustomAttribute<DuckDbDefaultValueIsNullishAttribute>() != null ||
+                false);
         }
 
         public static (Expression GetValue, Expression? HasValue) UnwrapNullableCore(Expression maybeNullable)
