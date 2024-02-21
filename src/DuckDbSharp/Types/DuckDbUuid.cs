@@ -87,6 +87,7 @@ namespace DuckDbSharp.Types
             return result;
         }
 
+        public static DuckDbUuid Parse(ReadOnlySpan<char> str) => Guid.Parse(str);
 
         public static DuckDbUuid Parse(string str) => Guid.Parse(str);
 
@@ -159,7 +160,18 @@ namespace DuckDbSharp.Types
             return TryParse(s, null, out result);
         }
 
+        public static bool TryParse(ReadOnlySpan<char> s, [MaybeNullWhen(false)] out DuckDbUuid result)
+        {
+            return TryParse(s, null, out result);
+        }
+
         public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out DuckDbUuid result)
+        {
+
+            return TryParse(s.AsSpan(), provider, out result);
+        }
+
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, [MaybeNullWhen(false)] out DuckDbUuid result)
         {
 
             if (Guid.TryParse(s, provider, out var guid))
@@ -167,7 +179,7 @@ namespace DuckDbSharp.Types
                 result = guid;
                 return true;
             }
-            
+
             result = default;
             return false;
         }
