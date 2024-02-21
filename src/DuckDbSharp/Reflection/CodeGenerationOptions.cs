@@ -1,4 +1,5 @@
 using DuckDbSharp.Functions;
+using DuckDbSharp.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,6 +56,7 @@ namespace DuckDbSharp.Reflection
         {
             name = name.Trim();
             if (name == "blob") return typeof(byte[]);
+            if (name == "uuid") return typeof(DuckDbUuid);
             var type = CSharpCodeWriter.PrimitiveTypes.FirstOrDefault(x => x.CSharp == name).Type;
             if (type != null) return type;
             type = typeof(object).Assembly.GetType("System." + name, throwOnError: throwOnError);

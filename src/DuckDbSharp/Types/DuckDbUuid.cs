@@ -70,7 +70,7 @@ namespace DuckDbSharp.Types
             BinaryPrimitives.WriteInt64BigEndian(destinationBigEndian, upperFlipBack);
         }
 
-        public byte[] ToBytes()
+        public byte[] ToByteArray()
         {
             var result = new byte[16];
             WriteBytes(result);
