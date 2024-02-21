@@ -72,7 +72,7 @@ namespace DuckDbSharp
         }
 
 
-        public override IEnumerable Execute(string sql, params object[]? parameters)
+        public override IEnumerable Execute(string sql, params object?[]? parameters)
         {
             IEnumerator enumerator;
             Type elementType;
