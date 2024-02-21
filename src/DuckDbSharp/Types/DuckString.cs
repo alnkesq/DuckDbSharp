@@ -15,6 +15,10 @@ namespace DuckDbSharp.Types
         [FieldOffset(12)] public uint Inlined2;
         [FieldOffset(8)] public byte* LongStringPointer;
 
+
+        [FieldOffset(0)] internal ulong Hi;
+        [FieldOffset(8)] internal ulong Lo;
+
         public const int TRUNCATED_STRING_INLINE_LENGTH = 4;
         public const int STRING_INLINE_LENGTH = 12;
         public readonly override string ToString() => Encoding.UTF8.GetString(Span);

@@ -1474,7 +1474,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_Id_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_Id_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -1500,7 +1500,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5_Num_0000000000000000000000000000000005000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.WithNullishDefault[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5_Num_0000000000000000000000000000000005000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.WithNullishDefault[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<long>(vectorPtr, objectsLength);
@@ -1521,7 +1521,7 @@ namespace DuckDbFuzzingGeneratedTypes
             }
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5_Str_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.WithNullishDefault[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5_Str_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.WithNullishDefault[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<DuckDbSharp.Types.DuckString>(vectorPtr, objectsLength);
@@ -1536,23 +1536,23 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 if (SerializationHelpers.IsPresent(validityVector, i))
                 {
-                    objects[i].Str = SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i));
+                    objects[i].Str = SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i), deserializationCtx);
                 }
                 i++;
             }
         }
 
-        private static void DeserializeStruct_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(nint vectorPtr, DuckDbSharp.FuzzingTypes.WithNullishDefault[] objects, int objectsLength)
+        private static void DeserializeStruct_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(nint vectorPtr, DuckDbSharp.FuzzingTypes.WithNullishDefault[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
-            DeserializeField_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5_Num_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5_Str_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 1), objects, objectsLength);
+            DeserializeField_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5_Num_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5_Str_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 1), objects, objectsLength, deserializationCtx);
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_WithNullishDefault_6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_WithNullishDefault_6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var subItems = SerializationHelpers.RentArrayZeroed<DuckDbSharp.FuzzingTypes.WithNullishDefault>(objectsLength);
-            DeserializeStruct_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(vectorPtr, subItems, objectsLength);
+            DeserializeStruct_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(vectorPtr, subItems, objectsLength, deserializationCtx);
             var rowId = 0;
             while (true)
             {
@@ -1575,7 +1575,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f_Num_0000000000000000000000000000000005000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.SomeStruct[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f_Num_0000000000000000000000000000000005000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.SomeStruct[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<long>(vectorPtr, objectsLength);
@@ -1596,16 +1596,16 @@ namespace DuckDbFuzzingGeneratedTypes
             }
         }
 
-        private static void DeserializeStruct_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(nint vectorPtr, DuckDbSharp.FuzzingTypes.SomeStruct[] objects, int objectsLength)
+        private static void DeserializeStruct_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(nint vectorPtr, DuckDbSharp.FuzzingTypes.SomeStruct[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
-            DeserializeField_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f_Num_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength);
+            DeserializeField_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f_Num_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength, deserializationCtx);
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_SomeStruct_ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_SomeStruct_ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var subItems = SerializationHelpers.RentArrayZeroed<DuckDbSharp.FuzzingTypes.SomeStruct>(objectsLength);
-            DeserializeStruct_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(vectorPtr, subItems, objectsLength);
+            DeserializeStruct_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(vectorPtr, subItems, objectsLength, deserializationCtx);
             var rowId = 0;
             while (true)
             {
@@ -1633,7 +1633,7 @@ namespace DuckDbFuzzingGeneratedTypes
             SerializationHelpers.GetReferenceToNullableWrappedValue(arr, idx).Num = val;
         }
 
-        private static void DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f_Num_0000000000000000000000000000000005000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.SomeStruct?[] objects, int objectsLength)
+        private static void DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f_Num_0000000000000000000000000000000005000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.SomeStruct?[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<long>(vectorPtr, objectsLength);
@@ -1654,12 +1654,12 @@ namespace DuckDbFuzzingGeneratedTypes
             }
         }
 
-        private static void DeserializeStruct_Nullable_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(nint vectorPtr, DuckDbSharp.FuzzingTypes.SomeStruct?[] objects, int objectsLength)
+        private static void DeserializeStruct_Nullable_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(nint vectorPtr, DuckDbSharp.FuzzingTypes.SomeStruct?[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
-            DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f_Num_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength);
+            DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f_Num_0000000000000000000000000000000005000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength, deserializationCtx);
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_SomeOptionalStruct_ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_SomeOptionalStruct_ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var subItems = SerializationHelpers.RentArrayZeroed<DuckDbSharp.FuzzingTypes.SomeStruct?>(objectsLength);
@@ -1678,7 +1678,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeStruct_Nullable_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(vectorPtr, subItems, objectsLength);
+            DeserializeStruct_Nullable_DuckDbSharp_FuzzingTypes_SomeStructad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(vectorPtr, subItems, objectsLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -1706,7 +1706,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_TheVal_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_TheVal_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -1732,7 +1732,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_Val2_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_Val2_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -1758,7 +1758,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_B_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_B_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<DuckDbSharp.Types.DuckString>(vectorPtr, objectsLength);
@@ -1773,7 +1773,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 if (SerializationHelpers.IsPresent(validityVector, i))
                 {
-                    DuckDbSharp_FuzzingTypes_InnerObj_SetPropertyViaReflection_B(objects, i, SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i)));
+                    DuckDbSharp_FuzzingTypes_InnerObj_SetPropertyViaReflection_B(objects, i, SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i), deserializationCtx));
                 }
                 i++;
             }
@@ -1789,7 +1789,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76_Q_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInner[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76_Q_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInner[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -1810,12 +1810,12 @@ namespace DuckDbFuzzingGeneratedTypes
             }
         }
 
-        private static void DeserializeStruct_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInner[] objects, int objectsLength)
+        private static void DeserializeStruct_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInner[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
-            DeserializeField_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76_Q_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength);
+            DeserializeField_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76_Q_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength, deserializationCtx);
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_EvenInner_1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_EvenInner_1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var subItems = SerializationHelpers.RentArrayZeroed<DuckDbSharp.FuzzingTypes.EvenInner>(objectsLength);
@@ -1834,7 +1834,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeStruct_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(vectorPtr, subItems, objectsLength);
+            DeserializeStruct_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(vectorPtr, subItems, objectsLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -1857,7 +1857,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_System_Int320000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, int[] objects, int objectsLength)
+        private static void DeserializeField_System_Int320000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, int[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -1878,7 +1878,7 @@ namespace DuckDbFuzzingGeneratedTypes
             }
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfIntInner_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfIntInner_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             int[] sublist;
             int j, absIdx, sublistSize;
@@ -1887,7 +1887,7 @@ namespace DuckDbFuzzingGeneratedTypes
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
             var totalLength = SerializationHelpers.GetTotalItems(offsetsAndLengths, listValidityVector);
             var allSubItems = SerializationHelpers.RentArrayZeroed<int>(totalLength);
-            DeserializeField_System_Int320000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_System_Int320000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             var rowId = 0;
             while (true)
             {
@@ -1925,7 +1925,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_Nullable_System_Int320000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, int?[] objects, int objectsLength)
+        private static void DeserializeField_Nullable_System_Int320000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, int?[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -1946,7 +1946,7 @@ namespace DuckDbFuzzingGeneratedTypes
             }
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfOptIntInner_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfOptIntInner_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             int?[] sublist;
             int j, absIdx, sublistSize;
@@ -1970,7 +1970,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeField_Nullable_System_Int320000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_Nullable_System_Int320000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -2008,7 +2008,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfObjs_eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfObjs_eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             DuckDbSharp.FuzzingTypes.EvenInner[] sublist;
             int j, absIdx, sublistSize;
@@ -2032,7 +2032,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeStruct_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeStruct_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -2070,7 +2070,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a_TheVal_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInnerStruct[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a_TheVal_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInnerStruct[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -2091,12 +2091,12 @@ namespace DuckDbFuzzingGeneratedTypes
             }
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInnerStruct[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInnerStruct[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
-            DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a_TheVal_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength);
+            DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a_TheVal_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength, deserializationCtx);
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfNonNullStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfNonNullStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             DuckDbSharp.FuzzingTypes.EvenInnerStruct[] sublist;
             int j, absIdx, sublistSize;
@@ -2105,7 +2105,7 @@ namespace DuckDbFuzzingGeneratedTypes
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
             var totalLength = SerializationHelpers.GetTotalItems(offsetsAndLengths, listValidityVector);
             var allSubItems = SerializationHelpers.RentArrayZeroed<DuckDbSharp.FuzzingTypes.EvenInnerStruct>(totalLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             var rowId = 0;
             while (true)
             {
@@ -2148,7 +2148,7 @@ namespace DuckDbFuzzingGeneratedTypes
             SerializationHelpers.GetReferenceToNullableWrappedValue(arr, idx).TheVal = val;
         }
 
-        private static void DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a_TheVal_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] objects, int objectsLength)
+        private static void DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a_TheVal_0000000000000000000000000000000004000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<int>(vectorPtr, objectsLength);
@@ -2169,12 +2169,12 @@ namespace DuckDbFuzzingGeneratedTypes
             }
         }
 
-        private static void DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] objects, int objectsLength)
+        private static void DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(nint vectorPtr, DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
-            DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a_TheVal_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength);
+            DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a_TheVal_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength, deserializationCtx);
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfOptionalStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfOptionalStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] sublist;
             int j, absIdx, sublistSize;
@@ -2198,7 +2198,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -2231,20 +2231,20 @@ namespace DuckDbFuzzingGeneratedTypes
             SerializationHelpers.ReleaseArray<DuckDbSharp.FuzzingTypes.EvenInnerStruct?>(allSubItems);
         }
 
-        private static void DeserializeStruct_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength)
+        private static void DeserializeStruct_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_TheVal_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_Val2_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 1), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_B_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 2), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_EvenInner_1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(SerializationHelpers.GetStructureChildVector(vectorPtr, 3), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfIntInner_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(SerializationHelpers.GetStructureChildVector(vectorPtr, 4), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfOptIntInner_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(SerializationHelpers.GetStructureChildVector(vectorPtr, 5), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfObjs_eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514(SerializationHelpers.GetStructureChildVector(vectorPtr, 6), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfNonNullStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(SerializationHelpers.GetStructureChildVector(vectorPtr, 7), objects, objectsLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfOptionalStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(SerializationHelpers.GetStructureChildVector(vectorPtr, 8), objects, objectsLength);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_TheVal_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 0), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_Val2_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 1), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_B_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetStructureChildVector(vectorPtr, 2), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_EvenInner_1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(SerializationHelpers.GetStructureChildVector(vectorPtr, 3), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfIntInner_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(SerializationHelpers.GetStructureChildVector(vectorPtr, 4), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfOptIntInner_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(SerializationHelpers.GetStructureChildVector(vectorPtr, 5), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfObjs_eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514(SerializationHelpers.GetStructureChildVector(vectorPtr, 6), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfNonNullStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(SerializationHelpers.GetStructureChildVector(vectorPtr, 7), objects, objectsLength, deserializationCtx);
+            DeserializeField_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7_ListOfOptionalStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(SerializationHelpers.GetStructureChildVector(vectorPtr, 8), objects, objectsLength, deserializationCtx);
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_InnerObj_e6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_InnerObj_e6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var subItems = SerializationHelpers.RentArrayZeroed<DuckDbSharp.FuzzingTypes.InnerObj>(objectsLength);
@@ -2263,7 +2263,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeStruct_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7(vectorPtr, subItems, objectsLength);
+            DeserializeStruct_DuckDbSharp_FuzzingTypes_InnerObje6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7(vectorPtr, subItems, objectsLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -2286,7 +2286,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_C_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_C_0000000000000000000000000000000011000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<DuckDbSharp.Types.DuckString>(vectorPtr, objectsLength);
@@ -2301,7 +2301,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 if (SerializationHelpers.IsPresent(validityVector, i))
                 {
-                    DuckDbSharp_FuzzingTypes_MyClass_SetPropertyViaReflection_C(objects, i, SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i)));
+                    DuckDbSharp_FuzzingTypes_MyClass_SetPropertyViaReflection_C(objects, i, SerializationHelpers.DeserializeString(SerializationHelpers.ReadSpanItem(vectorSpan, i), deserializationCtx));
                 }
                 i++;
             }
@@ -2312,7 +2312,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfInt_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfInt_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             int[] sublist;
             int j, absIdx, sublistSize;
@@ -2321,7 +2321,7 @@ namespace DuckDbFuzzingGeneratedTypes
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
             var totalLength = SerializationHelpers.GetTotalItems(offsetsAndLengths, listValidityVector);
             var allSubItems = SerializationHelpers.RentArrayZeroed<int>(totalLength);
-            DeserializeField_System_Int320000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_System_Int320000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             var rowId = 0;
             while (true)
             {
@@ -2359,7 +2359,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfOptInt_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfOptInt_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             int?[] sublist;
             int j, absIdx, sublistSize;
@@ -2383,7 +2383,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeField_Nullable_System_Int320000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_Nullable_System_Int320000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -2421,7 +2421,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_Bytes_0000000000000000000000000000000012000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_Bytes_0000000000000000000000000000000012000000000000000000000000000000(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             var validityVector = SerializationHelpers.GetVectorValidity(vectorPtr);
             var vectorSpan = SerializationHelpers.GetVectorData<DuckDbSharp.Types.DuckString>(vectorPtr, objectsLength);
@@ -2447,7 +2447,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfObjs_eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfObjs_eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             DuckDbSharp.FuzzingTypes.EvenInner[] sublist;
             int j, absIdx, sublistSize;
@@ -2471,7 +2471,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeStruct_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeStruct_DuckDbSharp_FuzzingTypes_EvenInner1aa059dfc128dfa24858acbe7bd6deda4154229e97c8e207c9aa130a04ffca76(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -2509,7 +2509,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfNonNullStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfNonNullStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             DuckDbSharp.FuzzingTypes.EvenInnerStruct[] sublist;
             int j, absIdx, sublistSize;
@@ -2518,7 +2518,7 @@ namespace DuckDbFuzzingGeneratedTypes
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
             var totalLength = SerializationHelpers.GetTotalItems(offsetsAndLengths, listValidityVector);
             var allSubItems = SerializationHelpers.RentArrayZeroed<DuckDbSharp.FuzzingTypes.EvenInnerStruct>(totalLength);
-            DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             var rowId = 0;
             while (true)
             {
@@ -2556,7 +2556,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfOptionalStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfOptionalStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] sublist;
             int j, absIdx, sublistSize;
@@ -2580,7 +2580,7 @@ namespace DuckDbFuzzingGeneratedTypes
             
                 rowId++;
             }
-            DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeField_Nullable_DuckDbSharp_FuzzingTypes_EvenInnerStruct8b66ae5e481c90570505e75a068303475a350af52eabc71797bfb0679d8e2b8a(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             rowId = 0;
             while (true)
             {
@@ -2618,7 +2618,7 @@ namespace DuckDbFuzzingGeneratedTypes
             throw new System.NotImplementedException();
         }
 
-        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListWithNullishDefault_9a993835d690bcd8edadd882bd59e0a1877932ae6fc5319893e7fa6930728082(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength)
+        private static void DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListWithNullishDefault_9a993835d690bcd8edadd882bd59e0a1877932ae6fc5319893e7fa6930728082(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationCtx)
         {
             DuckDbSharp.FuzzingTypes.WithNullishDefault[] sublist;
             int j, absIdx, sublistSize;
@@ -2627,7 +2627,7 @@ namespace DuckDbFuzzingGeneratedTypes
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
             var totalLength = SerializationHelpers.GetTotalItems(offsetsAndLengths, listValidityVector);
             var allSubItems = SerializationHelpers.RentArrayZeroed<DuckDbSharp.FuzzingTypes.WithNullishDefault>(totalLength);
-            DeserializeStruct_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength);
+            DeserializeStruct_DuckDbSharp_FuzzingTypes_WithNullishDefault6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(SerializationHelpers.GetSublistChildVector(vectorPtr), allSubItems, totalLength, deserializationCtx);
             var rowId = 0;
             while (true)
             {
@@ -2660,7 +2660,7 @@ namespace DuckDbFuzzingGeneratedTypes
             SerializationHelpers.ReleaseArray<DuckDbSharp.FuzzingTypes.WithNullishDefault>(allSubItems);
         }
 
-        private static System.Array DeserializeColumns_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91(nint chunk)
+        private static System.Array DeserializeColumns_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91(nint chunk, DuckDbSharp.Bindings.DuckDbDeserializationContext deserializationContext)
         {
             var rowCount = SerializationHelpers.GetChunkSize(chunk);
             var result = new DuckDbSharp.FuzzingTypes.MyClass[rowCount];
@@ -2675,19 +2675,19 @@ namespace DuckDbFuzzingGeneratedTypes
                 result[i] = SerializationHelpers.NewSkipCtor<DuckDbSharp.FuzzingTypes.MyClass>();
                 i++;
             }
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_Id_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 0), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_WithNullishDefault_6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(SerializationHelpers.GetDataChunkVector(chunk, 1), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_SomeStruct_ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(SerializationHelpers.GetDataChunkVector(chunk, 2), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_SomeOptionalStruct_ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(SerializationHelpers.GetDataChunkVector(chunk, 3), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_InnerObj_e6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7(SerializationHelpers.GetDataChunkVector(chunk, 4), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_C_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 5), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfInt_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(SerializationHelpers.GetDataChunkVector(chunk, 6), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfOptInt_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(SerializationHelpers.GetDataChunkVector(chunk, 7), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_Bytes_0000000000000000000000000000000012000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 8), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfObjs_eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514(SerializationHelpers.GetDataChunkVector(chunk, 9), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfNonNullStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(SerializationHelpers.GetDataChunkVector(chunk, 10), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfOptionalStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(SerializationHelpers.GetDataChunkVector(chunk, 11), result, rowCount);
-            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListWithNullishDefault_9a993835d690bcd8edadd882bd59e0a1877932ae6fc5319893e7fa6930728082(SerializationHelpers.GetDataChunkVector(chunk, 12), result, rowCount);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_Id_0000000000000000000000000000000004000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 0), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_WithNullishDefault_6f77cff4d9fcb046e7a07c9e168ab71e22b748a9cd8f9b363f12a65cf3ffbcc5(SerializationHelpers.GetDataChunkVector(chunk, 1), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_SomeStruct_ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(SerializationHelpers.GetDataChunkVector(chunk, 2), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_SomeOptionalStruct_ad01247c62e45b8ab63dd0c7cae7c3b7dbc8bf5ae1c8f18f807a6cc9e0d4373f(SerializationHelpers.GetDataChunkVector(chunk, 3), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_InnerObj_e6deb54a356d6644a68e0232d188bb9c1ba14be428a5bb719092b6d6493ffef7(SerializationHelpers.GetDataChunkVector(chunk, 4), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_C_0000000000000000000000000000000011000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 5), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfInt_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(SerializationHelpers.GetDataChunkVector(chunk, 6), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfOptInt_5481b8528ef488d0a4ed259244306aff9b145b7d675e159efece21def7561297(SerializationHelpers.GetDataChunkVector(chunk, 7), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_Bytes_0000000000000000000000000000000012000000000000000000000000000000(SerializationHelpers.GetDataChunkVector(chunk, 8), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfObjs_eb8c4c0bba6bc8add2a7eeb2ba66b76891f4112a10e5989416ee7771afacc514(SerializationHelpers.GetDataChunkVector(chunk, 9), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfNonNullStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(SerializationHelpers.GetDataChunkVector(chunk, 10), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListOfOptionalStructs_2f75a360e47e3e827b3fff41a0eb90624d8cc5c041b832edaab38c0e41c4ba3d(SerializationHelpers.GetDataChunkVector(chunk, 11), result, rowCount, deserializationContext);
+            DeserializeField_DuckDbSharp_FuzzingTypes_MyClass8b205741ac6669ebf1484ebda6afbd6984d3db24ebd4eba1095a8705dde0dd91_ListWithNullishDefault_9a993835d690bcd8edadd882bd59e0a1877932ae6fc5319893e7fa6930728082(SerializationHelpers.GetDataChunkVector(chunk, 12), result, rowCount, deserializationContext);
             
             return result;
         }

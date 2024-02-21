@@ -63,14 +63,29 @@ namespace DuckDbSharp
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Uri? DeserializeUri(DuckString d)
+        public static Uri? DeserializeUri(DuckString d, DuckDbDeserializationContext deserializationContext)
         {
-            return DeserializeString(d) is { } s ? new Uri(s) : null;
+            return DeserializeString(d, deserializationContext) is { } s ? new Uri(s) : null;
         }
 
-        public static string? DeserializeString(DuckString d)
+        public static string? DeserializeString(DuckString d, DuckDbDeserializationContext deserializationContext)
         {
-            return d.ToString();
+            if (d.Length == 0) return string.Empty;
+
+            if (d.Length > 1024) return d.ToString(); // Avoid caching big strings
+
+            const int CACHE_SIZE = 4096;
+            ClrStringCache[] cache;
+            cache = deserializationContext.CacheEntries ??= new ClrStringCache[CACHE_SIZE];
+            var entryIndex = (uint)HashCode.Combine(d.Hi, d.Lo) % CACHE_SIZE;
+            ref ClrStringCache cachedEntry = ref cache[(int)entryIndex];
+            if (cachedEntry.DuckString.Hi == d.Hi && cachedEntry.DuckString.Lo == d.Lo)
+            {
+                return cachedEntry.ClrString;
+            }
+            cachedEntry.ClrString = d.ToString();
+            cachedEntry.DuckString = d;
+            return cachedEntry.ClrString;
         }
         public static byte[] DeserializeByteArray(DuckString d)
         {

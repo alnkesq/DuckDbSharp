@@ -6,7 +6,7 @@ namespace DuckDbSharp
 {
 
 
-    internal record struct DeserializerParameters(Type OutputArrayElementType, DuckDbStructuralType OutputArrayStructuralType, ParameterExpression VectorPtr, ParameterExpression Objects, ParameterExpression ObjectsLength)
+    internal record struct DeserializerParameters(Type OutputArrayElementType, DuckDbStructuralType OutputArrayStructuralType, ParameterExpression VectorPtr, ParameterExpression Objects, ParameterExpression ObjectsLength, ParameterExpression DeserializationContext)
     {
     }
 

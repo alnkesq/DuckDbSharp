@@ -332,13 +332,14 @@ namespace DuckDbSharp
         {
             if (used.Value) throw new Exception("Results cannot be enumerated more than once.");
             used.Value = true;
+            var deserializationContext = new DuckDbDeserializationContext();
             try
             {
                 var deserializer = CreateRootDeserializer<T>(duckType);
                 ulong chunkIdx = 0;
                 while (true)
                 {
-                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++);
+                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++, deserializationContext);
                     if (array == null) break;
                     foreach (var item in array)
                     {
@@ -357,13 +358,14 @@ namespace DuckDbSharp
         {
             if (used.Value) throw new Exception("Results cannot be enumerated more than once.");
             used.Value = true;
+            var deserializationContext = new DuckDbDeserializationContext();
             try
             {
                 var deserializer = CreateRootDeserializer<T>(duckType);
                 ulong chunkIdx = 0;
                 while (true)
                 {
-                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++);
+                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++, deserializationContext);
                     if (array == null) break;
                     yield return array;
                 }
@@ -387,11 +389,13 @@ namespace DuckDbSharp
 
 
 
-        private unsafe static T[]? FetchAndDeserializeChunk<T>(RootDeserializer deserializer, nint result, ulong chunkIndex)
+        private unsafe static T[]? FetchAndDeserializeChunk<T>(RootDeserializer deserializer, nint result, ulong chunkIndex, DuckDbDeserializationContext deserializationContext)
         {
             using var chunk = (OwnedDuckDbDataChunk)Methods.duckdb_result_get_chunk(*(duckdb_result*)result, chunkIndex);
             if (chunk.Pointer == null) return null;
-            var array = (T[])deserializer((nint)chunk.Pointer);
+            if (deserializationContext.CacheEntries != null)
+                Array.Clear(deserializationContext.CacheEntries);
+            var array = (T[])deserializer((nint)chunk.Pointer, deserializationContext);
             return array;
         }
 

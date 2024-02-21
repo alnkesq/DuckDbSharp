@@ -252,7 +252,7 @@ namespace DuckDbSharp.Reflection
                 if (field != null)
                 {
                     var deserializer = CreateFieldDeserializer(p.OutputArrayElementType, p.OutputArrayStructuralType, field);
-                    body.Add(CreateCall(deserializer, Expression.Call(null, GetStructureChildVectorMethod, p.VectorPtr, Expression.Constant((ulong)fieldId)), p.Objects, p.ObjectsLength));
+                    body.Add(CreateCall(deserializer, Expression.Call(null, GetStructureChildVectorMethod, p.VectorPtr, Expression.Constant((ulong)fieldId)), p.Objects, p.ObjectsLength, p.DeserializationContext));
                 }
 
             }
@@ -394,7 +394,7 @@ namespace DuckDbSharp.Reflection
                 body.Add(CreateInitializationLoop(allSubItems, sublistElementType, rowId, totalLength, Expression.Call(null, IsPresentMethod, elementValidityVector, rowId)));
 
             var sublistItemDeserializer = CreateFieldDeserializer(sublistElementType, sublistStructuralElementType, null);
-            body.Add(CreateCall(sublistItemDeserializer, sublistVector, allSubItems, totalLength));
+            body.Add(CreateCall(sublistItemDeserializer, sublistVector, allSubItems, totalLength, p.DeserializationContext));
 
             var copyFrom = Expression.ArrayIndex(allSubItems, absIdx);
             var sublistSizeExpr = Expression.Call(null, GetSublistSizeMethod, offsetsAndLengths, rowId);
@@ -536,7 +536,7 @@ namespace DuckDbSharp.Reflection
             Expression deserializedValue = Expression.Call(null, ReadSpanItemMethod.MakeGenericMethod(primitiveConverter.SerializationType), vectorSpan, i);
             if (primitiveConverter.DeserializeMethod != null)
             {
-                deserializedValue = Expression.Call(null, primitiveConverter.DeserializeMethod, deserializedValue);
+                deserializedValue = Expression.Call(null, primitiveConverter.DeserializeMethod, primitiveConverter.DeserializeMethod.GetParameters().Length == 2 ? [deserializedValue, p.DeserializationContext] : [deserializedValue]);
             }
 
             var assign = CreateAssignment(getter, p.Objects, i, deserializedValue);
@@ -604,8 +604,9 @@ namespace DuckDbSharp.Reflection
                 var paramVectorPtr = Expression.Parameter(typeof(nint), "vectorPtr");
                 var paramObjects = Expression.Parameter(outputArrayElementType.MakeArrayType(), "objects");
                 var paramObjectsLength = Expression.Parameter(typeof(int), "objectsLength");
-                var body = impl(new DeserializerParameters(outputArrayElementType, outputArrayElementStructuralType, paramVectorPtr, paramObjects, paramObjectsLength));
-                r = CreateMethod(prefix + CreateSpeakableTypeName(outputArrayElementType, outputArrayElementStructuralType, field), null, null, null, body, paramVectorPtr, paramObjects, paramObjectsLength);
+                var paramDeserializationContext = Expression.Parameter(typeof(DuckDbDeserializationContext), "deserializationCtx");
+                var body = impl(new DeserializerParameters(outputArrayElementType, outputArrayElementStructuralType, paramVectorPtr, paramObjects, paramObjectsLength, paramDeserializationContext));
+                r = CreateMethod(prefix + CreateSpeakableTypeName(outputArrayElementType, outputArrayElementStructuralType, field), null, null, null, body, paramVectorPtr, paramObjects, paramObjectsLength, paramDeserializationContext);
                 deserializerCache.Add(cacheKey, r);
             }
             return r;
@@ -689,7 +690,7 @@ namespace DuckDbSharp.Reflection
                 body.Add(CreateInitializationLoop(subobjects, substructType, rowId, p.ObjectsLength, isPresent));
             var substructDeserializer = CreateDeserializer(substructType, "DeserializeStruct_", substructStructuralType, p => CreateNonNullStructureDeserializer(p, structureFields), null);
 
-            body.Add(CreateCall(substructDeserializer, p.VectorPtr, subobjects, p.ObjectsLength));
+            body.Add(CreateCall(substructDeserializer, p.VectorPtr, subobjects, p.ObjectsLength, p.DeserializationContext));
             var loopBody = Expression.Block(
                 Expression.IfThen(
                     Expression.Call(null, IsPresentMethod, validityVector, rowId),
@@ -799,7 +800,7 @@ namespace DuckDbSharp.Reflection
             var chunkParam = Expression.Parameter(typeof(nint), "chunk");
             var rowCount = Expression.Variable(typeof(int), "rowCount");
             var result = Expression.Variable(elementType.MakeArrayType(), "result");
-
+            var deserializationContext = Expression.Parameter(typeof(DuckDbDeserializationContext), "deserializationContext");
             var isWrappedSingleColumn = IsWrappedSingleColumn(elementType);
 
             var needsInitialization = !isWrappedSingleColumn && NeedsInitialization(elementType);
@@ -814,7 +815,7 @@ namespace DuckDbSharp.Reflection
             if (isWrappedSingleColumn)
             {
                 var deserializer = CreateFieldDeserializer(elementType, elementStructuralType, null);
-                body.Add(CreateCall(deserializer, Expression.Call(GetDataChunkVectorMethod, chunkParam, Expression.Constant((ulong)0)), result, rowCount));
+                body.Add(CreateCall(deserializer, Expression.Call(GetDataChunkVectorMethod, chunkParam, Expression.Constant((ulong)0)), result, rowCount, deserializationContext));
             }
             else
             {
@@ -825,14 +826,14 @@ namespace DuckDbSharp.Reflection
                     if (col != null)
                     {
                         var deserializer = CreateFieldDeserializer(elementType, elementStructuralType, DuckDbTypeCreator.CreateGetter(col));
-                        body.Add(CreateCall(deserializer, Expression.Call(GetDataChunkVectorMethod, chunkParam, Expression.Constant((ulong)colIdx)), result, rowCount));
+                        body.Add(CreateCall(deserializer, Expression.Call(GetDataChunkVectorMethod, chunkParam, Expression.Constant((ulong)colIdx)), result, rowCount, deserializationContext));
                     }
                     else throw new Exception($"A column that was selected doesn't have a corresponding field or property in the specified return type.");
                 }
             }
             body.Add(result);
             var bodyBlock = Expression.Block(new[] { rowCount, result, needsInitialization ? i : null }.Where(x => x != null).ToArray(), body);
-            return CreateMethod("DeserializeColumns_" + CreateSpeakableTypeName(elementType, elementStructuralType), typeof(RootDeserializer), elementType, elementStructuralType, bodyBlock, chunkParam);
+            return CreateMethod("DeserializeColumns_" + CreateSpeakableTypeName(elementType, elementStructuralType), typeof(RootDeserializer), elementType, elementStructuralType, bodyBlock, chunkParam, deserializationContext);
         }
 
         internal static bool IsWrappedSingleColumn(Type elementType)

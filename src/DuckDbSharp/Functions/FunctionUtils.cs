@@ -370,6 +370,6 @@ namespace DuckDbSharp.Functions
 
 
     public delegate int RootSerializer(IEnumerator enumerator, nint chunk, NativeArenaSlim arena);
-    public delegate Array RootDeserializer(nint chunk);
+    public delegate Array RootDeserializer(nint chunk, DuckDbDeserializationContext deserializationContext);
 }
 
