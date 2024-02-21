@@ -127,8 +127,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !SerializationHelpers.IsDefaultStructValue(objects[rowId].WithNullishDefault))
                 {
                     subobjects[rowId] = objects[rowId].WithNullishDefault;
@@ -203,8 +202,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if (SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null))
+                if (SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null))
                 {
                     subobjects[rowId] = objects[rowId].SomeStruct;
                 }
@@ -278,8 +276,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     objects[rowId].SomeOptionalStruct.HasValue)
                 {
                     subobjects[rowId] = (DuckDbSharp.FuzzingTypes.SomeStruct?)objects[rowId].SomeOptionalStruct.Value;
@@ -438,8 +435,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].EvenInner == null))
                 {
                     subobjects[rowId] = objects[rowId].EvenInner;
@@ -496,8 +492,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfIntInner == null))
                 {
                     sublist = objects[rowId].ListOfIntInner;
@@ -522,8 +517,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfIntInner == null))
                 {
                     sublist = objects[rowId].ListOfIntInner;
@@ -588,8 +582,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptIntInner == null))
                 {
                     sublist = objects[rowId].ListOfOptIntInner;
@@ -614,8 +607,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptIntInner == null))
                 {
                     sublist = objects[rowId].ListOfOptIntInner;
@@ -653,8 +645,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfObjs == null))
                 {
                     sublist = objects[rowId].ListOfObjs;
@@ -679,8 +670,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfObjs == null))
                 {
                     sublist = objects[rowId].ListOfObjs;
@@ -766,8 +756,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfNonNullStructs == null))
                 {
                     sublist = objects[rowId].ListOfNonNullStructs;
@@ -792,8 +781,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfNonNullStructs == null))
                 {
                     sublist = objects[rowId].ListOfNonNullStructs;
@@ -879,8 +867,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptionalStructs == null))
                 {
                     sublist = objects[rowId].ListOfOptionalStructs;
@@ -905,8 +892,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptionalStructs == null))
                 {
                     sublist = objects[rowId].ListOfOptionalStructs;
@@ -970,8 +956,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].InnerObj == null))
                 {
                     subobjects[rowId] = objects[rowId].InnerObj;
@@ -1029,8 +1014,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfInt == null))
                 {
                     sublist = objects[rowId].ListOfInt;
@@ -1055,8 +1039,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfInt == null))
                 {
                     sublist = objects[rowId].ListOfInt;
@@ -1094,8 +1077,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptInt == null))
                 {
                     sublist = objects[rowId].ListOfOptInt;
@@ -1120,8 +1102,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptInt == null))
                 {
                     sublist = objects[rowId].ListOfOptInt;
@@ -1187,8 +1168,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfObjs == null))
                 {
                     sublist = objects[rowId].ListOfObjs;
@@ -1213,8 +1193,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfObjs == null))
                 {
                     sublist = objects[rowId].ListOfObjs;
@@ -1252,8 +1231,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfNonNullStructs == null))
                 {
                     sublist = objects[rowId].ListOfNonNullStructs;
@@ -1278,8 +1256,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfNonNullStructs == null))
                 {
                     sublist = objects[rowId].ListOfNonNullStructs;
@@ -1317,8 +1294,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptionalStructs == null))
                 {
                     sublist = objects[rowId].ListOfOptionalStructs;
@@ -1343,8 +1319,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptionalStructs == null))
                 {
                     sublist = objects[rowId].ListOfOptionalStructs;
@@ -1382,8 +1357,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListWithNullishDefault == null))
                 {
                     sublist = objects[rowId].ListWithNullishDefault;
@@ -1408,8 +1382,7 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
-                    !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
                     !(objects[rowId].ListWithNullishDefault == null))
                 {
                     sublist = objects[rowId].ListWithNullishDefault;
@@ -2694,4 +2667,3 @@ namespace DuckDbFuzzingGeneratedTypes
 
     }
 }
-
