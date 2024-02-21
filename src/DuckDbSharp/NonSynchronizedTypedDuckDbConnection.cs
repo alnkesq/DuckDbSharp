@@ -34,28 +34,28 @@ namespace DuckDbSharp
         {
             CheckDisposed();
             MaybeLog(sql);
-            return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots);
+            return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
         }
 
         public override IEnumerable Execute(string sql, params object[]? parameters)
         {
             CheckDisposed();
             MaybeLog(sql);
-            return DuckDbUtils.Execute(conn, sql, parameters, EnumerableParameterSlots);
+            return DuckDbUtils.Execute(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
         }
 
         public override T ExecuteScalar<T>(string sql, params object[]? parameters)
         {
             CheckDisposed();
             MaybeLog(sql);
-            return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots);
+            return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
         }
 
         public override object ExecuteScalar(string sql, params object[]? parameters)
         {
             CheckDisposed();
             MaybeLog(sql);
-            return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots);
+            return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
         }
     }
 }

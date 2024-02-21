@@ -1,4 +1,5 @@
 using DuckDbSharp.Bindings;
+using DuckDbSharp.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,6 +41,7 @@ namespace DuckDbSharp
             }
         }
 
+
         public override IEnumerable<T> Execute<T>(string sql, params object?[]? parameters)
         {
             IEnumerator<T[]> enumerator;
@@ -47,7 +49,7 @@ namespace DuckDbSharp
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots).GetEnumerator();
+                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext).GetEnumerator();
             }
             try
             {
@@ -84,7 +86,7 @@ namespace DuckDbSharp
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots);
+                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
                 elementType = TypeSniffedEnumerable.TryGetEnumerableElementType(enumerable.GetType())!;
                 enumerator = enumerable.GetEnumerator();
             }
@@ -129,7 +131,7 @@ namespace DuckDbSharp
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots);
+                return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
             }
         }
 
@@ -139,7 +141,7 @@ namespace DuckDbSharp
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots);
+                return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
             }
         }
         public override void ExecuteNonQuery(string sql, params object[]? parameters)

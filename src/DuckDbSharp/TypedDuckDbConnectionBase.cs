@@ -25,8 +25,9 @@ namespace DuckDbSharp
             this.conn = conn;
             this.database = database;
         }
+		public TypeGenerationContext TypeGenerationContext { get; set; } = TypeGenerationContext.Global;
 
-        public DuckDbDatabase Database => database;
+		public DuckDbDatabase Database => database;
         public virtual void Dispose()
         {
             conn.Dispose();

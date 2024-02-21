@@ -235,7 +235,7 @@ namespace DuckDbSharp.Reflection
             return id;
         }
 
-        internal void AddKnownClrType(Type type)
+        public void AddKnownClrType(Type type)
         {
             var structural = DuckDbStructuralType.CreateStructuralType(type);
             this.ClrTypeCache!.TryAdd(structural.GetTypeKey(), type);

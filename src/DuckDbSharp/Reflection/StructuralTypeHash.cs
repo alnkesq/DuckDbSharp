@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 
 namespace DuckDbSharp.Reflection
 {
-    internal record struct StructuralTypeHash(UInt128 High, UInt128 Low)
+    public record struct StructuralTypeHash(UInt128 High, UInt128 Low)
     {
         internal static StructuralTypeHash Hash(StructuralTypeHash inner, DUCKDB_TYPE type)
         {
