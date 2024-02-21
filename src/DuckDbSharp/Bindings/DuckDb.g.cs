@@ -1,7 +1,9 @@
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace DuckDbSharp.Bindings
 {
+    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
     public enum DUCKDB_TYPE
     {
         DUCKDB_TYPE_INVALID = 0,
@@ -253,11 +255,6 @@ namespace DuckDbSharp.Bindings
         public void* __arrw;
     }
 
-    public unsafe partial struct _duckdb_arrow_stream
-    {
-        public void* __arrwstr;
-    }
-
     public unsafe partial struct _duckdb_config
     {
         public void* __cnfg;
@@ -319,12 +316,6 @@ namespace DuckDbSharp.Bindings
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern duckdb_state duckdb_connect([NativeTypeName("duckdb_database")] _duckdb_database* database, [NativeTypeName("duckdb_connection *")] _duckdb_connection** out_connection);
-
-        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void duckdb_interrupt([NativeTypeName("duckdb_connection")] _duckdb_connection* connection);
-
-        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern double duckdb_query_progress([NativeTypeName("duckdb_connection")] _duckdb_connection* connection);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void duckdb_disconnect([NativeTypeName("duckdb_connection *")] _duckdb_connection** connection);
@@ -615,12 +606,6 @@ namespace DuckDbSharp.Bindings
         public static extern duckdb_state duckdb_execute_prepared_arrow([NativeTypeName("duckdb_prepared_statement")] _duckdb_prepared_statement* prepared_statement, [NativeTypeName("duckdb_arrow *")] _duckdb_arrow** out_result);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern duckdb_state duckdb_arrow_scan([NativeTypeName("duckdb_connection")] _duckdb_connection* connection, [NativeTypeName("const char *")] byte* table_name, [NativeTypeName("duckdb_arrow_stream")] _duckdb_arrow_stream* arrow);
-
-        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern duckdb_state duckdb_arrow_array_scan([NativeTypeName("duckdb_connection")] _duckdb_connection* connection, [NativeTypeName("const char *")] byte* table_name, [NativeTypeName("duckdb_arrow_schema")] _duckdb_arrow_schema* arrow_schema, [NativeTypeName("duckdb_arrow_array")] _duckdb_arrow_array* arrow_array, [NativeTypeName("duckdb_arrow_stream *")] _duckdb_arrow_stream** out_stream);
-
-        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("idx_t")]
         public static extern ulong duckdb_extract_statements([NativeTypeName("duckdb_connection")] _duckdb_connection* connection, [NativeTypeName("const char *")] byte* query, [NativeTypeName("duckdb_extracted_statements *")] _duckdb_extracted_statements** out_extracted_statements);
 
@@ -694,11 +679,11 @@ namespace DuckDbSharp.Bindings
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
-        public static extern _duckdb_logical_type* duckdb_create_struct_type([NativeTypeName("duckdb_logical_type *")] _duckdb_logical_type** member_types, [NativeTypeName("const char **")] byte** member_names, [NativeTypeName("idx_t")] ulong member_count);
+        public static extern _duckdb_logical_type* duckdb_create_enum_type([NativeTypeName("const char *")] byte* enum_name, [NativeTypeName("const char **")] byte** member_names, [NativeTypeName("idx_t")] ulong member_count);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
-        public static extern _duckdb_logical_type* duckdb_create_enum_type([NativeTypeName("const char *")] byte* enum_name, [NativeTypeName("const char **")] byte** member_names, [NativeTypeName("idx_t")] ulong member_count);
+        public static extern _duckdb_logical_type* duckdb_create_struct_type([NativeTypeName("duckdb_logical_type *")] _duckdb_logical_type** member_types_p, [NativeTypeName("const char **")] byte** member_names, [NativeTypeName("idx_t")] ulong member_count);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
@@ -1104,3 +1089,4 @@ namespace DuckDbSharp.Bindings
         public static extern _duckdb_data_chunk* duckdb_stream_fetch_chunk(duckdb_result result);
     }
 }
+
