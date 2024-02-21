@@ -15,7 +15,7 @@ namespace DuckDbSharp.Types
 {
     [StructLayout(LayoutKind.Explicit)]
     [SuppressMessage("Design", "CA1036:Override methods on comparable types")]
-    public readonly struct DuckDbUuid : IEquatable<DuckDbUuid>, IComparable<DuckDbUuid>
+    public readonly struct DuckDbUuid : IEquatable<DuckDbUuid>, IComparable<DuckDbUuid>, IParsable<DuckDbUuid>
     {
         private DuckDbUuid(long upper, ulong lower)
         {
@@ -125,5 +125,22 @@ namespace DuckDbSharp.Types
             return upper;
         }
 
+        public static DuckDbUuid Parse(string s, IFormatProvider? provider)
+        {
+            return Guid.Parse(s, provider);
+        }
+
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out DuckDbUuid result)
+        {
+
+            if (Guid.TryParse(s, provider, out var guid))
+            {
+                result = guid;
+                return true;
+            }
+            
+            result = default;
+            return false;
+        }
     }
 }
