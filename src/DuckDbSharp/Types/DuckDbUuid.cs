@@ -24,6 +24,7 @@ namespace DuckDbSharp.Types
         }
 
         public static DuckDbUuid FromUpperLower(long upper, ulong lower) => new DuckDbUuid(upper, lower);
+        public static DuckDbUuid FromUpperLowerFlat(ulong upper, ulong lower) => new DuckDbUuid((long)(upper ^ (1UL << 63)), lower);
 
         public DuckDbUuid(ReadOnlySpan<byte> uuidBigEndian)
         {
@@ -107,6 +108,26 @@ namespace DuckDbSharp.Types
             return new DuckDbUuid(buffer);
         }
 
+        public static bool operator <(DuckDbUuid left, DuckDbUuid right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+
+        public static bool operator <=(DuckDbUuid left, DuckDbUuid right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >(DuckDbUuid left, DuckDbUuid right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        public static bool operator >=(DuckDbUuid left, DuckDbUuid right)
+        {
+            return left.CompareTo(right) >= 0;
+        }
+
         public override string ToString()
         {
             return ((Guid)this).ToString();
@@ -125,9 +146,17 @@ namespace DuckDbSharp.Types
             return upper;
         }
 
+        public ulong GetUpperFlat()
+        {
+            return (ulong)upper ^ (1UL << 63);
+        }
         public static DuckDbUuid Parse(string s, IFormatProvider? provider)
         {
             return Guid.Parse(s, provider);
+        }
+        public static bool TryParse([NotNullWhen(true)] string? s, [MaybeNullWhen(false)] out DuckDbUuid result)
+        {
+            return TryParse(s, null, out result);
         }
 
         public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out DuckDbUuid result)
