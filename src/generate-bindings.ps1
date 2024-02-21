@@ -7,3 +7,4 @@ $opaquePointersArr = $opaquePointers.Split(' ')
 
 ClangSharpPInvokeGenerator -I $DuckDbRepo/src/include  -f $DuckDbRepo/src/include/duckdb.h -n DuckDbSharp.Bindings -o DuckDbSharp/Bindings/DuckDb.g.cs -l duckdb --config preview-codegen  --remap "const char *=byte*" "char *=byte*" ($opaquePointers.Split(' ') | %{ "$_=$($_)_ptr" })
 
+(gc DuckDbSharp\Bindings\DuckDb.g.cs -raw).Replace('public enum DUCKDB_TYPE', "[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]`n    public enum DUCKDB_TYPE") | out-file DuckDbSharp\Bindings\DuckDb.g.cs

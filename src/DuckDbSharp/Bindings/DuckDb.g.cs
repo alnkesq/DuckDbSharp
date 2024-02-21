@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace DuckDbSharp.Bindings
 {
+    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
     public enum DUCKDB_TYPE
     {
         DUCKDB_TYPE_INVALID = 0,
@@ -1269,3 +1270,4 @@ namespace DuckDbSharp.Bindings
         public static extern _duckdb_data_chunk* duckdb_stream_fetch_chunk(duckdb_result result);
     }
 }
+
