@@ -64,6 +64,12 @@ namespace DuckDbSharp.Bindings
             ownedPtr = default;
             return copy;
         }
+
+        public static void CheckAppenderError(duckdb_state state, _duckdb_appender* appender)
+        {
+            if (state != duckdb_state.DuckDBSuccess)
+                throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_appender_error(appender)));
+        }
     }
 
     public unsafe delegate TPtr* PointerSelector<T, TPtr>(T input) where TPtr : unmanaged;

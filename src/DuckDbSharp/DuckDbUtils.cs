@@ -300,6 +300,7 @@ namespace DuckDbSharp
         {
             return Execute(conn, sql, parameters, expectSingleColumn: false, enumerableParameterSlots);
         }
+
         internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object[] parameters, bool expectSingleColumn, List<EnumerableParameterSlot> enumerableParameterSlots)
         {
             using var result = ExecuteCore(conn, sql, parameters, enumerableParameterSlots);
@@ -788,18 +789,17 @@ namespace DuckDbSharp
         {
             InsertRange((_duckdb_connection*)conn, destinationSchema, destinationTableOrView, items.Select(x => new Box<T>() { Value = x }));
         }
-        public static void InsertRange<T>(_duckdb_connection* conn, string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
+        public static long InsertRange<T>(_duckdb_connection* conn, string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
         {
             if (SerializerCreationContext.IsWrappedSingleColumn(typeof(T)))
             {
-                InsertRangeBoxedMethod.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { (nint)conn, destinationSchema, destinationTableOrView, items });
-                return;
+                return (long)InsertRangeBoxedMethod.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { (nint)conn, destinationSchema, destinationTableOrView, items })!;
             }
             using var appender = OwnedDuckDbPreparedAppender.Allocate();
 
             using var destinationSchemaBytes = (ScopedString)destinationSchema;
             using var destinationTableOrViewBytes = (ScopedString)destinationTableOrView;
-            BindingUtils.CheckState(Methods.duckdb_appender_create(conn, destinationSchemaBytes, destinationTableOrViewBytes, &appender.Pointer));
+            BindingUtils.CheckAppenderError(Methods.duckdb_appender_create(conn, destinationSchemaBytes, destinationTableOrViewBytes, &appender.Pointer), appender);
             RootSerializer rootSerializer;
             lock (SerializerCreationContext.Global)
             {
@@ -809,6 +809,7 @@ namespace DuckDbSharp
             var cols = DuckDbTypeCreator.GetFields(typeof(T));
             using var arena = new NativeArenaSlim();
             var colTypes = BindingUtils.ToPointerArray<FieldInfo2, _duckdb_logical_type>(cols.ToArray(), x => DuckDbTypeCreator.CreateLogicalType(x.FieldType, null));
+            long insertedItems = 0;
             fixed (_duckdb_logical_type** types = colTypes)
             {
                 using OwnedDuckDbDataChunk chunk = (OwnedDuckDbDataChunk)Methods.duckdb_create_data_chunk(types, (ulong)colTypes.Length);
@@ -816,17 +817,19 @@ namespace DuckDbSharp
                 while (true)
                 {
                     var writtenItems = rootSerializer(enumerator, (nint)chunk.Pointer, arena);
+                    insertedItems += writtenItems;
                     Methods.duckdb_data_chunk_set_size(chunk.Pointer, (ulong)writtenItems);
-                    if (Methods.duckdb_append_data_chunk(appender, chunk) != duckdb_state.DuckDBSuccess)
-                        throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_appender_error(appender)));
+                    BindingUtils.CheckAppenderError(Methods.duckdb_append_data_chunk(appender, chunk), appender);
                     if (writtenItems != DuckDbUtils.STANDARD_VECTOR_SIZE) break;
                     Methods.duckdb_data_chunk_reset(chunk);
                 }
 
             }
-            if(Methods.duckdb_appender_close(appender) != duckdb_state.DuckDBSuccess)
-                throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_appender_error(appender)));
 
+            BindingUtils.CheckAppenderError(Methods.duckdb_appender_close(appender), appender);
+            
+
+            return insertedItems;
         }
 
         public static object ExecuteScalar(_duckdb_connection* conn, string sql, object[] parameters, List<EnumerableParameterSlot?> enumerableParameterSlots)

@@ -40,14 +40,14 @@ namespace DuckDbSharp
         {
             InsertRange(destinationSchema, destinationTableOrView, new[] { item });
         }
-        public void InsertRange<T>(string destinationTableOrView, IEnumerable<T> items)
+        public long InsertRange<T>(string destinationTableOrView, IEnumerable<T> items)
         {
-            InsertRange(null, destinationTableOrView, items);
+            return InsertRange(null, destinationTableOrView, items);
         }
 
-        public void DeleteRange<TKey>(string destinationTable, string keyFieldName, IEnumerable<TKey> keys)
+        public long DeleteRange<TKey>(string destinationTable, string keyFieldName, IEnumerable<TKey> keys)
         {
-            ExecuteNonQuery($"delete from {destinationTable} where {keyFieldName} in (select k.Value from table_parameter_1() k)", new object[] { keys });
+            return ExecuteScalar<long>($"delete from {destinationTable} where {keyFieldName} in (select k.Value from table_parameter_1() k)", new object[] { keys });
         }
 
         public IEnumerable<T> BatchLookup<T, TKey>(string selectAndFromOrTableName, string keyFieldName, IEnumerable<TKey> keys, string? additionalFilter = null, params object[] parameters)
@@ -56,7 +56,7 @@ namespace DuckDbSharp
             return Execute<T>($"{selectAndFromOrTableName} where {(additionalFilter != null ? ("(" + additionalFilter + ") and ") : null)} {keyFieldName} in (select k.Value from table_parameter_1() k)", [keys, ..parameters]);
         }
 
-        public abstract void InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items);
+        public abstract long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items);
         public abstract IEnumerable<T> Execute<T>(string sql, params object[] parameters);
         public abstract IEnumerable Execute(string sql, params object[] parameters);
 

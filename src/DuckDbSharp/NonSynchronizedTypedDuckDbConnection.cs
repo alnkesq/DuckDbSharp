@@ -24,10 +24,10 @@ namespace DuckDbSharp
             DuckDbUtils.ExecuteNonQuery(conn, sql, parameters, EnumerableParameterSlots);
         }
 
-        public override void InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
+        public override long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
         {
             CheckDisposed();
-            DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
+            return DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
         }
 
         public override IEnumerable<T> Execute<T>(string sql, params object[] parameters)

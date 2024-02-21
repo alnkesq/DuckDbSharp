@@ -2,6 +2,8 @@ using DuckDbSharp.Bindings;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace DuckDbSharp
 {
@@ -25,12 +27,12 @@ namespace DuckDbSharp
             }
         }
 
-        public override void InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
+        public override long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
         {
             lock (this)
             {
                 CheckDisposed();
-                DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
+                return DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
             }
         }
 
@@ -43,42 +45,77 @@ namespace DuckDbSharp
                 MaybeLog(sql);
                 enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots).GetEnumerator();
             }
-            while (true)
+            try
             {
-                T[] current;
+                while (true)
+                {
+                    T[] current;
+                    lock (this)
+                    {
+                        CheckDisposed();
+                        if (!enumerator.MoveNext()) yield break;
+                        current = enumerator.Current;
+                    }
+                    foreach (var item in current)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+            finally
+            {
                 lock (this)
                 {
-                    CheckDisposed();
-                    if (!enumerator.MoveNext()) yield break;
-                    current = enumerator.Current;
-                }
-                foreach (var item in current)
-                {
-                    yield return item;
+                    enumerator.Dispose();
                 }
             }
         }
 
+
         public override IEnumerable Execute(string sql, params object[] parameters)
         {
             IEnumerator enumerator;
+            Type elementType;
             lock (this)
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                enumerator = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots).GetEnumerator();
+                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots);
+                elementType = TypeSniffedEnumerable.TryGetEnumerableElementType(enumerable.GetType())!;
+                enumerator = enumerable.GetEnumerator();
             }
-            while (true)
+            var threadSafeEnumerable = ProduceEnumerable(enumerator);
+            EnumerableCast ??= typeof(Enumerable).GetMethod("Cast", BindingFlags.Static | BindingFlags.Public);
+            return (IEnumerable)EnumerableCast.MakeGenericMethod([elementType]).Invoke(null, [threadSafeEnumerable])!;
+        }
+
+        private static MethodInfo? EnumerableCast;
+        
+        private IEnumerable ProduceEnumerable(IEnumerator enumerator)
+        {
+
+            try
             {
-                // Here it's wasteful to lock and unlock for every item in the chunk, but this is the untyped version so we don't care too much.
-                object current;
+
+                while (true)
+                {
+                    // Here it's wasteful to lock and unlock for every item in the chunk, but this is the untyped version so we don't care too much.
+                    object current;
+                    lock (this)
+                    {
+                        CheckDisposed();
+                        if (!enumerator.MoveNext()) yield break;
+                        current = enumerator.Current;
+                    }
+                    yield return current;
+                }
+            }
+            finally
+            {
                 lock (this)
                 {
-                    CheckDisposed();
-                    if (!enumerator.MoveNext()) yield break;
-                    current = enumerator.Current;
+                    (enumerator as IDisposable)?.Dispose();
                 }
-                yield return current;
             }
         }
 
