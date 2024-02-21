@@ -824,7 +824,8 @@ namespace DuckDbSharp
                 }
 
             }
-            BindingUtils.CheckState(Methods.duckdb_appender_close(appender));
+            if(Methods.duckdb_appender_close(appender) != duckdb_state.DuckDBSuccess)
+                throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_appender_error(appender)));
 
         }
 
