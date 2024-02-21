@@ -45,6 +45,8 @@ namespace DuckDbSharp.Bindings
         DUCKDB_TYPE_UNION,
         DUCKDB_TYPE_BIT,
         DUCKDB_TYPE_UHUGEINT,
+        DUCKDB_TYPE_TIME_TZ,
+        DUCKDB_TYPE_TIMESTAMP_TZ,
     }
 }
 
