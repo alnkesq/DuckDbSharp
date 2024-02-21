@@ -1,8 +1,10 @@
 using DuckDbSharp;
 using DuckDbSharp.Reflection;
+using DuckDbSharp.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -26,7 +28,51 @@ namespace DuckDbSharp.Tests
             Assert.Equal(rows, DuckDbUtils.QueryParquet<SomeParquetRow>("output.parquet", "select * from data order by a"));
         }
 
+#if NET8_0_OR_GREATER
+        [Fact]
+        public static void UuidComparisons()
+        {
+            var longs = new ulong[] 
+            { 
+                ulong.MinValue, 
+                ulong.MaxValue,
+                unchecked((ulong)long.MinValue), 
+                long.MaxValue, 
+                1UL,
+                0xFFUL,
+                0x1UL << 8,
+                0xFFUL << 8,
+                0x1UL << (64 - 16),
+                0xFFUL << (64 - 16),
+                0x1UL << (64 - 8),
+                0xFFUL << (64 - 8),
+            };
+            var guids = new List<Guid>();
+            foreach (var a in longs)
+            {
+                foreach (var b in longs)
+                {
+                    var bytes = MemoryMarshal.AsBytes<ulong>(new[] { a, b });
+                    var guid = new Guid(bytes, true);
+                    guids.Add(guid);
+                }
+            }
 
+            guids = guids.OrderBy(x => x.ToString()).ToList();
+
+            for (int i = 0; i < guids.Count; i++)
+            {
+                var guid = guids[i];
+                var roundtrip = (Guid)(DuckDbUuid)guid;
+                Assert.Equal(guid, roundtrip);
+                if (i != 0)
+                {
+                    var cmp = ((DuckDbUuid)guids[i - 1]).CompareTo((DuckDbUuid)guid);
+                    Assert.True(cmp < 0);
+                }
+            }
+        }
+#endif
 
     }
     record SomeParquetRow(int a, string b);

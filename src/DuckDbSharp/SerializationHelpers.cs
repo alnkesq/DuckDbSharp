@@ -47,6 +47,15 @@ namespace DuckDbSharp
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static DateOnly DeserializeDateOnly(int unixDay) => UnixDateEpoch.AddDays(unixDay);
 
+
+#if NET8_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DuckDbUuid SerializeGuid(Guid guid) => (DuckDbUuid)guid;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid DeserializeGuid(DuckDbUuid uuid) => (Guid)uuid;
+#endif
+
         public readonly static DateOnly UnixDateEpoch = new DateOnly(1970, 1, 1);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
