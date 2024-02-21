@@ -128,5 +128,11 @@ namespace DuckDbSharp.Types
         {
             return upper;
         }
+#if NET8_0_OR_GREATER
+        public string ToGuidString()
+        {
+            return ((Guid)this).ToString();
+        }
+#endif
     }
 }
