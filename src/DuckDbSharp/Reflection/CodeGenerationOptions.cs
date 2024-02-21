@@ -23,6 +23,7 @@ namespace DuckDbSharp.Reflection
         public string? QueryTypeCachePath;
         internal QueryTypeCache QueryTypeCache;
         public QueryInfoCacheBehavior CacheBehavior = QueryInfoCacheBehavior.PreferCache;
+        public bool LogToStderr = true;
 
         public Type GetTypeByName(string name)
         {

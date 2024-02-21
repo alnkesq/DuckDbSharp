@@ -136,6 +136,7 @@ namespace DuckDbSharp.Reflection
         {
             var structuralType = TryGetPossiblyCachedResultStructuralType(conn, sql, parameters, options);
             if (structuralType is null) return default;
+
             var type = CreateClrType(structuralType, nameHint, new TypePath { RootSql = sql, RootSqlName = nameHint, RootParameters = parameters, RootSpec = spec });
             return (type, structuralType);
         }
@@ -153,6 +154,9 @@ namespace DuckDbSharp.Reflection
             }
             else
             {
+                if(options.LogToStderr)
+                    Console.Error.WriteLine($"Determining result type for {DuckDbUtils.ToSingleLineSql(sql)}");
+
                 try
                 {
                     var args = DuckDbUtils.GetExampleParameterValues(parameters, options, sql);

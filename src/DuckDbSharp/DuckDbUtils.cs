@@ -505,7 +505,6 @@ namespace DuckDbSharp
                     if (spec.Type == null)
                     {
                         var sql = spec.GetSql();
-                        Console.Error.WriteLine($"Determining result type for {ToSingleLineSql(sql)}");
                         var generatedType = ctx.GenerateCSharpTypeForQuery(conn, spec.SqlName, sql, spec.Parameters, options, spec);
                         if (generatedType == default) continue;
                         specToGeneratedType.Add(spec, (generatedType.Type, generatedType.StructuralType));
@@ -515,7 +514,8 @@ namespace DuckDbSharp
                         if (spec.SqlName != null)
                         {
                             var sql = spec.GetSql();
-                            Console.Error.WriteLine($"Checking types for {ToSingleLineSql(sql)}");
+                            if (options.LogToStderr)
+                                Console.Error.WriteLine($"Checking types for {ToSingleLineSql(sql)}");
 
                             var args = DuckDbUtils.GetExampleParameterValues(spec.Parameters, options, spec.GetSql());
                             //using var result = DuckDbUtils.ExecuteCore(conn.Handle, $"select * from ({sql}) limit 0", args, conn.EnumerableParameterSlots);

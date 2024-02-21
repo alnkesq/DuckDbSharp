@@ -19,14 +19,16 @@ namespace DuckDbSharp.Reflection
         private static bool IsAlwaysNonNull(TypedDuckDbConnectionBase conn, FieldInfo field, TypePath path, Dictionary<NullnessCacheKey, bool> neverNullCache, CodeGenerationOptions options)
         {
 
-            Console.Error.Write("Determining whether field is ever null: " + path.ToString() + " -> " + field.Name);
             if (!CanTryTurningIntoNonNullable(field.FieldType)) return true;
             var key = new NullnessCacheKey(path.ToString(true), field.Name);
             if (neverNullCache.TryGetValue(key, out var result))
             {
-                WriteAlwaysNonNull(result, true);
+                if (options.LogToStderr)
+                    WriteAlwaysNonNull(result, true);
                 return result;
             }
+            if (options.LogToStderr)
+                Console.Error.Write("Determining whether field is ever null: " + path.ToString() + " -> " + field.Name);
             result = IsAlwaysNonNullCore(conn, field, path, options);
             neverNullCache.Add(key, result);
             return result;
@@ -52,14 +54,16 @@ namespace DuckDbSharp.Reflection
                 alwaysNonNull = false;
             }
 
-            WriteAlwaysNonNull(alwaysNonNull, false);
+            if (options.LogToStderr)
+                WriteAlwaysNonNull(alwaysNonNull, false);
             return alwaysNonNull;
 
         }
 
         private static void WriteAlwaysNonNull(bool alwaysNonNull, bool fromCache)
         {
-            Console.WriteLine(" = " + (alwaysNonNull ? "(mandatory)" : "(optional)") + (fromCache ? " [from cache]" : null));
+
+            Console.Error.WriteLine(" = " + (alwaysNonNull ? "(mandatory)" : "(optional)") + (fromCache ? " [from cache]" : null));
         }
 
         public static Dictionary<TypeKey, List<string>> FindAlwaysNonNullFields(TypedDuckDbConnectionBase conn, TypeGenerationContext ctx, Dictionary<NullnessCacheKey, bool> neverNullCache, CodeGenerationOptions options)
