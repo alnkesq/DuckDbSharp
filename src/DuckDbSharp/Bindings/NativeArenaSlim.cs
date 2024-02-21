@@ -54,7 +54,10 @@ namespace DuckDbSharp.Bindings
             }
 
 
-            var chunkSize = (int)Math.Max(BitOperations.RoundUpToPowerOf2((uint)size), lastChunkSize) * 2;
+            var chunkSizeLong = Math.Max(BitOperations.RoundUpToPowerOf2((uint)size), lastChunkSize);
+            if (chunkSizeLong * 2 < int.MaxValue)
+                chunkSizeLong *= 2;
+            var chunkSize = checked((int)chunkSizeLong);
             lastChunkSize = chunkSize;
             nextAllocation = (byte*)NativeMemory.Alloc((nuint)chunkSize);
             //if ((nuint)nextAllocation % 8 != 0) throw new Exception();
