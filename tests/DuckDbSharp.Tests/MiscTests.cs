@@ -30,6 +30,14 @@ namespace DuckDbSharp.Tests
 
 #if NET8_0_OR_GREATER
         [Fact]
+        public static void UuidMarshalling()
+        {
+            using var db = ThreadSafeTypedDuckDbConnection.CreateInMemory();
+            var uuid = db.Execute<DuckDbUuid>("select '6dc1a4ed-bff3-47a7-83fe-3beba206808c'::uuid").Single();
+            Assert.Equal("6dc1a4ed-bff3-47a7-83fe-3beba206808c", uuid.ToString());
+        }
+
+        [Fact]
         public static void UuidComparisons()
         {
             var longs = new ulong[] 
