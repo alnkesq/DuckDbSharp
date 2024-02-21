@@ -219,7 +219,7 @@ namespace DuckDbSharp.Reflection
         {
             if (ElementType is not null) return $"{ElementType.ToSql()}[]";
             if (StructureFields is not null) return $"STRUCT({string.Join(", ", StructureFields.Select(x => x.Name + " " + x.FieldType.ToSql()))})";
-            if (EnumMembers is not null) return $"ENUM([{string.Join(", ", EnumMembers)}])";
+            if (EnumMembers is not null) return $"ENUM({string.Join(", ", EnumMembers.Select(x => $"'{x}'"))})";
 
             return this.Kind.ToString().Substring("DUCKDB_TYPE_".Length);
         }
