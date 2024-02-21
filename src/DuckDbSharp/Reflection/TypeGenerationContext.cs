@@ -160,7 +160,7 @@ namespace DuckDbSharp.Reflection
                 try
                 {
                     var args = DuckDbUtils.GetExampleParameterValues(parameters, options, sql);
-                    using var result = DuckDbUtils.ExecuteCore(conn.Handle, $"select * from ({sql}) limit 0", args, conn.EnumerableParameterSlots);
+                    using var result = conn.ExecuteUnsafe($"select * from ({sql}) limit 0", args);
                     structuralType = DuckDbStructuralType.CreateStructuralTypeForResult(result);
                 }
                 catch (Exception ex)

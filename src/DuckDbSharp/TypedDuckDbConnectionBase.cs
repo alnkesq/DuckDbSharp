@@ -26,7 +26,7 @@ namespace DuckDbSharp
             this.database = database;
         }
 		public TypeGenerationContext TypeGenerationContext { get; set; } = TypeGenerationContext.Global;
-
+        
 		public DuckDbDatabase Database => database;
         public virtual void Dispose()
         {
@@ -183,6 +183,8 @@ namespace DuckDbSharp
             CheckDisposed();
             DuckDbUtils.CreateEnumType(Handle, t);
         }
+        public abstract OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters);
 
-    }
+
+	}
 }

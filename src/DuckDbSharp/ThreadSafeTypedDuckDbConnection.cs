@@ -42,6 +42,7 @@ namespace DuckDbSharp
         }
 
 
+
         public override IEnumerable<T> Execute<T>(string sql, params object?[]? parameters)
         {
             IEnumerator<T[]> enumerator;
@@ -76,9 +77,18 @@ namespace DuckDbSharp
                 }
             }
         }
+        public override OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters)
+        {
+            lock (this)
+            {
+                CheckDisposed();
+                MaybeLog(sql);
+                return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots);
+            }
+        }
 
 
-        public override IEnumerable Execute(string sql, params object?[]? parameters)
+		public override IEnumerable Execute(string sql, params object?[]? parameters)
         {
             IEnumerator enumerator;
             Type elementType;

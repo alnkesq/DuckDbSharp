@@ -56,7 +56,14 @@ namespace DuckDbSharp
             CheckDisposed();
             MaybeLog(sql);
             return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
-        }
-    }
+		}
+		public override OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters)
+		{
+			CheckDisposed();
+			MaybeLog(sql);
+			return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots);
+		}
+
+	}
 }
 
