@@ -154,6 +154,7 @@ namespace DuckDbSharp.Functions
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
         static void TableFunctionInit(duckdb_init_info_ptr p)
         {
 

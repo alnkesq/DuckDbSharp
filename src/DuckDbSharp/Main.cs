@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DuckDbSharp
 {
-    public unsafe class Program
+    public static unsafe class Program
     {
         public static void Main()
         { 

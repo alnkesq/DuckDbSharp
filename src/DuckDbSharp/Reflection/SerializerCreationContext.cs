@@ -577,7 +577,7 @@ namespace DuckDbSharp.Reflection
             return r;
         }
 
-        private string CreateSpeakableTypeName(Type type, DuckDbStructuralType? structuralType, StructureFieldInfo? field)
+        private static string CreateSpeakableTypeName(Type type, DuckDbStructuralType? structuralType, StructureFieldInfo? field)
         {
             return CreateSpeakableTypeName(type, structuralType) + (field != null ? "_" + field.DuckDbFieldName + (field.FieldStructuralType is not null ? "_" + field.FieldStructuralType.Hash : null) : null);
         }
@@ -1129,8 +1129,8 @@ namespace DuckDbSharp.Reflection
         }
 
         private int lastIlGeneratedMethodId;
-        private AssemblyBuilder? assemblyBuilder;
-        private ModuleBuilder? moduleBuilder;
+        //private AssemblyBuilder? assemblyBuilder;
+        //private ModuleBuilder? moduleBuilder;
 
         private static MethodInfo GetDataChunkVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetDataChunkVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetVectorValidityMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorValidity), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
