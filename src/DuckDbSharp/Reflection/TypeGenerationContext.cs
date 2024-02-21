@@ -47,7 +47,7 @@ namespace DuckDbSharp.Reflection
             return string.IsNullOrEmpty(Namespace) ? name : Namespace + "." + name;
         }
 
-        private Type CreateOrReuseType(string nameHint, DuckDbStructuralType type, Func<Type> factory)
+        private Type CreateOrReuseType(string? nameHint, DuckDbStructuralType type, Func<Type> factory)
         {
             if (ClrTypeCache == null) return factory(); // nullness check phase: we don't want to reuse types.
             return ClrTypeCache.GetOrAdd(type.GetTypeKey(nameHint), _ => factory());
@@ -238,7 +238,7 @@ namespace DuckDbSharp.Reflection
         internal void AddKnownClrType(Type type)
         {
             var structural = DuckDbStructuralType.CreateStructuralType(type);
-            this.ClrTypeCache.TryAdd(structural.GetTypeKey(), type);
+            this.ClrTypeCache!.TryAdd(structural.GetTypeKey(), type);
         }
 
         public readonly static TypeGenerationContext Global = new();

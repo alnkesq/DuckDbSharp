@@ -11,7 +11,7 @@ namespace DuckDbSharp.Reflection
         public readonly string? TableOrView;
         public readonly string? Sql;
         public readonly string? SqlName;
-        public readonly QueryParameterInfo[] Parameters;
+        public readonly QueryParameterInfo[]? Parameters;
         internal bool IsForSerialization => Sql == null && TableOrView == null;
         public string? Comment { get; init; }
         internal readonly DirectoryInfo? queriesDirectory;

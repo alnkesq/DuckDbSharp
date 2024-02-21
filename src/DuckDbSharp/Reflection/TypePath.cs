@@ -48,11 +48,11 @@ namespace DuckDbSharp.Reflection
 
                 if (ListElement)
                 {
-                    return $"select unnest(p{Parent.Prefix}) as v from ({Parent.FullSql}) p";
+                    return $"select unnest(p{Parent!.Prefix}) as v from ({Parent.FullSql}) p";
                 }
                 if (FieldOrColumn != null)
                 {
-                    var f = Parent.Prefix + "." + FieldOrColumn;
+                    var f = Parent!.Prefix + "." + FieldOrColumn;
                     return $"select p{f} as v from ({Parent.FullSql}) p where p{f} is not null";
                 }
                 throw new NotSupportedException();

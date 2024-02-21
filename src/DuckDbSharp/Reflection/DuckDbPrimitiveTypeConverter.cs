@@ -109,8 +109,8 @@ namespace DuckDbSharp.Reflection
                 max <= ushort.MaxValue ? 16 :
                 max <= uint.MaxValue ? 32 :
                 throw new NotSupportedException();
-            var serializer = typeof(SerializationHelpers).GetMethod($"SerializeEnum_{clrBits}To{duckBits}", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(clrType);
-            var deserializer = typeof(SerializationHelpers).GetMethod($"DeserializeEnum_{duckBits}To{clrBits}", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(clrType);
+            var serializer = typeof(SerializationHelpers).GetMethod($"SerializeEnum_{clrBits}To{duckBits}", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(clrType);
+            var deserializer = typeof(SerializationHelpers).GetMethod($"DeserializeEnum_{duckBits}To{clrBits}", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(clrType);
 
             var members = new string[max + 1];
             foreach (var clrValue in clrValues)

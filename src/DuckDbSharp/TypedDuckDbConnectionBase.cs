@@ -50,19 +50,19 @@ namespace DuckDbSharp
             return ExecuteScalar<long>($"delete from {destinationTable} where {keyFieldName} in (select k.Value from table_parameter_1() k)", new object[] { keys });
         }
 
-        public IEnumerable<T> BatchLookup<T, TKey>(string selectAndFromOrTableName, string keyFieldName, IEnumerable<TKey> keys, string? additionalFilter = null, params object[] parameters)
+        public IEnumerable<T> BatchLookup<T, TKey>(string selectAndFromOrTableName, string keyFieldName, IEnumerable<TKey> keys, string? additionalFilter = null, params object[]? parameters)
         {
             if (!selectAndFromOrTableName.Contains(' ')) selectAndFromOrTableName = "from " + selectAndFromOrTableName;
             return Execute<T>($"{selectAndFromOrTableName} where {(additionalFilter != null ? ("(" + additionalFilter + ") and ") : null)} {keyFieldName} in (select k.Value from table_parameter_1() k)", [keys, ..parameters]);
         }
 
         public abstract long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items);
-        public abstract IEnumerable<T> Execute<T>(string sql, params object[] parameters);
-        public abstract IEnumerable Execute(string sql, params object[] parameters);
+        public abstract IEnumerable<T> Execute<T>(string sql, params object[]? parameters);
+        public abstract IEnumerable Execute(string sql, params object[]? parameters);
 
-        public abstract T ExecuteScalar<T>(string sql, params object[] parameters);
-        public abstract object ExecuteScalar(string sql, params object[] parameters);
-        public abstract void ExecuteNonQuery(string sql, params object[] parameters);
+        public abstract T ExecuteScalar<T>(string sql, params object[]? parameters);
+        public abstract object ExecuteScalar(string sql, params object[]? parameters);
+        public abstract void ExecuteNonQuery(string sql, params object[]? parameters);
 
         protected unsafe void CheckDisposed()
         {
@@ -158,14 +158,14 @@ namespace DuckDbSharp
             {
                 if (any) sb.Append(", ");
                 any = true;
-                sb.Append(col.DuckDbFieldName);
+                sb.Append(col!.DuckDbFieldName);
                 sb.Append(' ');
                 var structural = DuckDbStructuralType.CreateStructuralType(col.FieldType);
                 sb.Append(structural.ToSql());
             }
             if (primaryKey == null)
             {
-                primaryKey = structureFields.Where(x => x.ClrField.GetCustomAttribute<KeyAttribute>() != null).Select(x => x.DuckDbFieldName).ToArray();
+                primaryKey = structureFields.Where(x => x!.ClrField.GetCustomAttribute<KeyAttribute>() != null).Select(x => x!.DuckDbFieldName).ToArray();
                 if (primaryKey.Length == 0) primaryKey = null;
             }
             if (primaryKey != null)

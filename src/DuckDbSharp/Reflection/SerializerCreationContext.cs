@@ -58,20 +58,20 @@ namespace DuckDbSharp.Reflection
             new(typeof(ReadOnlyMemory<byte>), DUCKDB_TYPE.DUCKDB_TYPE_BLOB, nameof(SerializationHelpers.SerializeReadOnlyMemory), nameof(SerializationHelpers.DeserializeReadOnlyMemory)),
         };
 
-        private readonly static MethodInfo GetStructureChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetStructureChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo GetSublistChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo GetSublistChildVectorAndReserveMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistChildVectorAndReserve), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo ShowSpanForDebuggingMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ShowSpanForDebugging), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo ThrowEnumOutOfRangeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ThrowEnumOutOfRange), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private static readonly MethodInfo GetVectorDataMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorData), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-        private static readonly MethodInfo AssignSpanItemMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.AssignSpanItem), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-        private static readonly MethodInfo ReadSpanItemMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ReadSpanItem), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-        private static readonly ConstructorInfo OffsetAndCountCtor = typeof(OffsetAndCount).GetConstructor(new[] { typeof(int), typeof(int) });
-        private readonly static MethodInfo GetChunkSizeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetChunkSize), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo NewSkipCtorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.NewSkipCtor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo GetTotalItemsMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetTotalItems), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo GetSublistSizeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistSize), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo GetSublistOffsetMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistOffset), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        private readonly static MethodInfo GetStructureChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetStructureChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetSublistChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetSublistChildVectorAndReserveMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistChildVectorAndReserve), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo ShowSpanForDebuggingMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ShowSpanForDebugging), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo ThrowEnumOutOfRangeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ThrowEnumOutOfRange), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private static readonly MethodInfo GetVectorDataMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorData), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!;
+        private static readonly MethodInfo AssignSpanItemMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.AssignSpanItem), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!;
+        private static readonly MethodInfo ReadSpanItemMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ReadSpanItem), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!;
+        private static readonly ConstructorInfo OffsetAndCountCtor = typeof(OffsetAndCount).GetConstructor(new[] { typeof(int), typeof(int) })!;
+        private readonly static MethodInfo GetChunkSizeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetChunkSize), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo NewSkipCtorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.NewSkipCtor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetTotalItemsMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetTotalItems), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetSublistSizeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistSize), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetSublistOffsetMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistOffset), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
 
         private readonly Dictionary<SerializerCacheKey, GeneratedMethodInfo> serializerCache = new();
@@ -131,7 +131,7 @@ namespace DuckDbSharp.Reflection
                 false;
         }
 
-        public static (Expression GetValue, Expression HasValue) UnwrapNullableCore(Expression maybeNullable)
+        public static (Expression GetValue, Expression? HasValue) UnwrapNullableCore(Expression maybeNullable)
         {
             Expression? hasValue;
             if (maybeNullable.Type.IsClass)
@@ -152,16 +152,16 @@ namespace DuckDbSharp.Reflection
         }
 
 
-        private static Expression AndConditions(params Expression?[] conditions)
+        private static Expression? AndConditions(params Expression?[] conditions)
         {
             conditions = conditions.Where(x => x != null).ToArray();
             return conditions.Length switch
             {
                 0 => null,
                 1 => conditions[0],
-                2 => Expression.AndAlso(conditions[0], conditions[1]),
-                3 => Expression.AndAlso(Expression.AndAlso(conditions[0], conditions[1]), conditions[2]),
-                4 => Expression.AndAlso(Expression.AndAlso(Expression.AndAlso(conditions[0], conditions[1]), conditions[2]), conditions[3]),
+                2 => Expression.AndAlso(conditions[0]!, conditions[1]!),
+                3 => Expression.AndAlso(Expression.AndAlso(conditions[0]!, conditions[1]!), conditions[2]!),
+                4 => Expression.AndAlso(Expression.AndAlso(Expression.AndAlso(conditions[0]!, conditions[1]!), conditions[2]!), conditions[3]!),
                 _ => throw new Exception()
             };
         }
@@ -410,7 +410,7 @@ namespace DuckDbSharp.Reflection
             }
             else
             {
-                newSublist = Expression.New(sublist.Type.GetConstructor(new[] { typeof(int) }), sublistSize);
+                newSublist = Expression.New(sublist.Type.GetConstructor(new[] { typeof(int) })!, sublistSize);
                 addToSublist = Expression.Call(sublist, "Add", null, copyFrom);
             }
 
@@ -455,7 +455,7 @@ namespace DuckDbSharp.Reflection
 
             var validityVector = Expression.Variable(typeof(nint), "validityVector");
             body.Add(CreateValidityVectorInitialization(validityVector, p.VectorPtr));
-            body.Add(CreateForLoop(i, p.ObjectsLength, MaybeIf(Expression.Not(hasValue), CreateSetNotPresent(validityVector, i))));
+            body.Add(CreateForLoop(i, p.ObjectsLength, MaybeIf(Expression.Not(hasValue!), CreateSetNotPresent(validityVector, i))));
             variables.Add(i);
             variables.Add(validityVector);
 
@@ -864,7 +864,7 @@ namespace DuckDbSharp.Reflection
 
         private static bool HasEmptyCtor(Type elementType, out ConstructorInfo ctor)
         {
-            ctor = elementType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, Array.Empty<Type>());
+            ctor = elementType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, Array.Empty<Type>())!;
             if (ctor == null) return false;
             return true;
             /*
@@ -1132,12 +1132,12 @@ namespace DuckDbSharp.Reflection
         private AssemblyBuilder? assemblyBuilder;
         private ModuleBuilder? moduleBuilder;
 
-        private static MethodInfo GetDataChunkVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetDataChunkVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo GetVectorValidityMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorValidity), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        private static MethodInfo GetDataChunkVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetDataChunkVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetVectorValidityMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorValidity), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        private readonly static MethodInfo GetVectorValidityAndSetAllMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorValidityAndSetAll), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo SetNotPresentMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.SetNotPresent), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo GetSubObjectsCountMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSubObjectsCount), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        private readonly static MethodInfo GetVectorValidityAndSetAllMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorValidityAndSetAll), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo SetNotPresentMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.SetNotPresent), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetSubObjectsCountMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSubObjectsCount), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
 
         public readonly static SerializerCreationContext Global = new();

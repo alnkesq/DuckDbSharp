@@ -17,7 +17,7 @@ namespace DuckDbSharp
         public static NonSynchronizedTypedDuckDbConnection CreateInMemory() => Create(null);
 
 
-        public override void ExecuteNonQuery(string sql, params object[] parameters)
+        public override void ExecuteNonQuery(string sql, params object[]? parameters)
         {
             CheckDisposed();
             MaybeLog(sql);
@@ -30,28 +30,28 @@ namespace DuckDbSharp
             return DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
         }
 
-        public override IEnumerable<T> Execute<T>(string sql, params object[] parameters)
+        public override IEnumerable<T> Execute<T>(string sql, params object[]? parameters)
         {
             CheckDisposed();
             MaybeLog(sql);
             return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots);
         }
 
-        public override IEnumerable Execute(string sql, params object[] parameters)
+        public override IEnumerable Execute(string sql, params object[]? parameters)
         {
             CheckDisposed();
             MaybeLog(sql);
             return DuckDbUtils.Execute(conn, sql, parameters, EnumerableParameterSlots);
         }
 
-        public override T ExecuteScalar<T>(string sql, params object[] parameters)
+        public override T ExecuteScalar<T>(string sql, params object[]? parameters)
         {
             CheckDisposed();
             MaybeLog(sql);
             return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots);
         }
 
-        public override object ExecuteScalar(string sql, params object[] parameters)
+        public override object ExecuteScalar(string sql, params object[]? parameters)
         {
             CheckDisposed();
             MaybeLog(sql);

@@ -36,7 +36,7 @@ namespace DuckDbSharp
             }
         }
 
-        public override IEnumerable<T> Execute<T>(string sql, params object[] parameters)
+        public override IEnumerable<T> Execute<T>(string sql, params object[]? parameters)
         {
             IEnumerator<T[]> enumerator;
             lock (this)
@@ -72,7 +72,7 @@ namespace DuckDbSharp
         }
 
 
-        public override IEnumerable Execute(string sql, params object[] parameters)
+        public override IEnumerable Execute(string sql, params object[]? parameters)
         {
             IEnumerator enumerator;
             Type elementType;
@@ -119,7 +119,7 @@ namespace DuckDbSharp
             }
         }
 
-        public override T ExecuteScalar<T>(string sql, params object[] parameters)
+        public override T ExecuteScalar<T>(string sql, params object[]? parameters)
         {
             lock (this)
             {
@@ -129,7 +129,7 @@ namespace DuckDbSharp
             }
         }
 
-        public override object ExecuteScalar(string sql, params object[] parameters)
+        public override object ExecuteScalar(string sql, params object[]? parameters)
         {
             lock (this)
             {
@@ -138,7 +138,7 @@ namespace DuckDbSharp
                 return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots);
             }
         }
-        public override void ExecuteNonQuery(string sql, params object[] parameters)
+        public override void ExecuteNonQuery(string sql, params object[]? parameters)
         {
             lock (this)
             {

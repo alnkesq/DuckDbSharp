@@ -197,7 +197,7 @@ namespace DuckDbSharp
 
                 using var result = OwnedDuckDbResult.Allocate(simpleParamCount != (ulong)parameters.Length ? () =>
                 {
-                    lock (enumerableParameterSlots)
+                    lock (enumerableParameterSlots!)
                     {
                         foreach (var item in enumerableParameterSlots)
                         {
@@ -267,7 +267,7 @@ namespace DuckDbSharp
         internal static IEnumerable Execute(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots);
         internal static IEnumerable<T> Execute<T>(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots);
 
-        public static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object[] parameters, List<EnumerableParameterSlot?> enumerableParameterSlots)
+        public static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
         {
             PrepareExecute<T>(conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots);
             var enumerable = EnumerateResultsCore<T>(result, structuralType, enumerableParameterSlots);
@@ -283,7 +283,7 @@ namespace DuckDbSharp
             return enumerable;
         }
 
-        internal static void PrepareExecute<T>(_duckdb_connection* conn, string sql, object[] parameters, out OwnedDuckDbResult result, out DuckDbStructuralType structuralType, List<EnumerableParameterSlot> enumerableParameterSlots)
+        internal static void PrepareExecute<T>(_duckdb_connection* conn, string sql, object[]? parameters, out OwnedDuckDbResult result, out DuckDbStructuralType structuralType, List<EnumerableParameterSlot>? enumerableParameterSlots)
         {
             result = ExecuteCore(conn, sql, parameters, enumerableParameterSlots);
             structuralType = DuckDbStructuralType.CreateStructuralTypeForResult(result, typeof(T));
@@ -296,17 +296,17 @@ namespace DuckDbSharp
             return structuralType;
         }
 
-        public static void ExecuteNonQuery(_duckdb_connection* conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots)
+        public static void ExecuteNonQuery(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots)
         {
             using var _ = ExecuteCore(conn, sql, parameters, enumerableParameterSlots);
         }
 
-        public static IEnumerable Execute(_duckdb_connection* conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots)
+        public static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots)
         {
             return Execute(conn, sql, parameters, expectSingleColumn: false, enumerableParameterSlots);
         }
 
-        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object[] parameters, bool expectSingleColumn, List<EnumerableParameterSlot> enumerableParameterSlots)
+        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, bool expectSingleColumn, List<EnumerableParameterSlot>? enumerableParameterSlots)
         {
             using var result = ExecuteCore(conn, sql, parameters, enumerableParameterSlots);
 
@@ -440,7 +440,7 @@ namespace DuckDbSharp
         {
             var conn = options.Connection;
             using var tempConnection = conn == null ? ThreadSafeTypedDuckDbConnection.CreateInMemory() : null;
-            if (conn == null) conn = tempConnection;
+            if (conn == null) conn = tempConnection!;
             options.Namespace ??= "Untitled";
             options.FullTypeNameForAotSerializers ??= options.Namespace + ".AotSerializers";
             options.FullTypeNameForQueries ??= options.Namespace + ".Queries";
@@ -604,9 +604,9 @@ namespace DuckDbSharp
                         foreach (var p in spec.Parameters)
                         {
                             writer.Write(", ");
-                            writer.WriteTypeReference(ResolveType(p.Type), false);
+                            writer.WriteTypeReference(ResolveType(p.Type)!, false);
                             writer.Write(" ");
-                            writer.Write(p.Name);
+                            writer.Write(p.Name!);
                         }
                     }
                     writer.WriteLine(")");
@@ -734,7 +734,7 @@ namespace DuckDbSharp
                     writer.Write("), ");
                     writer.Write(deserializer.Name);
                     writer.Write(", ");
-                    writer.WriteString(deserializer.IsRootForStructuralType.Hash.ToString());
+                    writer.WriteString(deserializer.IsRootForStructuralType!.Hash.ToString());
                     writer.WriteLine(");");
                 }
 
@@ -787,7 +787,7 @@ namespace DuckDbSharp
             return tw.ToString();
         }
 
-        private readonly static MethodInfo InsertRangeBoxedMethod = typeof(DuckDbUtils).GetMethod(nameof(InsertRangeBoxed), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        private readonly static MethodInfo InsertRangeBoxedMethod = typeof(DuckDbUtils).GetMethod(nameof(InsertRangeBoxed), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
 
         private static void InsertRangeBoxed<T>(nint conn, string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
@@ -837,14 +837,14 @@ namespace DuckDbSharp
             return insertedItems;
         }
 
-        public static object ExecuteScalar(_duckdb_connection* conn, string sql, object[] parameters, List<EnumerableParameterSlot?> enumerableParameterSlots)
+        public static object? ExecuteScalar(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
         {
             var box = DuckDbUtils.Execute(conn, sql, parameters, expectSingleColumn: true, enumerableParameterSlots).Cast<object>().Single();
             var fields = box.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
             if (fields.Length != 1) throw new Exception($"A scalar query returned {fields.Length} columns.");
             return fields[0].GetValue(box);
         }
-        internal static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object[] parameters, List<EnumerableParameterSlot?> enumerableParameterSlots)
+        internal static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
         {
             return Execute<T>(conn, sql, parameters, enumerableParameterSlots).Single();
         }
@@ -867,7 +867,7 @@ namespace DuckDbSharp
             }).ToArray() : null;
         }
 
-        public static IEnumerable<T> QueryParquet<T>(string parquetPath, string? query = null, params object[] parameters)
+        public static IEnumerable<T> QueryParquet<T>(string parquetPath, string? query = null, params object[]? parameters)
         {
             using var db = ThreadSafeTypedDuckDbConnection.CreateInMemory();
             db.ExecuteNonQuery($"CREATE TEMP VIEW data AS SELECT * FROM read_parquet('{parquetPath}') ");
