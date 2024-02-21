@@ -161,6 +161,13 @@ namespace DuckDbSharp
                         using var s = (ScopedString)str;
                         BindingUtils.CheckState(Methods.duckdb_bind_varchar_length(prepared, i, s, (ulong)s.Length));
                     }
+                    else if (val is byte[] blob)
+                    {
+                        fixed (byte* ptr = blob)
+                        {
+                            BindingUtils.CheckState(Methods.duckdb_bind_blob(prepared, i, ptr, (ulong)blob.Length));
+                        }
+                    }
                     else if (val is Memory<byte> m)
                     {
                         fixed (byte* ptr = m.Span)
