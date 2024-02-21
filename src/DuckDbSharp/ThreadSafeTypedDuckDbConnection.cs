@@ -13,11 +13,15 @@ namespace DuckDbSharp
             : base(conn, database)
         {
         }
+        public static ThreadSafeTypedDuckDbConnection Create(DuckDbDatabase db)
+        {
+            return new ThreadSafeTypedDuckDbConnection(DuckDbDatabase.Connect(db.Path, db), db);
+        }
         public static ThreadSafeTypedDuckDbConnection Create(string? path)
         {
             return new ThreadSafeTypedDuckDbConnection(DuckDbUtils.Connect(path, out var db), db);
         }
-        public static ThreadSafeTypedDuckDbConnection CreateInMemory() => Create(null);
+        public static ThreadSafeTypedDuckDbConnection CreateInMemory() => Create((string?)null);
 
         public override void Dispose()
         {

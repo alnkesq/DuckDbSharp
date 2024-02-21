@@ -14,14 +14,14 @@ namespace DuckDbSharp
         private OwnedDuckDbDatabase database;
         private int usageCount;
         public List<string>? _attachedFiles;
-        private DuckDbDatabase(OwnedDuckDbDatabase database)
+        private DuckDbDatabase(string? path, OwnedDuckDbDatabase database)
         {
+            this.Path = path;
             this.database = database;
         }
 
         internal Dictionary<string, object> RegisteredFunctions = new();
-
-
+        internal string? Path;
 
         internal unsafe static OwnedDuckDbConnection AcquireConnection(string? path, out DuckDbDatabase ownerDb, int timeoutMs = 30000)
         {
@@ -34,7 +34,7 @@ namespace DuckDbSharp
                     {
                         try
                         {
-                            db = new DuckDbDatabase(DuckDbUtils.OpenDatabase(path));
+                            db = new DuckDbDatabase(path, DuckDbUtils.OpenDatabase(path));
                             break;
                         }
                         catch (DuckDbException) when (sw.ElapsedMilliseconds < timeoutMs)
@@ -46,9 +46,18 @@ namespace DuckDbSharp
                     if (path != null)
                         dbs.Add(path, db);
                 }
+                ownerDb = db;
+                return Connect(path, db);
+            }
+
+        }
+
+        internal static unsafe OwnedDuckDbConnection Connect(string path, DuckDbDatabase db)
+        {
+            lock (dbs)
+            {
                 var connection = DuckDbUtils.ConnectCore(db.database);
                 db.usageCount++;
-                ownerDb = db;
                 return new OwnedDuckDbConnection(connection.Pointer, () =>
                 {
                     lock (dbs)
@@ -81,7 +90,6 @@ namespace DuckDbSharp
                     }
                 });
             }
-
         }
     }
 }

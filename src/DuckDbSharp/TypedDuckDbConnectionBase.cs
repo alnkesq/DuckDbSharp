@@ -26,6 +26,7 @@ namespace DuckDbSharp
             this.database = database;
         }
 
+        public DuckDbDatabase Database => database;
         public virtual void Dispose()
         {
             conn.Dispose();
