@@ -6,38 +6,39 @@ namespace DuckDbSharp.Bindings
     public enum DUCKDB_TYPE
     {
         DUCKDB_TYPE_INVALID = 0,
-        DUCKDB_TYPE_BOOLEAN,
-        DUCKDB_TYPE_TINYINT,
-        DUCKDB_TYPE_SMALLINT,
-        DUCKDB_TYPE_INTEGER,
-        DUCKDB_TYPE_BIGINT,
-        DUCKDB_TYPE_UTINYINT,
-        DUCKDB_TYPE_USMALLINT,
-        DUCKDB_TYPE_UINTEGER,
-        DUCKDB_TYPE_UBIGINT,
-        DUCKDB_TYPE_FLOAT,
-        DUCKDB_TYPE_DOUBLE,
-        DUCKDB_TYPE_TIMESTAMP,
-        DUCKDB_TYPE_DATE,
-        DUCKDB_TYPE_TIME,
-        DUCKDB_TYPE_INTERVAL,
-        DUCKDB_TYPE_HUGEINT,
-        DUCKDB_TYPE_UHUGEINT,
-        DUCKDB_TYPE_VARCHAR,
-        DUCKDB_TYPE_BLOB,
-        DUCKDB_TYPE_DECIMAL,
-        DUCKDB_TYPE_TIMESTAMP_S,
-        DUCKDB_TYPE_TIMESTAMP_MS,
-        DUCKDB_TYPE_TIMESTAMP_NS,
-        DUCKDB_TYPE_ENUM,
-        DUCKDB_TYPE_LIST,
-        DUCKDB_TYPE_STRUCT,
-        DUCKDB_TYPE_MAP,
-        DUCKDB_TYPE_UUID,
-        DUCKDB_TYPE_UNION,
-        DUCKDB_TYPE_BIT,
-        DUCKDB_TYPE_TIME_TZ,
-        DUCKDB_TYPE_TIMESTAMP_TZ,
+        DUCKDB_TYPE_BOOLEAN = 1,
+        DUCKDB_TYPE_TINYINT = 2,
+        DUCKDB_TYPE_SMALLINT = 3,
+        DUCKDB_TYPE_INTEGER = 4,
+        DUCKDB_TYPE_BIGINT = 5,
+        DUCKDB_TYPE_UTINYINT = 6,
+        DUCKDB_TYPE_USMALLINT = 7,
+        DUCKDB_TYPE_UINTEGER = 8,
+        DUCKDB_TYPE_UBIGINT = 9,
+        DUCKDB_TYPE_FLOAT = 10,
+        DUCKDB_TYPE_DOUBLE = 11,
+        DUCKDB_TYPE_TIMESTAMP = 12,
+        DUCKDB_TYPE_DATE = 13,
+        DUCKDB_TYPE_TIME = 14,
+        DUCKDB_TYPE_INTERVAL = 15,
+        DUCKDB_TYPE_HUGEINT = 16,
+        DUCKDB_TYPE_UHUGEINT = 32,
+        DUCKDB_TYPE_VARCHAR = 17,
+        DUCKDB_TYPE_BLOB = 18,
+        DUCKDB_TYPE_DECIMAL = 19,
+        DUCKDB_TYPE_TIMESTAMP_S = 20,
+        DUCKDB_TYPE_TIMESTAMP_MS = 21,
+        DUCKDB_TYPE_TIMESTAMP_NS = 22,
+        DUCKDB_TYPE_ENUM = 23,
+        DUCKDB_TYPE_LIST = 24,
+        DUCKDB_TYPE_STRUCT = 25,
+        DUCKDB_TYPE_MAP = 26,
+        DUCKDB_TYPE_ARRAY = 33,
+        DUCKDB_TYPE_UUID = 27,
+        DUCKDB_TYPE_UNION = 28,
+        DUCKDB_TYPE_BIT = 29,
+        DUCKDB_TYPE_TIME_TZ = 30,
+        DUCKDB_TYPE_TIMESTAMP_TZ = 31,
     }
 
     public enum duckdb_state
@@ -56,42 +57,42 @@ namespace DuckDbSharp.Bindings
 
     public enum duckdb_result_type
     {
-        DUCKDB_RESULT_TYPE_INVALID,
-        DUCKDB_RESULT_TYPE_CHANGED_ROWS,
-        DUCKDB_RESULT_TYPE_NOTHING,
-        DUCKDB_RESULT_TYPE_QUERY_RESULT,
+        DUCKDB_RESULT_TYPE_INVALID = 0,
+        DUCKDB_RESULT_TYPE_CHANGED_ROWS = 1,
+        DUCKDB_RESULT_TYPE_NOTHING = 2,
+        DUCKDB_RESULT_TYPE_QUERY_RESULT = 3,
     }
 
     public enum duckdb_statement_type
     {
-        DUCKDB_STATEMENT_TYPE_INVALID,
-        DUCKDB_STATEMENT_TYPE_SELECT,
-        DUCKDB_STATEMENT_TYPE_INSERT,
-        DUCKDB_STATEMENT_TYPE_UPDATE,
-        DUCKDB_STATEMENT_TYPE_EXPLAIN,
-        DUCKDB_STATEMENT_TYPE_DELETE,
-        DUCKDB_STATEMENT_TYPE_PREPARE,
-        DUCKDB_STATEMENT_TYPE_CREATE,
-        DUCKDB_STATEMENT_TYPE_EXECUTE,
-        DUCKDB_STATEMENT_TYPE_ALTER,
-        DUCKDB_STATEMENT_TYPE_TRANSACTION,
-        DUCKDB_STATEMENT_TYPE_COPY,
-        DUCKDB_STATEMENT_TYPE_ANALYZE,
-        DUCKDB_STATEMENT_TYPE_VARIABLE_SET,
-        DUCKDB_STATEMENT_TYPE_CREATE_FUNC,
-        DUCKDB_STATEMENT_TYPE_DROP,
-        DUCKDB_STATEMENT_TYPE_EXPORT,
-        DUCKDB_STATEMENT_TYPE_PRAGMA,
-        DUCKDB_STATEMENT_TYPE_VACUUM,
-        DUCKDB_STATEMENT_TYPE_CALL,
-        DUCKDB_STATEMENT_TYPE_SET,
-        DUCKDB_STATEMENT_TYPE_LOAD,
-        DUCKDB_STATEMENT_TYPE_RELATION,
-        DUCKDB_STATEMENT_TYPE_EXTENSION,
-        DUCKDB_STATEMENT_TYPE_LOGICAL_PLAN,
-        DUCKDB_STATEMENT_TYPE_ATTACH,
-        DUCKDB_STATEMENT_TYPE_DETACH,
-        DUCKDB_STATEMENT_TYPE_MULTI,
+        DUCKDB_STATEMENT_TYPE_INVALID = 0,
+        DUCKDB_STATEMENT_TYPE_SELECT = 1,
+        DUCKDB_STATEMENT_TYPE_INSERT = 2,
+        DUCKDB_STATEMENT_TYPE_UPDATE = 3,
+        DUCKDB_STATEMENT_TYPE_EXPLAIN = 4,
+        DUCKDB_STATEMENT_TYPE_DELETE = 5,
+        DUCKDB_STATEMENT_TYPE_PREPARE = 6,
+        DUCKDB_STATEMENT_TYPE_CREATE = 7,
+        DUCKDB_STATEMENT_TYPE_EXECUTE = 8,
+        DUCKDB_STATEMENT_TYPE_ALTER = 9,
+        DUCKDB_STATEMENT_TYPE_TRANSACTION = 10,
+        DUCKDB_STATEMENT_TYPE_COPY = 11,
+        DUCKDB_STATEMENT_TYPE_ANALYZE = 12,
+        DUCKDB_STATEMENT_TYPE_VARIABLE_SET = 13,
+        DUCKDB_STATEMENT_TYPE_CREATE_FUNC = 14,
+        DUCKDB_STATEMENT_TYPE_DROP = 15,
+        DUCKDB_STATEMENT_TYPE_EXPORT = 16,
+        DUCKDB_STATEMENT_TYPE_PRAGMA = 17,
+        DUCKDB_STATEMENT_TYPE_VACUUM = 18,
+        DUCKDB_STATEMENT_TYPE_CALL = 19,
+        DUCKDB_STATEMENT_TYPE_SET = 20,
+        DUCKDB_STATEMENT_TYPE_LOAD = 21,
+        DUCKDB_STATEMENT_TYPE_RELATION = 22,
+        DUCKDB_STATEMENT_TYPE_EXTENSION = 23,
+        DUCKDB_STATEMENT_TYPE_LOGICAL_PLAN = 24,
+        DUCKDB_STATEMENT_TYPE_ATTACH = 25,
+        DUCKDB_STATEMENT_TYPE_DETACH = 26,
+        DUCKDB_STATEMENT_TYPE_MULTI = 27,
     }
 
     public partial struct duckdb_date
@@ -141,7 +142,7 @@ namespace DuckDbSharp.Bindings
 
     public partial struct duckdb_time_tz_struct
     {
-        public duckdb_time time;
+        public duckdb_time_struct time;
 
         [NativeTypeName("int32_t")]
         public int offset;
@@ -214,18 +215,18 @@ namespace DuckDbSharp.Bindings
 
     public partial struct duckdb_string_t
     {
-        [NativeTypeName("union (anonymous union at C:/Repositories/duckdb/src/include/duckdb.h:280:2)")]
+        [NativeTypeName("union (anonymous union at C:/Repositories/duckdb/src/include/duckdb.h:290:2)")]
         public _value_e__Union value;
 
         [StructLayout(LayoutKind.Explicit)]
         public partial struct _value_e__Union
         {
             [FieldOffset(0)]
-            [NativeTypeName("struct (anonymous struct at C:/Repositories/duckdb/src/include/duckdb.h:281:3)")]
+            [NativeTypeName("struct (anonymous struct at C:/Repositories/duckdb/src/include/duckdb.h:291:3)")]
             public _pointer_e__Struct pointer;
 
             [FieldOffset(0)]
-            [NativeTypeName("struct (anonymous struct at C:/Repositories/duckdb/src/include/duckdb.h:286:3)")]
+            [NativeTypeName("struct (anonymous struct at C:/Repositories/duckdb/src/include/duckdb.h:296:3)")]
             public _inlined_e__Struct inlined;
 
             public unsafe partial struct _pointer_e__Struct
@@ -802,6 +803,10 @@ namespace DuckDbSharp.Bindings
         public static extern _duckdb_value* duckdb_create_list_value([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type, [NativeTypeName("duckdb_value *")] _duckdb_value** values, [NativeTypeName("idx_t")] ulong value_count);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_array_value([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type, [NativeTypeName("duckdb_value *")] _duckdb_value** values, [NativeTypeName("idx_t")] ulong value_count);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("char *")]
         public static extern byte* duckdb_get_varchar([NativeTypeName("duckdb_value")] _duckdb_value* value);
 
@@ -820,6 +825,10 @@ namespace DuckDbSharp.Bindings
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
         public static extern _duckdb_logical_type* duckdb_create_list_type([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_logical_type")]
+        public static extern _duckdb_logical_type* duckdb_create_array_type([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type, [NativeTypeName("idx_t")] ulong array_size);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
@@ -869,6 +878,14 @@ namespace DuckDbSharp.Bindings
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
         public static extern _duckdb_logical_type* duckdb_list_type_child_type([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_logical_type")]
+        public static extern _duckdb_logical_type* duckdb_array_type_child_type([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("idx_t")]
+        public static extern ulong duckdb_array_type_array_size([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
@@ -967,6 +984,10 @@ namespace DuckDbSharp.Bindings
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_vector")]
         public static extern _duckdb_vector* duckdb_struct_vector_get_child([NativeTypeName("duckdb_vector")] _duckdb_vector* vector, [NativeTypeName("idx_t")] ulong index);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_vector")]
+        public static extern _duckdb_vector* duckdb_array_vector_get_child([NativeTypeName("duckdb_vector")] _duckdb_vector* vector);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("bool")]
@@ -1268,6 +1289,11 @@ namespace DuckDbSharp.Bindings
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_data_chunk")]
         public static extern _duckdb_data_chunk* duckdb_stream_fetch_chunk(duckdb_result result);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_data_chunk")]
+        public static extern _duckdb_data_chunk* duckdb_fetch_chunk(duckdb_result result);
     }
 }
+
 
