@@ -152,7 +152,7 @@ namespace DuckDbSharp
         {
             var sb = new StringBuilder(replaceIfExisting ? "CREATE OR REPLACE TABLE " : "CREATE TABLE ");
             sb.Append(name);
-            DuckDbTypeCreator.GetDuckDbType(typeof(T), null, out _, out _, out _, out var structureFields);
+            DuckDbTypeCreator.GetDuckDbType(typeof(T), null, out _, out _, out _, out var structureFields, out _);
             if (structureFields == null) throw new ArgumentException("A non-primitive, non-list type is required.");
             sb.Append('(');
             var any = false;

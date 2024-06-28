@@ -63,7 +63,7 @@ namespace DuckDbSharp.Functions
             t = Nullable.GetUnderlyingType(t) ?? t;
 
 
-            GetDuckDbType(t, null, out var primitiveType, out var sublistElementType, out _, out var structureFields);
+            GetDuckDbType(t, null, out var primitiveType, out var sublistElementType, out _, out var structureFields, out var arrayFixedLength);
             if (primitiveType != null)
             {
                 if (primitiveType.IsEnum)
@@ -80,7 +80,16 @@ namespace DuckDbSharp.Functions
                 }
             }
 
-            if (sublistElementType != null) return Methods.duckdb_create_list_type(CreateLogicalType(sublistElementType, typesBeingCreated));
+
+            if (arrayFixedLength != null)
+            {
+                return Methods.duckdb_create_array_type(CreateLogicalType(sublistElementType, typesBeingCreated), (ulong)arrayFixedLength.Value);
+            }
+
+            if (sublistElementType != null)
+            {
+                return Methods.duckdb_create_list_type(CreateLogicalType(sublistElementType, typesBeingCreated));
+            }
 
             var fields = structureFields.Select(x =>
             {/*
@@ -232,7 +241,7 @@ DuckDbStructuralType.BooleanStructuralType,
         }
 
 
-        public static void GetDuckDbType(Type nonNullableType, DuckDbStructuralType? structuralType, out DuckDbPrimitiveTypeConverter? primitiveType, out Type? sublistElementType, out DuckDbStructuralType? sublistElementStructuralType, out StructureFieldInfo?[]? structureFields)
+        public static void GetDuckDbType(Type nonNullableType, DuckDbStructuralType? structuralType, out DuckDbPrimitiveTypeConverter? primitiveType, out Type? sublistElementType, out DuckDbStructuralType? sublistElementStructuralType, out StructureFieldInfo?[]? structureFields, out int? arrayFixedLength)
         {
             if (Nullable.GetUnderlyingType(nonNullableType) != null) throw new ArgumentException();
             if (nonNullableType == typeof(object)) throw new NotSupportedException("Type should be statically known, but it's 'System.Object'.");
@@ -240,6 +249,7 @@ DuckDbStructuralType.BooleanStructuralType,
             sublistElementType = null;
             sublistElementStructuralType = null;
             structureFields = null;
+            arrayFixedLength = null;
 
             if (structuralType is not null)
                 CheckTypeCompatibility(nonNullableType, structuralType);
@@ -263,6 +273,9 @@ DuckDbStructuralType.BooleanStructuralType,
                 primitiveType = new DuckDbPrimitiveTypeConverter(nonNullableType, enumInfo);
                 return;
             }
+
+
+
             primitiveType = SerializerCreationContext.TryGetPrimitiveConverter(nonNullableType);
             if (primitiveType != null) return;
 
@@ -276,6 +289,21 @@ DuckDbStructuralType.BooleanStructuralType,
                 }
                 return;
             }
+
+            var fixedSizeArrayAttribute = nonNullableType.GetCustomAttribute<System.Runtime.CompilerServices.InlineArrayAttribute>();
+            if (fixedSizeArrayAttribute != null)
+            {
+                sublistElementType = nonNullableType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Single().FieldType;
+                arrayFixedLength = fixedSizeArrayAttribute.Length;
+                if (structuralType is not null)
+                {
+                    if (structuralType.ElementType is null || structuralType.FixedSizeArrayLength != fixedSizeArrayAttribute.Length) throw new Exception();
+                    sublistElementStructuralType = structuralType.ElementType;
+                }
+                return;
+            }
+
+
 
             var structureFieldInfos = DuckDbTypeCreator.GetFields(nonNullableType, structuralType);
             structureFields = structureFieldInfos.Select((x, i) =>
@@ -297,16 +325,25 @@ DuckDbStructuralType.BooleanStructuralType,
         {
             a = Nullable.GetUnderlyingType(a) ?? a;
             if (b.Kind is DUCKDB_TYPE.DUCKDB_TYPE_ENUM or DUCKDB_TYPE.DUCKDB_TYPE_VARCHAR && DuckDbUtils.IsEnum(a)) return;
-            GetDuckDbType(a, null, out var aPrimitive, out var aElementType, out _, out var aStructureFields);
+            GetDuckDbType(a, null, out var aPrimitive, out var aElementType, out _, out var aStructureFields, out var arrayFixedLength);
             if (aPrimitive != null)
             {
                 if (aPrimitive.Kind != b.Kind)
                     ThrowIncompatibleTypesException(a, b);
                 return;
             }
-            if (aElementType != null)
+            if (aElementType != null && arrayFixedLength == null)
             {
                 if (b.Kind != DUCKDB_TYPE.DUCKDB_TYPE_LIST)
+                    ThrowIncompatibleTypesException(a, b);
+                CheckTypeCompatibility(aElementType, b.ElementType);
+                return;
+            }
+            if (aElementType != null && arrayFixedLength != null)
+            {
+                if (b.Kind != DUCKDB_TYPE.DUCKDB_TYPE_ARRAY)
+                    ThrowIncompatibleTypesException(a, b);
+                if (b.FixedSizeArrayLength != arrayFixedLength)
                     ThrowIncompatibleTypesException(a, b);
                 CheckTypeCompatibility(aElementType, b.ElementType);
                 return;

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Unicode;
 
@@ -218,6 +219,12 @@ namespace DuckDbSharp
             return (nint)Methods.duckdb_list_vector_get_child(vector);
         }
         [DebuggerStepThrough]
+        public unsafe static nint GetSubarrayChildVector(nint parent)
+        {
+            var vector = (_duckdb_vector*)parent;
+            return (nint)Methods.duckdb_array_vector_get_child(vector);
+        }
+        [DebuggerStepThrough]
         public unsafe static nint GetSublistChildVectorAndReserve(nint parent, int totalCount)
         {
             var vector = (_duckdb_vector*)parent;
@@ -274,6 +281,16 @@ namespace DuckDbSharp
                 // Ranges can overlap, e.g. DuckDB reuses the same list if it's identical.
                 if (IsPresent(validityVector, i))
                     num = Math.Max(num, span[i].End);
+            }
+            return checked((int)num);
+        }
+        public static int GetArraysTotalItems(int objectsLength, nint validityVector, ulong fixedLength)
+        {
+            ulong num = 0;
+            for (int i = 0; i < objectsLength; i++)
+            {
+                if (IsPresent(validityVector, i))
+                    num += fixedLength;
             }
             return checked((int)num);
         }
@@ -349,6 +366,15 @@ namespace DuckDbSharp
 
         [DebuggerStepThrough]
         public static T[] CreateArray<T>(int length) => length == 0 ? Array.Empty<T>() : new T[length];
+
+
+        public static TBuffer CopyToFixedLengthArray<TBuffer, TItem>(TItem[] source, int offset, int length) where TBuffer : new()
+        {
+            var buffer = new TBuffer();
+            var bufferAsSpan = MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TItem>(ref buffer), length);
+            source.AsSpan(offset, length).CopyTo(bufferAsSpan);
+            return buffer;
+        }
     }
 }
 

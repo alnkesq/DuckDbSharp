@@ -12,12 +12,13 @@ namespace DuckDbSharp.Reflection
     internal unsafe class DuckDbStructuralType : IEquatable<DuckDbStructuralType>
     {
         [JsonConstructor]
-        public DuckDbStructuralType(DUCKDB_TYPE Kind, List<string>? EnumMembers, DuckDbStructuralType? ElementType, List<StructuralTypeStructureField>? StructureFields)
+        public DuckDbStructuralType(DUCKDB_TYPE Kind, List<string>? EnumMembers, DuckDbStructuralType? ElementType, List<StructuralTypeStructureField>? StructureFields, int? FixedSizeArrayLength)
         {
             this.Kind = Kind;
             this.EnumMembers = EnumMembers;
             this.ElementType = ElementType;
             this.StructureFields = StructureFields;
+            this.FixedSizeArrayLength = FixedSizeArrayLength;
         }
         internal DuckDbStructuralType(StructuralTypeHash hash, DUCKDB_TYPE kind)
         {
@@ -31,6 +32,7 @@ namespace DuckDbSharp.Reflection
         public List<string>? EnumMembers { get; init; }
         public List<StructuralTypeStructureField>? StructureFields { get; init; }
         public DuckDbStructuralType? ElementType { get; init; }
+        public int? FixedSizeArrayLength { get; init; }
 
         internal static DuckDbStructuralType BooleanStructuralType = CreateStructuralTypeForPrimitive(DUCKDB_TYPE.DUCKDB_TYPE_BOOLEAN);
         // internal bool IsRoot => Kind == default && StructureFields != null;
@@ -61,6 +63,7 @@ namespace DuckDbSharp.Reflection
             if (kind == DUCKDB_TYPE.DUCKDB_TYPE_ENUM) return CreateStructuralTypeForEnum(lt);
             else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_STRUCT) return CreateStructuralTypeForStructure(lt);
             else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_LIST) return CreateStructuralTypeForList(lt);
+            else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_ARRAY) return CreateStructuralTypeForFixedLengthArray(lt, (int)Methods.duckdb_array_type_array_size(lt));
             else return CreateStructuralTypeForPrimitive(kind);
         }
 
@@ -126,6 +129,13 @@ namespace DuckDbSharp.Reflection
             var elementTypeStructuralType = CreateStructuralType(elementType);
             var hash = StructuralTypeHash.Hash(elementTypeStructuralType.Hash, DUCKDB_TYPE.DUCKDB_TYPE_LIST);
             return CreateOrReuseStructuralType(hash, () => new DuckDbStructuralType(hash, DUCKDB_TYPE.DUCKDB_TYPE_LIST) { ElementType = elementTypeStructuralType });
+        }
+        private static DuckDbStructuralType CreateStructuralTypeForFixedLengthArray(_duckdb_logical_type* lt, int length)
+        {
+            using var elementType = (OwnedDuckDbLogicalType)Methods.duckdb_array_type_child_type(lt);
+            var elementTypeStructuralType = CreateStructuralType(elementType);
+            var hash = StructuralTypeHash.Hash(elementTypeStructuralType.Hash, length);
+            return CreateOrReuseStructuralType(hash, () => new DuckDbStructuralType(hash, DUCKDB_TYPE.DUCKDB_TYPE_ARRAY) { ElementType = elementTypeStructuralType, FixedSizeArrayLength = length });
         }
 
         private static DuckDbStructuralType CreateStructuralTypeForStructure(_duckdb_logical_type* lt)
@@ -217,6 +227,7 @@ namespace DuckDbSharp.Reflection
 
         public string ToSql()
         {
+            if (FixedSizeArrayLength != null) return $"{ElementType.ToSql()}[{FixedSizeArrayLength}]";
             if (ElementType is not null) return $"{ElementType.ToSql()}[]";
             if (StructureFields is not null) return $"STRUCT({string.Join(", ", StructureFields.Select(x => x.Name + " " + x.FieldType.ToSql()))})";
             if (EnumMembers is not null) return $"ENUM({string.Join(", ", EnumMembers.Select(x => $"'{x}'"))})";

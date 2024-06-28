@@ -423,9 +423,14 @@ namespace DuckDbSharp
         private static void AddTypesToPossiblyReuse(Type type, HashSet<Type> knownTypes, List<Type> knownTypesList)
         {
             type = Nullable.GetUnderlyingType(type) ?? type;
-            DuckDbTypeCreator.GetDuckDbType(type, null, out var primitiveType, out var sublistElementType, out _, out var structureFields);
+            DuckDbTypeCreator.GetDuckDbType(type, null, out var primitiveType, out var sublistElementType, out _, out var structureFields, out var arrayFixedLength);
             if (sublistElementType != null)
             {
+                if (arrayFixedLength != null)
+                {
+                    if (!knownTypes.Add(type)) return;
+                    knownTypesList.Add(type);
+                }
                 AddTypesToPossiblyReuse(sublistElementType, knownTypes, knownTypesList);
                 return;
             }

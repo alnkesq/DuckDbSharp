@@ -62,6 +62,8 @@ namespace DuckDbSharp.Reflection
                 return CreateOrReuseType(nameHint, lt, () => CreateClrStructureTypeCore(lt, nameHint, path));
             if (lt.Kind == DUCKDB_TYPE.DUCKDB_TYPE_LIST)
                 return CreateClrListTypeCore(lt, nameHint, path);
+            if (lt.Kind == DUCKDB_TYPE.DUCKDB_TYPE_ARRAY)
+                return CreateOrReuseType(nameHint, lt, () => CreateClrFixedArrayTypeCore(lt, nameHint, path));
             var t = lt.Kind;
             var primitive = SerializerCreationContext.PrimitiveConverters.FirstOrDefault(x => x.Kind == t);
             if (primitive == null) throw new NotSupportedException($"DuckDb type is not supported: {t}");
@@ -72,6 +74,10 @@ namespace DuckDbSharp.Reflection
         {
             return CreateClrType(lt.ElementType, nameHint, new TypePath { ListElement = true, Parent = path }).MakeArrayType();
 
+        }
+        private Type CreateClrFixedArrayTypeCore(DuckDbStructuralType lt, string? nameHint, TypePath path)
+        {            
+            throw new NotImplementedException();
         }
 
         private Type CreateClrEnumTypeCore(DuckDbStructuralType structural, string? nameHint)

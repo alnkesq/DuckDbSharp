@@ -12,6 +12,13 @@ namespace DuckDbSharp.Reflection
         {
             return Hash(MemoryMarshal.AsBytes(new ReadOnlySpan<StructuralTypeHash>(in inner)), type);
         }
+        internal static StructuralTypeHash Hash(StructuralTypeHash inner, int fixedLengthArray)
+        {
+            return Hash([
+                ..MemoryMarshal.AsBytes([inner]),
+                ..MemoryMarshal.AsBytes([fixedLengthArray])
+                ], DUCKDB_TYPE.DUCKDB_TYPE_ARRAY);
+        }
 
         internal static StructuralTypeHash Hash(DUCKDB_TYPE type)
         {

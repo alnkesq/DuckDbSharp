@@ -149,7 +149,7 @@ namespace DuckDbSharp.Functions
 
         public static bool IsStructure(Type t)
         {
-            DuckDbTypeCreator.GetDuckDbType(t, null, out _, out _, out _, out var structFields);
+            DuckDbTypeCreator.GetDuckDbType(t, null, out _, out _, out _, out var structFields, out _);
             return structFields != null;
         }
 

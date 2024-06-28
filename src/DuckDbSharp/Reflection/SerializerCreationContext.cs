@@ -60,6 +60,7 @@ namespace DuckDbSharp.Reflection
 
         private readonly static MethodInfo GetStructureChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetStructureChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetSublistChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetSubarrayChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSubarrayChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetSublistChildVectorAndReserveMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistChildVectorAndReserve), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo ShowSpanForDebuggingMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ShowSpanForDebugging), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo ThrowEnumOutOfRangeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ThrowEnumOutOfRange), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
@@ -70,6 +71,7 @@ namespace DuckDbSharp.Reflection
         private readonly static MethodInfo GetChunkSizeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetChunkSize), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo NewSkipCtorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.NewSkipCtor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetTotalItemsMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetTotalItems), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo GetArraysTotalItemsMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetArraysTotalItems), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetSublistSizeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistSize), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetSublistOffsetMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistOffset), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
@@ -173,7 +175,7 @@ namespace DuckDbSharp.Reflection
                 var inputArrayNonNullableElementType = Nullable.GetUnderlyingType(inputArrayElementType) ?? inputArrayElementType;
                 var type = getter != null ? getter.FieldType : inputArrayElementType;
                 var nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
-                DuckDbTypeCreator.GetDuckDbType(nonNullableType, null, out var primitiveType, out var sublistElementType, out _, out var structureFields);
+                DuckDbTypeCreator.GetDuckDbType(nonNullableType, null, out var primitiveType, out var sublistElementType, out _, out var structureFields, out var arrayFixedLength);
                 Func<SerializerParameters, Expression> factory;
                 if (primitiveType != null)
                 {
@@ -181,7 +183,7 @@ namespace DuckDbSharp.Reflection
                 }
                 else if (sublistElementType != null)
                 {
-                    factory = p => CreateListFieldSerializer(p, getter, sublistElementType);
+                    factory = p => CreateListFieldSerializer(p, getter, sublistElementType, arrayFixedLength);
                 }
                 else
                 {
@@ -211,7 +213,7 @@ namespace DuckDbSharp.Reflection
                 var type = getter != null ? getter.FieldType : outputArrayElementType;
                 var structuralType = getter != null ? getter.FieldStructuralType : outputArrayStructuralType;
                 var nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
-                DuckDbTypeCreator.GetDuckDbType(nonNullableType, structuralType, out var primitiveType, out var sublistElementType, out var sublistElementStructuralType, out var structureFields);
+                DuckDbTypeCreator.GetDuckDbType(nonNullableType, structuralType, out var primitiveType, out var sublistElementType, out var sublistElementStructuralType, out var structureFields, out var arrayFixedLength);
                 Func<DeserializerParameters, Expression> factory;
                 if (primitiveType != null)
                 {
@@ -219,7 +221,7 @@ namespace DuckDbSharp.Reflection
                 }
                 else if (sublistElementType != null)
                 {
-                    factory = p => CreateListFieldDeserializer(p, getter, sublistElementType, sublistElementStructuralType);
+                    factory = p => CreateListFieldDeserializer(p, getter, sublistElementType, sublistElementStructuralType, arrayFixedLength);
                 }
                 else
                 {
@@ -271,8 +273,9 @@ namespace DuckDbSharp.Reflection
             , breakLoop));
         }
 
-        private Expression CreateListFieldSerializer(SerializerParameters p, StructureFieldInfo? getter, Type sublistElementType)
+        private Expression CreateListFieldSerializer(SerializerParameters p, StructureFieldInfo? getter, Type sublistElementType, int? arrayFixedLength)
         {
+            if (arrayFixedLength != null) throw new NotImplementedException();
             var sublistType = getter != null ? getter.FieldType : p.InputArrayElementType;
 
             var offsetsAndLengths = Expression.Variable(typeof(Span<>).MakeGenericType(typeof(OffsetAndCount)), "offsetsAndLengths");
@@ -355,14 +358,16 @@ namespace DuckDbSharp.Reflection
         }
 
         private readonly static MethodInfo CreateArrayMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.CreateArray), BindingFlags.Public | BindingFlags.Static);
+        private readonly static MethodInfo CopyToFixedLengthArrayMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.CopyToFixedLengthArray), BindingFlags.Public | BindingFlags.Static);
 
-
-        private Expression CreateListFieldDeserializer(DeserializerParameters p, StructureFieldInfo? getter, Type sublistElementType, DuckDbStructuralType sublistStructuralElementType)
+        private Expression CreateListFieldDeserializer(DeserializerParameters p, StructureFieldInfo? getter, Type sublistElementType, DuckDbStructuralType sublistStructuralElementType, int? fixedArrayLength)
         {
             var sublistType = getter != null ? getter.FieldType : p.OutputArrayElementType;
+            sublistType = Nullable.GetUnderlyingType(sublistType) ?? sublistType;
             var variables = new List<ParameterExpression>();
-
-            var offsetsAndLengths = Expression.Variable(typeof(Span<OffsetAndCount>), "offsetsAndLengths");
+            var isFixedArray = fixedArrayLength != null;
+            var offsetsAndLengths = isFixedArray ? null : Expression.Variable(typeof(Span<OffsetAndCount>), "offsetsAndLengths");
+            //var offsets = isFixedArray ? Expression.Variable(typeof(Span<ulong>), "offsets") : null;
             var allSubItems = Expression.Variable(sublistElementType.MakeArrayType(), "allSubItems");
             var listValidityVector = Expression.Variable(typeof(nint), "listValidityVector");
             var elementValidityVector = Expression.Variable(typeof(nint), "elementValidityVector");
@@ -371,24 +376,33 @@ namespace DuckDbSharp.Reflection
             var j = Expression.Variable(typeof(int), "j");
             var absIdx = Expression.Variable(typeof(int), "absIdx");
             var totalLength = Expression.Variable(typeof(int), "totalLength");
-            variables.Add(offsetsAndLengths);
             variables.Add(allSubItems);
             variables.Add(listValidityVector);
             variables.Add(elementValidityVector);
             variables.Add(rowId);
-            variables.Add(sublist);
-            variables.Add(j);
+            if (!isFixedArray)
+            {
+                variables.Add(offsetsAndLengths);
+                variables.Add(sublist);
+                variables.Add(j);
+            }
             variables.Add(absIdx);
             variables.Add(totalLength);
-            var sublistVector = Expression.Call(null, GetSublistChildVectorMethod, p.VectorPtr);
+            var sublistVector = Expression.Call(null, isFixedArray ? GetSubarrayChildVectorMethod : GetSublistChildVectorMethod, p.VectorPtr);
             var assignment = CreateAssignment(getter, p.Objects, rowId, sublist);
             var body = new List<Expression>();
             body.Add(Expression.Assign(listValidityVector, Expression.Call(null, GetVectorValidityMethod, p.VectorPtr)));
             body.Add(Expression.Assign(elementValidityVector, Expression.Call(null, GetVectorValidityMethod, sublistVector)));
-            body.Add(Expression.Assign(offsetsAndLengths, Expression.Call(null, GetVectorDataMethod.MakeGenericMethod(typeof(OffsetAndCount)), p.VectorPtr, p.ObjectsLength)));
-            body.Add(Expression.Assign(totalLength, Expression.Call(null, GetTotalItemsMethod, offsetsAndLengths, listValidityVector)));
+            if (isFixedArray)
+            {
+                //body.Add(Expression.Assign(offsets, Expression.Call(null, GetVectorDataMethod.MakeGenericMethod(typeof(ulong)), p.VectorPtr, p.ObjectsLength)));
+            }
+            else
+            {
+                body.Add(Expression.Assign(offsetsAndLengths, Expression.Call(null, GetVectorDataMethod.MakeGenericMethod(typeof(OffsetAndCount)), p.VectorPtr, p.ObjectsLength)));
+            }
+            body.Add(Expression.Assign(totalLength, isFixedArray ? Expression.Call(null, GetArraysTotalItemsMethod, p.ObjectsLength, listValidityVector, Expression.Constant((ulong)fixedArrayLength.Value)) : Expression.Call(null, GetTotalItemsMethod, offsetsAndLengths, listValidityVector)));
             body.Add(Expression.Assign(allSubItems, CreateRentArrayExpression(sublistElementType, totalLength, zeroed: true)));
-
             var needsInitialization = NeedsInitialization(sublistElementType);
             if (needsInitialization)
                 body.Add(CreateInitializationLoop(allSubItems, sublistElementType, rowId, totalLength, Expression.Call(null, IsPresentMethod, elementValidityVector, rowId)));
@@ -397,13 +411,19 @@ namespace DuckDbSharp.Reflection
             body.Add(CreateCall(sublistItemDeserializer, sublistVector, allSubItems, totalLength, p.DeserializationContext));
 
             var copyFrom = Expression.ArrayIndex(allSubItems, absIdx);
-            var sublistSizeExpr = Expression.Call(null, GetSublistSizeMethod, offsetsAndLengths, rowId);
+            var sublistSizeExpr = isFixedArray ? null : Expression.Call(null, GetSublistSizeMethod, offsetsAndLengths, rowId);
             Expression newSublist;
             Expression addToSublist;
             var sublistSize = Expression.Variable(typeof(int), "sublistSize");
-            variables.Add(sublistSize);
+            if (!isFixedArray)
+                variables.Add(sublistSize);
 
-            if (sublist.Type.IsArray)
+            if (isFixedArray)
+            {
+                newSublist = null;// Expression.New(sublist.Type);
+                addToSublist = null; // Expression.Call(null, SetFixedLengthArrayItem());
+            }
+            else if (sublist.Type.IsArray)
             {
                 newSublist = Expression.Call(CreateArrayMethod.MakeGenericMethod(sublistElementType), sublistSize);
                 addToSublist = Expression.Assign(Expression.ArrayAccess(sublist, j), copyFrom);
@@ -414,22 +434,32 @@ namespace DuckDbSharp.Reflection
                 addToSublist = Expression.Call(sublist, "Add", null, copyFrom);
             }
 
-            var loopBody = Expression.Block(
-                Expression.IfThen(
-                    Expression.Call(null, IsPresentMethod, listValidityVector, rowId),
+            Expression loopBodyInner;
+            if (isFixedArray)
+            {
+                loopBodyInner = Expression.Block(
+                    CreateAssignment(getter, p.Objects, rowId, Expression.Call(CopyToFixedLengthArrayMethod.MakeGenericMethod(sublistType, sublistElementType), allSubItems, absIdx, Expression.Constant(fixedArrayLength.Value))),
+                    Expression.Assign(absIdx, Expression.Add(absIdx, Expression.Constant(fixedArrayLength.Value)))
+                    );
+            }
+            else
+            {
+                loopBodyInner =
                     Expression.Block(
-                         Expression.Assign(sublistSize, sublistSizeExpr),
-                         Expression.Assign(sublist, newSublist),
-                         Expression.Assign(absIdx, Expression.Call(null, GetSublistOffsetMethod, offsetsAndLengths, rowId)),
-                         CreateForLoop(j, sublistSize,
-                         Expression.Block(
-                             addToSublist,
-                             Expression.PostIncrementAssign(absIdx))
-                         ),
-                         assignment
-                    )
-                )
-            );
+                            Expression.Assign(sublistSize, sublistSizeExpr),
+                            Expression.Assign(sublist, newSublist),
+                            Expression.Assign(absIdx, Expression.Call(null, GetSublistOffsetMethod, offsetsAndLengths, rowId)),
+                            CreateForLoop(j, sublistSize,
+                            Expression.Block(
+                                addToSublist,
+                                Expression.PostIncrementAssign(absIdx))
+                            ),
+                            assignment
+                );
+            }
+            var loopBody = Expression.Block(
+                    Expression.IfThen(
+                        Expression.Call(null, IsPresentMethod, listValidityVector, rowId), loopBodyInner));
             body.Add(CreateForLoop(rowId, p.ObjectsLength, loopBody));
             body.Add(CreateReleaseArrayExpression(allSubItems));
             return Expression.Block(typeof(void), variables, body);
