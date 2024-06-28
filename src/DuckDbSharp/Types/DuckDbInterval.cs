@@ -20,7 +20,7 @@ namespace DuckDbSharp.Types
             var totalMicros =
                 Micros +
                 Days * MicrosPerDay;
-            return new TimeSpan(totalMicros);
+            return new TimeSpan(totalMicros * TimeSpan.TicksPerMicrosecond);
         }
 
         public TimeSpan ToTimeSpanWithPossiblePrecisionLoss()
