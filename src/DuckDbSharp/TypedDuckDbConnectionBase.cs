@@ -127,7 +127,7 @@ namespace DuckDbSharp
             if (database.RegisteredFunctions.TryGetValue(name, out var existing))
             {
                 if (object.ReferenceEquals(existing, method)) return false;
-                throw new ArgumentException($"A function with the same name (but different lambda or method) was already added to a different connection to the same database file. This is not supported. Ensure that the lambda or method passed to {nameof(RegisterFunction)} is reference-equal for all connections to this database file.");
+                throw new ArgumentException($"A function with the same name (but different lambda or method) was already added to a different connection to the same database file. This is not supported. Ensure that the lambda or method passed to {nameof(RegisterFunction)} is reference-equal for all connections to this database file. This can also be caused by Visual Studio \"Edit and Continue\".");
             }
             database.RegisteredFunctions.Add(name, method);
             return true;
