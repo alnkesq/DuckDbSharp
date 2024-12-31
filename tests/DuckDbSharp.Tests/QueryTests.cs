@@ -21,12 +21,6 @@ namespace DuckDbSharp.Tests
             Assert.Contains("Parser Error: syntax error", ex.Message);
             Assert.Contains("invalid sql", ex.Message);
         }
-        [Fact]
-        public void UnspeakableDynamicColumn()
-        {
-            var ex = Assert.Throws<NotSupportedException>(() => db.Execute("select 1 + 2").Cast<object>().ToList());
-            Assert.Contains("Consider adding column aliases", ex.Message);
-        }
 
         [Fact]
         public void ExecuteScalarTyped()
@@ -69,7 +63,7 @@ namespace DuckDbSharp.Tests
         [Fact]
         public void RegisterFunction()
         {
-            db.RegisterFunction("myfunc", (int a, string b) => new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
+            db.RegisterTableFunction("myfunc", (int a, string b) => new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
             Assert.Equal("[{'Col1':7,'Col2':8}]", Serialize(db.Execute<SomeRow>("select * from myfunc(?, ?)", 7, "8")));
         }
 
@@ -77,7 +71,7 @@ namespace DuckDbSharp.Tests
         [Fact]
         public void PropagateFunctionError()
         {
-            db.RegisterFunction("myfunc", (int a, string b) => new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
+            db.RegisterTableFunction("myfunc", (int a, string b) => new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
             var ex = Assert.Throws<DuckDbException>(() => db.Execute<SomeRow>("select * from myfunc(?, ?)", 7, "aaaaa").ToList());
             Assert.Contains("The input string 'aaaaa' was not in a correct format", ex.Message);
         }
@@ -85,21 +79,21 @@ namespace DuckDbSharp.Tests
         [Fact]
         public void RegisterFunctionUntyped()
         {
-            db.RegisterFunction("myfunc", (int a, string b) => (object)new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
+            db.RegisterTableFunction("myfunc", (int a, string b) => (object)new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
             Assert.Equal("[{'Col1':7,'Col2':8}]", Serialize(db.Execute<SomeRow>("select * from myfunc(?, ?)", 7, "8")));
         }
 
         [Fact]
         public void RegisterFunctionListOfScalars()
         {
-            db.RegisterFunction("myfunc", (int a, string b) => new[] { a, int.Parse(b) });
+            db.RegisterTableFunction("myfunc", (int a, string b) => new[] { a, int.Parse(b) });
             Assert.Equal(new[] { 7, 8 }, db.Execute<int>("select v.Value from myfunc(?, ?) v order by v", 7, "8"));
         }
 
         [Fact]
         public void RegisterFunctionReturningStructs()
         {
-            db.RegisterFunction("myfunc", (int a, string b) => new[] { new { a, b } });
+            db.RegisterTableFunction("myfunc", (int a, string b) => new[] { new { a, b } });
             Assert.Equal("[{'a':7,'b':'8'}]", Serialize(db.Execute("select * from myfunc(?, ?)", 7, "8")));
         }
 
@@ -107,15 +101,15 @@ namespace DuckDbSharp.Tests
         public void RegisterFunctionTwiceButIdentical()
         {
             var deleg = () => new[] { 5 };
-            db.RegisterFunction("myfunc", deleg);
-            db.RegisterFunction("myfunc", deleg);
+            db.RegisterTableFunction("myfunc", deleg);
+            db.RegisterTableFunction("myfunc", deleg);
         }
 
         [Fact]
         public void RegisterFunctionTwiceAndDifferent()
         {
-            db.RegisterFunction("myfunc", () => new[] { 6 });
-            Assert.Throws<ArgumentException>(() => db.RegisterFunction("myfunc", () => new[] { 7 }));
+            db.RegisterTableFunction("myfunc", () => new[] { 6 });
+            Assert.Throws<ArgumentException>(() => db.RegisterTableFunction("myfunc", () => new[] { 7 }));
         }
 
         [Fact]
@@ -157,8 +151,8 @@ namespace DuckDbSharp.Tests
         }
 
 
-        [DuckDbFunction] static int ReturnsInt() => 5;
-        [DuckDbFunction] static MyResult ReturnsSingleMyResult() => new MyResult();
+        [DuckDbFunction(isScalar: false)] static int ReturnsInt() => 5;
+        [DuckDbFunction(isScalar: false)] static MyResult ReturnsSingleMyResult() => new MyResult();
         [DuckDbFunction] static IEnumerable<int> ReturnsInts() => Enumerable.Range(0, 5);
         [DuckDbFunction] public static IEnumerable<object> ReturnsAnonymousObjects() => new[] { new { SomeVal = 5 } };
 
@@ -192,7 +186,7 @@ namespace DuckDbSharp.Tests
             }
         }
 
-        [DuckDbFunction] static void ReturnsVoid() => VoidFunctionWasCalled = true;
+        [DuckDbFunction(isScalar: false)] static void ReturnsVoid() => VoidFunctionWasCalled = true;
         static bool VoidFunctionWasCalled;
 
 

@@ -108,6 +108,7 @@ namespace DuckDbSharp.Functions
         {
             using var scalarFunctionName = (ScopedString)name;
             var parameters = method.GetParameters();
+            if (parameters.Length == 0) throw new NotSupportedException("Scalar functions with zero arguments are not supported.");
 
             Func<object[], object> baseInvoke = args => method.Invoke(delegateTarget, args);
             var funcInfo = new FunctionInfo

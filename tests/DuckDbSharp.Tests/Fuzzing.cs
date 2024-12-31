@@ -34,7 +34,7 @@ namespace DuckDbSharp
         public Fuzzing()
         {
             Connection = ThreadSafeTypedDuckDbConnection.CreateInMemory();
-            Connection.RegisterFunction("myfunc", () => Expected);
+            Connection.RegisterTableFunction("myfunc", () => Expected);
             JsonSettings = new Newtonsoft.Json.JsonSerializerSettings();
             JsonSettings.Converters.Add(new CustomEnumConverter());
             JsonSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
