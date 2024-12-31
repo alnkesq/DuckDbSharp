@@ -69,6 +69,21 @@ namespace DuckDbSharp.Tests
 
 
         [Fact]
+        public void RegisterScalarFunction()
+        {
+            db.RegisterScalarFunction("myfunc", (int a, string b, string c) => new { A = a * 2, B = "B" + b, C = "C" + c });
+            Assert.Equal("[{'R':{'A':14,'B':'B8---8---8---8---#','C':'C9---9---9---9---#'}}]", Serialize(db.Execute("select myfunc(?, ?, ?) as R", 7, "8---8---8---8---#", "9---9---9---9---#"))); // 13 chars so strings are not inlined.
+        }
+
+        [Fact]
+        public void RegisterScalarFunctionReturningArray()
+        {
+            db.RegisterScalarFunction("myfunc", (int a) => new[] { a, a * 2 });
+            Assert.Equal("[{'R':[7,14]}]", Serialize(db.Execute("select myfunc(?) as R", 7)));
+        }
+
+
+        [Fact]
         public void PropagateFunctionError()
         {
             db.RegisterTableFunction("myfunc", (int a, string b) => new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
@@ -142,6 +157,7 @@ namespace DuckDbSharp.Tests
             Assert.Equal(File.ReadAllText("../../../data/2.json"), json2);
             Assert.Equal(new[] { 0, 1, 2, 3, 4 }, db.Execute<int>("select Value from ReturnsInts()"));
             Assert.Equal("[{'SomeVal':5}]", Serialize(db.Execute("select * from ReturnsAnonymousObjects()")));
+            Assert.Equal("[{'Str':'6'}]", Serialize(db.Execute("select ReturnsScalarString(6) as Str")));
             var json3 = Serialize(db.Execute<MyResult>("select * from ReturnsComplexObjects(3, 'a')"), true);
             //File.WriteAllText("../../../data/3.json", json3);
             Assert.Equal(File.ReadAllText("../../../data/3.json"), json3);
@@ -155,6 +171,7 @@ namespace DuckDbSharp.Tests
         [DuckDbFunction(isScalar: false)] static MyResult ReturnsSingleMyResult() => new MyResult();
         [DuckDbFunction] static IEnumerable<int> ReturnsInts() => Enumerable.Range(0, 5);
         [DuckDbFunction] public static IEnumerable<object> ReturnsAnonymousObjects() => new[] { new { SomeVal = 5 } };
+        [DuckDbFunction] static string ReturnsScalarString(int a) => a.ToString();
 
         [DuckDbFunction]
         public static IEnumerable<MyResult> ReturnsComplexObjects(int a, string q)
