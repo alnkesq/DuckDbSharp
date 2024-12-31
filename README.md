@@ -6,7 +6,7 @@ DuckDbSharp is a bidirectional interoperability layer between [DuckDB](https://g
 
 Features
 - Support for **deeply nested** structures and lists
-- Expose .NET methods/collections as **table UDFs**
+- Expose .NET methods/collections as **table UDFs**, or as **scalar functions**
 - Execute DuckDB queries from .NET
 - Generates **static types** from SQL (incl. field nullness detection)
 - Dynamic results are supported as well (as dynamic assemblies/types)
@@ -21,8 +21,6 @@ Notes:
 - This is **not** an ADO.NET (System.Data) provider
   - Rationale: ADO.NET is flat-table oriented (sublists/subfields are not first class citizens, despite these being probably among the best features of DuckDB).
   - Additionally, ADO.NET is very unergonomic to use unless you add an ORM on top of it. Most existing ORMs however don't work well with sublists/subfields. This library deserializes/serializes directly on top of CLR POCO objects, and can generate (and keep up to date) the type definitions for a better IDE experience.
-
-- Exporting methods as scalar functions is not supported, only as table functions (DuckDB doesn't currently provide C APIs for that)
 
 ## Usage
 
