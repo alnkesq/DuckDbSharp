@@ -147,6 +147,8 @@ namespace DuckDbSharp.Functions
                 if (isTuple && structuralType is not null)
                 {
                     var argCount = t.GetGenericTypeDefinition().GetGenericArguments().Length;
+                    if (structuralType.StructureFields.Count > 7)
+                        throw new ArgumentException($"Tuples with more than 7 items are not supported. Use a named type instead."); // ValueTuple<..., TRest>
                     if (argCount != structuralType.StructureFields.Count)
                         throw new ArgumentException($"Attempting to select {structuralType.StructureFields.Count} columns or fields onto a tuple type with {argCount} fields.");
 
