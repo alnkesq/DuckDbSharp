@@ -227,6 +227,15 @@ namespace DuckDbSharp
         }
         public abstract OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters);
 
+        public Type GetRowTypeForQuery(string sql, params object?[]? parameters)
+        {
+            var zeroResults = Execute($"from ({sql}) limit 0", parameters);
+            using ((IDisposable)zeroResults)
+            {
+                return TypeSniffedEnumerable.TryGetEnumerableElementType(zeroResults.GetType())!;
+            }
+        }
 
-	}
+
+    }
 }
