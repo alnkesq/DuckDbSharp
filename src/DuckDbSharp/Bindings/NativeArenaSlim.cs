@@ -79,6 +79,12 @@ namespace DuckDbSharp.Bindings
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
             if (chunks == null) return;
             foreach (var item in chunks)
             {
@@ -88,6 +94,10 @@ namespace DuckDbSharp.Bindings
             nextAllocation = null;
         }
 
+        ~NativeArenaSlim()
+        {
+            Dispose(false);
+        }
 
         internal void Reset()
         {
