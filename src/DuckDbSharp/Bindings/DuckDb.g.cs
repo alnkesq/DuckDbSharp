@@ -39,6 +39,9 @@ namespace DuckDbSharp.Bindings
         DUCKDB_TYPE_BIT = 29,
         DUCKDB_TYPE_TIME_TZ = 30,
         DUCKDB_TYPE_TIMESTAMP_TZ = 31,
+        DUCKDB_TYPE_ANY = 34,
+        DUCKDB_TYPE_VARINT = 35,
+        DUCKDB_TYPE_SQLNULL = 36,
     }
 
     public enum duckdb_state
@@ -93,6 +96,59 @@ namespace DuckDbSharp.Bindings
         DUCKDB_STATEMENT_TYPE_ATTACH = 25,
         DUCKDB_STATEMENT_TYPE_DETACH = 26,
         DUCKDB_STATEMENT_TYPE_MULTI = 27,
+    }
+
+    public enum duckdb_error_type
+    {
+        DUCKDB_ERROR_INVALID = 0,
+        DUCKDB_ERROR_OUT_OF_RANGE = 1,
+        DUCKDB_ERROR_CONVERSION = 2,
+        DUCKDB_ERROR_UNKNOWN_TYPE = 3,
+        DUCKDB_ERROR_DECIMAL = 4,
+        DUCKDB_ERROR_MISMATCH_TYPE = 5,
+        DUCKDB_ERROR_DIVIDE_BY_ZERO = 6,
+        DUCKDB_ERROR_OBJECT_SIZE = 7,
+        DUCKDB_ERROR_INVALID_TYPE = 8,
+        DUCKDB_ERROR_SERIALIZATION = 9,
+        DUCKDB_ERROR_TRANSACTION = 10,
+        DUCKDB_ERROR_NOT_IMPLEMENTED = 11,
+        DUCKDB_ERROR_EXPRESSION = 12,
+        DUCKDB_ERROR_CATALOG = 13,
+        DUCKDB_ERROR_PARSER = 14,
+        DUCKDB_ERROR_PLANNER = 15,
+        DUCKDB_ERROR_SCHEDULER = 16,
+        DUCKDB_ERROR_EXECUTOR = 17,
+        DUCKDB_ERROR_CONSTRAINT = 18,
+        DUCKDB_ERROR_INDEX = 19,
+        DUCKDB_ERROR_STAT = 20,
+        DUCKDB_ERROR_CONNECTION = 21,
+        DUCKDB_ERROR_SYNTAX = 22,
+        DUCKDB_ERROR_SETTINGS = 23,
+        DUCKDB_ERROR_BINDER = 24,
+        DUCKDB_ERROR_NETWORK = 25,
+        DUCKDB_ERROR_OPTIMIZER = 26,
+        DUCKDB_ERROR_NULL_POINTER = 27,
+        DUCKDB_ERROR_IO = 28,
+        DUCKDB_ERROR_INTERRUPT = 29,
+        DUCKDB_ERROR_FATAL = 30,
+        DUCKDB_ERROR_INTERNAL = 31,
+        DUCKDB_ERROR_INVALID_INPUT = 32,
+        DUCKDB_ERROR_OUT_OF_MEMORY = 33,
+        DUCKDB_ERROR_PERMISSION = 34,
+        DUCKDB_ERROR_PARAMETER_NOT_RESOLVED = 35,
+        DUCKDB_ERROR_PARAMETER_NOT_ALLOWED = 36,
+        DUCKDB_ERROR_DEPENDENCY = 37,
+        DUCKDB_ERROR_HTTP = 38,
+        DUCKDB_ERROR_MISSING_EXTENSION = 39,
+        DUCKDB_ERROR_AUTOLOAD = 40,
+        DUCKDB_ERROR_SEQUENCE = 41,
+        DUCKDB_INVALID_CONFIGURATION = 42,
+    }
+
+    public enum duckdb_cast_mode
+    {
+        DUCKDB_CAST_NORMAL = 0,
+        DUCKDB_CAST_TRY = 1,
     }
 
     public partial struct duckdb_date
@@ -215,18 +271,18 @@ namespace DuckDbSharp.Bindings
 
     public partial struct duckdb_string_t
     {
-        [NativeTypeName("union (anonymous union at C:/Repositories/duckdb/src/include/duckdb.h:290:2)")]
+        [NativeTypeName("union (anonymous union at C:/Repositories/duckdb/src/include/duckdb.h:331:2)")]
         public _value_e__Union value;
 
         [StructLayout(LayoutKind.Explicit)]
         public partial struct _value_e__Union
         {
             [FieldOffset(0)]
-            [NativeTypeName("struct (anonymous struct at C:/Repositories/duckdb/src/include/duckdb.h:291:3)")]
+            [NativeTypeName("struct (anonymous struct at C:/Repositories/duckdb/src/include/duckdb.h:332:3)")]
             public _pointer_e__Struct pointer;
 
             [FieldOffset(0)]
-            [NativeTypeName("struct (anonymous struct at C:/Repositories/duckdb/src/include/duckdb.h:296:3)")]
+            [NativeTypeName("struct (anonymous struct at C:/Repositories/duckdb/src/include/duckdb.h:337:3)")]
             public _inlined_e__Struct inlined;
 
             public unsafe partial struct _pointer_e__Struct
@@ -263,21 +319,21 @@ namespace DuckDbSharp.Bindings
 
     public unsafe partial struct duckdb_column
     {
-        public void* __deprecated_data;
+        public void* deprecated_data;
 
-        public bool* __deprecated_nullmask;
+        public bool* deprecated_nullmask;
 
-        public DUCKDB_TYPE __deprecated_type;
+        public DUCKDB_TYPE deprecated_type;
 
         [NativeTypeName("char *")]
-        public byte* __deprecated_name;
+        public byte* deprecated_name;
 
         public void* internal_data;
     }
 
     public unsafe partial struct _duckdb_vector
     {
-        public void* __vctr;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct duckdb_string
@@ -300,90 +356,177 @@ namespace DuckDbSharp.Bindings
     public unsafe partial struct duckdb_result
     {
         [NativeTypeName("idx_t")]
-        public ulong __deprecated_column_count;
+        public ulong deprecated_column_count;
 
         [NativeTypeName("idx_t")]
-        public ulong __deprecated_row_count;
+        public ulong deprecated_row_count;
 
         [NativeTypeName("idx_t")]
-        public ulong __deprecated_rows_changed;
+        public ulong deprecated_rows_changed;
 
-        public duckdb_column* __deprecated_columns;
+        public duckdb_column* deprecated_columns;
 
         [NativeTypeName("char *")]
-        public byte* __deprecated_error_message;
+        public byte* deprecated_error_message;
 
         public void* internal_data;
     }
 
     public unsafe partial struct _duckdb_database
     {
-        public void* __db;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_connection
     {
-        public void* __conn;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_prepared_statement
     {
-        public void* __prep;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_extracted_statements
     {
-        public void* __extrac;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_pending_result
     {
-        public void* __pend;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_appender
     {
-        public void* __appn;
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_table_description
+    {
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_config
     {
-        public void* __cnfg;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_logical_type
     {
-        public void* __lglt;
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_create_type_info
+    {
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_data_chunk
     {
-        public void* __dtck;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_value
     {
-        public void* __val;
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_profiling_info
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_extension_info
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_function_info
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_scalar_function
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_scalar_function_set
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_aggregate_function
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_aggregate_function_set
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_aggregate_state
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_table_function
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_bind_info
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_init_info
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_cast_function
+    {
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct _duckdb_replacement_scan_info
+    {
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_arrow
     {
-        public void* __arrw;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_arrow_stream
     {
-        public void* __arrwstr;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_arrow_schema
     {
-        public void* __arrs;
+        public void* internal_ptr;
     }
 
     public unsafe partial struct _duckdb_arrow_array
     {
-        public void* __arra;
+        public void* internal_ptr;
+    }
+
+    public unsafe partial struct duckdb_extension_access
+    {
+        [NativeTypeName("void (*)(duckdb_extension_info, const char *)")]
+        public delegate* unmanaged[Cdecl]<_duckdb_extension_info*, byte*, void> set_error;
+
+        [NativeTypeName("duckdb_database *(*)(duckdb_extension_info)")]
+        public delegate* unmanaged[Cdecl]<_duckdb_extension_info*, _duckdb_database**> get_database;
+
+        [NativeTypeName("const void *(*)(duckdb_extension_info, const char *)")]
+        public delegate* unmanaged[Cdecl]<_duckdb_extension_info*, byte*, void*> get_api;
     }
 
     public static unsafe partial class Methods
@@ -470,6 +613,9 @@ namespace DuckDbSharp.Bindings
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("const char *")]
         public static extern byte* duckdb_result_error(duckdb_result* result);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_error_type duckdb_result_error_type(duckdb_result* result);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_data_chunk")]
@@ -583,6 +729,14 @@ namespace DuckDbSharp.Bindings
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("bool")]
         public static extern byte duckdb_string_is_inlined(duckdb_string_t @string);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("uint32_t")]
+        public static extern uint duckdb_string_t_length(duckdb_string_t @string);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("const char *")]
+        public static extern byte* duckdb_string_t_data(duckdb_string_t* @string);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern duckdb_date_struct duckdb_from_date(duckdb_date date);
@@ -719,6 +873,9 @@ namespace DuckDbSharp.Bindings
         public static extern duckdb_state duckdb_bind_timestamp([NativeTypeName("duckdb_prepared_statement")] _duckdb_prepared_statement* prepared_statement, [NativeTypeName("idx_t")] ulong param_idx, duckdb_timestamp val);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_bind_timestamp_tz([NativeTypeName("duckdb_prepared_statement")] _duckdb_prepared_statement* prepared_statement, [NativeTypeName("idx_t")] ulong param_idx, duckdb_timestamp val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern duckdb_state duckdb_bind_interval([NativeTypeName("duckdb_prepared_statement")] _duckdb_prepared_statement* prepared_statement, [NativeTypeName("idx_t")] ulong param_idx, duckdb_interval val);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -792,7 +949,153 @@ namespace DuckDbSharp.Bindings
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_bool([NativeTypeName("bool")] byte input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_int8([NativeTypeName("int8_t")] sbyte input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_uint8([NativeTypeName("uint8_t")] byte input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_int16([NativeTypeName("int16_t")] short input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_uint16([NativeTypeName("uint16_t")] ushort input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_int32([NativeTypeName("int32_t")] int input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_uint32([NativeTypeName("uint32_t")] uint input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_uint64([NativeTypeName("uint64_t")] ulong input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
         public static extern _duckdb_value* duckdb_create_int64([NativeTypeName("int64_t")] long val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_hugeint(duckdb_hugeint input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_uhugeint(duckdb_uhugeint input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_float(float input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_double(double input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_date(duckdb_date input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_time(duckdb_time input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_time_tz_value(duckdb_time_tz value);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_timestamp(duckdb_timestamp input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_interval(duckdb_interval input);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_create_blob([NativeTypeName("const uint8_t *")] byte* data, [NativeTypeName("idx_t")] ulong length);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern byte duckdb_get_bool([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("int8_t")]
+        public static extern sbyte duckdb_get_int8([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("uint8_t")]
+        public static extern byte duckdb_get_uint8([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("int16_t")]
+        public static extern short duckdb_get_int16([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("uint16_t")]
+        public static extern ushort duckdb_get_uint16([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("int32_t")]
+        public static extern int duckdb_get_int32([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("uint32_t")]
+        public static extern uint duckdb_get_uint32([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("int64_t")]
+        public static extern long duckdb_get_int64([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("uint64_t")]
+        public static extern ulong duckdb_get_uint64([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_hugeint duckdb_get_hugeint([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_uhugeint duckdb_get_uhugeint([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern float duckdb_get_float([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern double duckdb_get_double([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_date duckdb_get_date([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_time duckdb_get_time([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_time_tz duckdb_get_time_tz([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_timestamp duckdb_get_timestamp([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_interval duckdb_get_interval([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_logical_type")]
+        public static extern _duckdb_logical_type* duckdb_get_value_type([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_blob duckdb_get_blob([NativeTypeName("duckdb_value")] _duckdb_value* val);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("char *")]
+        public static extern byte* duckdb_get_varchar([NativeTypeName("duckdb_value")] _duckdb_value* value);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_value")]
@@ -807,12 +1110,16 @@ namespace DuckDbSharp.Bindings
         public static extern _duckdb_value* duckdb_create_array_value([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type, [NativeTypeName("duckdb_value *")] _duckdb_value** values, [NativeTypeName("idx_t")] ulong value_count);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("char *")]
-        public static extern byte* duckdb_get_varchar([NativeTypeName("duckdb_value")] _duckdb_value* value);
+        [return: NativeTypeName("idx_t")]
+        public static extern ulong duckdb_get_map_size([NativeTypeName("duckdb_value")] _duckdb_value* value);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("int64_t")]
-        public static extern long duckdb_get_int64([NativeTypeName("duckdb_value")] _duckdb_value* value);
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_get_map_key([NativeTypeName("duckdb_value")] _duckdb_value* value, [NativeTypeName("idx_t")] ulong index);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_get_map_value([NativeTypeName("duckdb_value")] _duckdb_value* value, [NativeTypeName("idx_t")] ulong index);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
@@ -821,6 +1128,9 @@ namespace DuckDbSharp.Bindings
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("char *")]
         public static extern byte* duckdb_logical_type_get_alias([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_logical_type_set_alias([NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type, [NativeTypeName("const char *")] byte* alias);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_logical_type")]
@@ -923,6 +1233,9 @@ namespace DuckDbSharp.Bindings
         public static extern void duckdb_destroy_logical_type([NativeTypeName("duckdb_logical_type *")] _duckdb_logical_type** type);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_register_logical_type([NativeTypeName("duckdb_connection")] _duckdb_connection* con, [NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type, [NativeTypeName("duckdb_create_type_info")] _duckdb_create_type_info* info);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_data_chunk")]
         public static extern _duckdb_data_chunk* duckdb_create_data_chunk([NativeTypeName("duckdb_logical_type *")] _duckdb_logical_type** types, [NativeTypeName("idx_t")] ulong column_count);
 
@@ -1001,6 +1314,109 @@ namespace DuckDbSharp.Bindings
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void duckdb_validity_set_row_valid([NativeTypeName("uint64_t *")] ulong* validity, [NativeTypeName("idx_t")] ulong row);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_scalar_function")]
+        public static extern duckdb_scalar_function_ptr duckdb_create_scalar_function();
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_destroy_scalar_function([NativeTypeName("duckdb_scalar_function *")] duckdb_scalar_function_ptr* scalar_function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_set_name([NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function, [NativeTypeName("const char *")] byte* name);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_set_varargs([NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function, [NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_set_special_handling([NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_set_volatile([NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_add_parameter([NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function, [NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_set_return_type([NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function, [NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_set_extra_info([NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function, void* extra_info, [NativeTypeName("duckdb_delete_callback_t")] delegate* unmanaged[Cdecl]<void*, void> destroy);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_set_function([NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function, [NativeTypeName("duckdb_scalar_function_t")] delegate* unmanaged[Cdecl]<duckdb_function_info_ptr, _duckdb_data_chunk*, _duckdb_vector*, void> function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_register_scalar_function([NativeTypeName("duckdb_connection")] _duckdb_connection* con, [NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr scalar_function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void* duckdb_scalar_function_get_extra_info([NativeTypeName("duckdb_function_info")] duckdb_function_info_ptr info);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_scalar_function_set_error([NativeTypeName("duckdb_function_info")] duckdb_function_info_ptr info, [NativeTypeName("const char *")] byte* error);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_scalar_function_set")]
+        public static extern _duckdb_scalar_function_set* duckdb_create_scalar_function_set([NativeTypeName("const char *")] byte* name);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_destroy_scalar_function_set([NativeTypeName("duckdb_scalar_function_set *")] _duckdb_scalar_function_set** scalar_function_set);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_add_scalar_function_to_set([NativeTypeName("duckdb_scalar_function_set")] _duckdb_scalar_function_set* set, [NativeTypeName("duckdb_scalar_function")] duckdb_scalar_function_ptr function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_register_scalar_function_set([NativeTypeName("duckdb_connection")] _duckdb_connection* con, [NativeTypeName("duckdb_scalar_function_set")] _duckdb_scalar_function_set* set);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_aggregate_function")]
+        public static extern _duckdb_aggregate_function* duckdb_create_aggregate_function();
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_destroy_aggregate_function([NativeTypeName("duckdb_aggregate_function *")] _duckdb_aggregate_function** aggregate_function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_aggregate_function_set_name([NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* aggregate_function, [NativeTypeName("const char *")] byte* name);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_aggregate_function_add_parameter([NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* aggregate_function, [NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_aggregate_function_set_return_type([NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* aggregate_function, [NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_aggregate_function_set_functions([NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* aggregate_function, [NativeTypeName("duckdb_aggregate_state_size")] delegate* unmanaged[Cdecl]<duckdb_function_info_ptr, ulong> state_size, [NativeTypeName("duckdb_aggregate_init_t")] delegate* unmanaged[Cdecl]<duckdb_function_info_ptr, _duckdb_aggregate_state*, void> state_init, [NativeTypeName("duckdb_aggregate_update_t")] delegate* unmanaged[Cdecl]<duckdb_function_info_ptr, _duckdb_data_chunk*, _duckdb_aggregate_state**, void> update, [NativeTypeName("duckdb_aggregate_combine_t")] delegate* unmanaged[Cdecl]<duckdb_function_info_ptr, _duckdb_aggregate_state**, _duckdb_aggregate_state**, ulong, void> combine, [NativeTypeName("duckdb_aggregate_finalize_t")] delegate* unmanaged[Cdecl]<duckdb_function_info_ptr, _duckdb_aggregate_state**, _duckdb_vector*, ulong, ulong, void> finalize);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_aggregate_function_set_destructor([NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* aggregate_function, [NativeTypeName("duckdb_aggregate_destroy_t")] delegate* unmanaged[Cdecl]<_duckdb_aggregate_state**, ulong, void> destroy);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_register_aggregate_function([NativeTypeName("duckdb_connection")] _duckdb_connection* con, [NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* aggregate_function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_aggregate_function_set_special_handling([NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* aggregate_function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_aggregate_function_set_extra_info([NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* aggregate_function, void* extra_info, [NativeTypeName("duckdb_delete_callback_t")] delegate* unmanaged[Cdecl]<void*, void> destroy);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void* duckdb_aggregate_function_get_extra_info([NativeTypeName("duckdb_function_info")] duckdb_function_info_ptr info);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_aggregate_function_set_error([NativeTypeName("duckdb_function_info")] duckdb_function_info_ptr info, [NativeTypeName("const char *")] byte* error);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_aggregate_function_set")]
+        public static extern _duckdb_aggregate_function_set* duckdb_create_aggregate_function_set([NativeTypeName("const char *")] byte* name);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_destroy_aggregate_function_set([NativeTypeName("duckdb_aggregate_function_set *")] _duckdb_aggregate_function_set** aggregate_function_set);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_add_aggregate_function_to_set([NativeTypeName("duckdb_aggregate_function_set")] _duckdb_aggregate_function_set* set, [NativeTypeName("duckdb_aggregate_function")] _duckdb_aggregate_function* function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_register_aggregate_function_set([NativeTypeName("duckdb_connection")] _duckdb_connection* con, [NativeTypeName("duckdb_aggregate_function_set")] _duckdb_aggregate_function_set* set);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_table_function")]
@@ -1117,6 +1533,26 @@ namespace DuckDbSharp.Bindings
         public static extern void duckdb_replacement_scan_set_error([NativeTypeName("duckdb_replacement_scan_info")] duckdb_replacement_scan_info_ptr info, [NativeTypeName("const char *")] byte* error);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_profiling_info")]
+        public static extern _duckdb_profiling_info* duckdb_get_profiling_info([NativeTypeName("duckdb_connection")] _duckdb_connection* connection);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_profiling_info_get_value([NativeTypeName("duckdb_profiling_info")] _duckdb_profiling_info* info, [NativeTypeName("const char *")] byte* key);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_value")]
+        public static extern _duckdb_value* duckdb_profiling_info_get_metrics([NativeTypeName("duckdb_profiling_info")] _duckdb_profiling_info* info);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("idx_t")]
+        public static extern ulong duckdb_profiling_info_get_child_count([NativeTypeName("duckdb_profiling_info")] _duckdb_profiling_info* info);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_profiling_info")]
+        public static extern _duckdb_profiling_info* duckdb_profiling_info_get_child([NativeTypeName("duckdb_profiling_info")] _duckdb_profiling_info* info, [NativeTypeName("idx_t")] ulong index);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern duckdb_state duckdb_appender_create([NativeTypeName("duckdb_connection")] _duckdb_connection* connection, [NativeTypeName("const char *")] byte* schema, [NativeTypeName("const char *")] byte* table, [NativeTypeName("duckdb_appender *")] _duckdb_appender** out_appender);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -1145,6 +1581,9 @@ namespace DuckDbSharp.Bindings
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern duckdb_state duckdb_appender_end_row([NativeTypeName("duckdb_appender")] _duckdb_appender* appender);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_append_default([NativeTypeName("duckdb_appender")] _duckdb_appender* appender);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern duckdb_state duckdb_append_bool([NativeTypeName("duckdb_appender")] _duckdb_appender* appender, [NativeTypeName("bool")] byte value);
@@ -1211,6 +1650,19 @@ namespace DuckDbSharp.Bindings
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern duckdb_state duckdb_append_data_chunk([NativeTypeName("duckdb_appender")] _duckdb_appender* appender, [NativeTypeName("duckdb_data_chunk")] _duckdb_data_chunk* chunk);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_table_description_create([NativeTypeName("duckdb_connection")] _duckdb_connection* connection, [NativeTypeName("const char *")] byte* schema, [NativeTypeName("const char *")] byte* table, [NativeTypeName("duckdb_table_description *")] _duckdb_table_description** @out);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_table_description_destroy([NativeTypeName("duckdb_table_description *")] _duckdb_table_description** table_description);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("const char *")]
+        public static extern byte* duckdb_table_description_error([NativeTypeName("duckdb_table_description")] _duckdb_table_description* table_description);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_column_has_default([NativeTypeName("duckdb_table_description")] _duckdb_table_description* table_description, [NativeTypeName("idx_t")] ulong index, bool* @out);
 
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern duckdb_state duckdb_query_arrow([NativeTypeName("duckdb_connection")] _duckdb_connection* connection, [NativeTypeName("const char *")] byte* query, [NativeTypeName("duckdb_arrow *")] _duckdb_arrow** out_result);
@@ -1293,6 +1745,43 @@ namespace DuckDbSharp.Bindings
         [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("duckdb_data_chunk")]
         public static extern _duckdb_data_chunk* duckdb_fetch_chunk(duckdb_result result);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("duckdb_cast_function")]
+        public static extern _duckdb_cast_function* duckdb_create_cast_function();
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_cast_function_set_source_type([NativeTypeName("duckdb_cast_function")] _duckdb_cast_function* cast_function, [NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* source_type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_cast_function_set_target_type([NativeTypeName("duckdb_cast_function")] _duckdb_cast_function* cast_function, [NativeTypeName("duckdb_logical_type")] _duckdb_logical_type* target_type);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_cast_function_set_implicit_cast_cost([NativeTypeName("duckdb_cast_function")] _duckdb_cast_function* cast_function, [NativeTypeName("int64_t")] long cost);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_cast_function_set_function([NativeTypeName("duckdb_cast_function")] _duckdb_cast_function* cast_function, [NativeTypeName("duckdb_cast_function_t")] delegate* unmanaged[Cdecl]<duckdb_function_info_ptr, ulong, _duckdb_vector*, _duckdb_vector*, byte> function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_cast_function_set_extra_info([NativeTypeName("duckdb_cast_function")] _duckdb_cast_function* cast_function, void* extra_info, [NativeTypeName("duckdb_delete_callback_t")] delegate* unmanaged[Cdecl]<void*, void> destroy);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void* duckdb_cast_function_get_extra_info([NativeTypeName("duckdb_function_info")] duckdb_function_info_ptr info);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_cast_mode duckdb_cast_function_get_cast_mode([NativeTypeName("duckdb_function_info")] duckdb_function_info_ptr info);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_cast_function_set_error([NativeTypeName("duckdb_function_info")] duckdb_function_info_ptr info, [NativeTypeName("const char *")] byte* error);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_cast_function_set_row_error([NativeTypeName("duckdb_function_info")] duckdb_function_info_ptr info, [NativeTypeName("const char *")] byte* error, [NativeTypeName("idx_t")] ulong row, [NativeTypeName("duckdb_vector")] _duckdb_vector* output);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern duckdb_state duckdb_register_cast_function([NativeTypeName("duckdb_connection")] _duckdb_connection* con, [NativeTypeName("duckdb_cast_function")] _duckdb_cast_function* cast_function);
+
+        [DllImport("duckdb", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void duckdb_destroy_cast_function([NativeTypeName("duckdb_cast_function *")] _duckdb_cast_function** cast_function);
     }
 }
 

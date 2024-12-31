@@ -48,6 +48,9 @@ namespace DuckDbSharp.Bindings
         DUCKDB_TYPE_TIME_TZ,
         DUCKDB_TYPE_TIMESTAMP_TZ,
         DUCKDB_TYPE_ARRAY,
+        DUCKDB_TYPE_ANY,
+        DUCKDB_TYPE_VARINT,
+        DUCKDB_TYPE_SQLNULL,
     }
 }
 

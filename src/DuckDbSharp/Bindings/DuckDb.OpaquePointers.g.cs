@@ -1,5 +1,6 @@
 namespace DuckDbSharp.Bindings; 
 public unsafe struct duckdb_table_function_ptr { public void* ptr; }
+public unsafe struct duckdb_scalar_function_ptr { public void* ptr; }
 public unsafe struct duckdb_bind_info_ptr { public void* ptr; }
 public unsafe struct duckdb_init_info_ptr { public void* ptr; }
 public unsafe struct duckdb_function_info_ptr { public void* ptr; }
