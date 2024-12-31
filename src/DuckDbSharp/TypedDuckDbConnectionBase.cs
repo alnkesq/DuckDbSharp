@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -89,33 +90,47 @@ namespace DuckDbSharp
         {
             lock (database)
             {
+                if (database.didRegisterFunctionsInTypes.Contains(methodsInType)) return;
                 var fns = FunctionUtils.RegisterFunctions(conn, methodsInType);
                 foreach (var item in fns)
                 {
                     EnqueueFunctionDisposal(item);
                 }
+                database.didRegisterFunctionsInTypes.Add(methodsInType);
             }
         }
-        public unsafe void RegisterFunction(string name, Delegate @delegate)
+        public unsafe void RegisterTableFunction(string name, Delegate @delegate)
         {
             lock (database)
             {
-                if (AddFunction(name, @delegate))
+                if (AddTableFunction(name, @delegate))
                 {
-                    var fn = FunctionUtils.RegisterFunction(conn, name, @delegate);
+                    var fn = FunctionUtils.RegisterTableFunction(conn, name, @delegate);
+                    EnqueueFunctionDisposal(fn);
+                }
+            }
+
+        }
+        public unsafe void RegisterScalarFunction(string name, Delegate @delegate)
+        {
+            lock (database)
+            {
+                if (AddScalarFunction(name, @delegate))
+                {
+                    var fn = FunctionUtils.RegisterScalarFunction(conn, name, @delegate);
                     EnqueueFunctionDisposal(fn);
                 }
             }
 
         }
 
-        public unsafe void RegisterFunction(MethodInfo method)
+        public unsafe void RegisterTableFunction(MethodInfo method)
         {
             lock (database)
             {
-                if (AddFunction(FunctionUtils.GetRegistrationNameForMethod(method), method))
+                if (AddTableFunction(FunctionUtils.GetRegistrationNameForMethod(method), method))
                 {
-                    var fn = FunctionUtils.RegisterFunction(conn, method);
+                    var fn = FunctionUtils.RegisterTableFunction(conn, method);
                     EnqueueFunctionDisposal(fn);
                 }
 
@@ -123,14 +138,40 @@ namespace DuckDbSharp
 
         }
 
-        private bool AddFunction(string name, object method)
+        public unsafe void RegisterScalarFunction(MethodInfo method)
         {
-            if (database.RegisteredFunctions.TryGetValue(name, out var existing))
+            lock (database)
+            {
+                if (AddScalarFunction(FunctionUtils.GetRegistrationNameForMethod(method), method))
+                {
+                    var fn = FunctionUtils.RegisterScalarFunction(conn, method);
+                    EnqueueFunctionDisposal(fn);
+                }
+
+            }
+
+        }
+
+        private bool AddTableFunction(string name, object method)
+        {
+            if (database.RegisteredTableFunctions.TryGetValue(name, out var existing))
             {
                 if (object.ReferenceEquals(existing, method)) return false;
-                throw new ArgumentException($"A function with the same name (but different lambda or method) was already added to a different connection to the same database file. This is not supported. Ensure that the lambda or method passed to {nameof(RegisterFunction)} is reference-equal for all connections to this database file. This can also be caused by Visual Studio \"Edit and Continue\".");
+                throw new ArgumentException($"A table function with the same name (but different lambda or method) was already added to a different connection to the same database file. This is not supported. Ensure that the lambda or method passed to {nameof(RegisterTableFunction)} is reference-equal for all connections to this database file. This can also be caused by Visual Studio \"Edit and Continue\".");
             }
-            database.RegisteredFunctions.Add(name, method);
+            database.RegisteredTableFunctions.Add(name, method);
+            return true;
+        }
+
+
+        private bool AddScalarFunction(string name, object method)
+        {
+            if (database.RegisteredScalarFunctions.TryGetValue(name, out var existing))
+            {
+                if (object.ReferenceEquals(existing, method)) return false;
+                throw new ArgumentException($"A scalar function with the same name (but different lambda or method) was already added to a different connection to the same database file. This is not supported. Ensure that the lambda or method passed to {nameof(RegisterScalarFunction)} is reference-equal for all connections to this database file. This can also be caused by Visual Studio \"Edit and Continue\".");
+            }
+            database.RegisteredScalarFunctions.Add(name, method);
             return true;
         }
 

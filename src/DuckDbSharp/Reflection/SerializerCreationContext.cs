@@ -803,6 +803,7 @@ namespace DuckDbSharp.Reflection
 
 
         internal static ConcurrentDictionary<Type, RootSerializer> RootSerializerCache = new();
+        internal static ConcurrentDictionary<Type, RootVectorSerializer> RootVectorSerializerCache = new();
         internal static ConcurrentDictionary<(Type ClrType, StructuralTypeHash StructuralType), RootDeserializer> RootDeserializerCache = new();
         internal static ConcurrentDictionary<StructuralTypeHash, Type> StructuralHashToRegisteredClrType = new();
 
@@ -816,6 +817,18 @@ namespace DuckDbSharp.Reflection
             }
             return r;
         }
+
+        public RootVectorSerializer CreateRootVectorSerializer(Type elementType)
+        {
+            if (!RootVectorSerializerCache.TryGetValue(elementType, out var r))
+            {
+                if (!RuntimeFeature.IsDynamicCodeSupported)
+                    throw new NotSupportedException($"Could not find a pre-compiled vector serializer for CLR type '{elementType}'.");
+                r = RootVectorSerializerCache.GetOrAdd(elementType, elementType => (RootVectorSerializer)CreateRootVectorSerializerCore(elementType).Delegate);
+            }
+            return r;
+        }
+
         public RootDeserializer CreateRootDeserializer(Type elementType, DuckDbStructuralType elementStructuralType)
         {
             if (!RootDeserializerCache.TryGetValue((elementType, elementStructuralType.Hash), out var r))
@@ -826,6 +839,7 @@ namespace DuckDbSharp.Reflection
             }
             return r;
         }
+
         internal GeneratedMethodInfo CreateRootDeserializerCore(Type elementType, DuckDbStructuralType elementStructuralType)
         {
             var chunkParam = Expression.Parameter(typeof(nint), "chunk");
@@ -947,6 +961,24 @@ namespace DuckDbSharp.Reflection
             var bodyBlock = Expression.Block(new[] { itemCount, buffer, typedEnumerator }, body);
 
             return CreateMethod("SerializeColumns_" + CreateSpeakableTypeName(elementType, null), typeof(RootSerializer), elementType, null, bodyBlock, enumeratorParam, chunkParam, arenaParam);
+
+        }
+
+        internal GeneratedMethodInfo CreateRootVectorSerializerCore(Type elementType)
+        {
+            var untypedArrayParam = Expression.Parameter(typeof(Array), "untypedArray");
+            var vectorParam = Expression.Parameter(typeof(nint), "vector");
+            var arenaParam = Expression.Parameter(typeof(NativeArenaSlim), "arena");
+            var array = Expression.Variable(elementType.MakeArrayType(), "array");
+            var serializer = CreateFieldSerializer(elementType, null);
+            var body = new List<Expression>
+            {
+                Expression.Assign(array, Expression.Convert(untypedArrayParam, elementType.MakeArrayType())),
+                CreateCall(serializer, vectorParam, array, Expression.ArrayLength(array), Expression.Constant((nint)0), arenaParam)
+            };
+            
+            var bodyBlock = Expression.Block(new[] { array }, body);
+            return CreateMethod("SerializeVector_" + CreateSpeakableTypeName(elementType, null), typeof(RootVectorSerializer), elementType, null, bodyBlock, untypedArrayParam, vectorParam, arenaParam);
 
         }
 

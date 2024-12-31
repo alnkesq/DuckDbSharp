@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -86,16 +87,159 @@ namespace DuckDbSharp.Functions
 
         }
 
-        internal static FunctionInfo RegisterFunction(_duckdb_connection* conn, string name, Delegate deleg)
+        internal static FunctionInfo RegisterTableFunction(_duckdb_connection* conn, string name, Delegate deleg)
         {
-            return RegisterFunctionCore(conn, deleg.Method, name, deleg.Target);
+            return RegisterTableFunctionCore(conn, deleg.Method, name, deleg.Target);
         }
-        internal static FunctionInfo RegisterFunction(_duckdb_connection* conn, MethodInfo method)
+        internal static FunctionInfo RegisterTableFunction(_duckdb_connection* conn, MethodInfo method)
         {
-            return RegisterFunctionCore(conn, method, GetRegistrationNameForMethod(method), null);
+            return RegisterTableFunctionCore(conn, method, GetRegistrationNameForMethod(method), null);
+        }
+        internal static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, string name, Delegate deleg)
+        {
+            return RegisterScalarFunctionCore(conn, deleg.Method, name, deleg.Target);
+        }
+        internal static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, MethodInfo method)
+        {
+            return RegisterScalarFunctionCore(conn, method, GetRegistrationNameForMethod(method), null);
         }
         internal static string GetRegistrationNameForMethod(MethodInfo m) => DuckDbUtils.ToDuckCaseFunction(m.Name);
-        private static FunctionInfo RegisterFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget)
+        private unsafe static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget)
+        {
+            using var scalarFunctionName = (ScopedString)name;
+            var parameters = method.GetParameters();
+
+            Func<object[], object> baseInvoke = args => method.Invoke(delegateTarget, args);
+            var funcInfo = new FunctionInfo
+            {
+                Name = name,
+                Method = method,
+                DelegateTarget = delegateTarget,
+                Parameters = parameters,
+            };
+
+            var clrReturnType = method.ReturnType;
+
+            if (clrReturnType == typeof(object) || clrReturnType == typeof(void)) throw new ArgumentException("Scalar function must return a non-void, non-System.Object type.");
+            
+            var nonNullClrReturnType = Nullable.GetUnderlyingType(clrReturnType) ?? clrReturnType;
+            
+
+            var func = Methods.duckdb_create_scalar_function();
+            Methods.duckdb_scalar_function_set_name(func, scalarFunctionName);
+            Methods.duckdb_scalar_function_set_return_type(func, DuckDbTypeCreator.CreateLogicalType(nonNullClrReturnType, null));
+
+
+
+            
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var param = parameters[i];
+                var lt = DuckDbTypeCreator.CreateLogicalType(param.ParameterType, null);
+                Methods.duckdb_scalar_function_add_parameter(func, lt);
+                //var structuralType = DuckDbStructuralType.CreateStructuralType(lt);
+                //colTypes[i] = DuckDbTypeCreator.CreateGetter(new FieldInfo2("Arg" + i, ))
+            }
+            var argChunkClrType = typeof(ValueTuple).Assembly.GetType("System.ValueTuple`" + parameters.Length)?.MakeGenericType(parameters.Select(x => x.ParameterType).ToArray());
+            if (argChunkClrType == null) throw new Exception("Could not find a System.ValueTuple with the required number of type parameters.");
+            funcInfo.ScalarArgumentChunkType = DuckDbStructuralType.CreateStructuralType(argChunkClrType);
+            funcInfo.ScalarArgumentDeserializer = SerializerCreationContext.Global.CreateRootDeserializer(argChunkClrType, funcInfo.ScalarArgumentChunkType);
+
+            //funcInfo.ScalarArgumentDeserializer = DuckDbStructuralType.CreateStructuralType()
+            Methods.duckdb_scalar_function_set_extra_info(func, CreateGcHandle(funcInfo), &BindingUtils.FreeGcHandle);
+            Methods.duckdb_scalar_function_set_function(func, &ExecuteScalarFunction);
+            
+            BindingUtils.CheckState(Methods.duckdb_register_scalar_function(conn, func));
+            funcInfo.PointerScalarFn = func;
+            return funcInfo;
+        }
+
+
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+        private static void ExecuteScalarFunction(duckdb_function_info_ptr p, _duckdb_data_chunk* chunk, _duckdb_vector* vector)
+        {
+            object[]? argsArray = null;
+            t_scalarFunctionRecursionLevel++;
+            try
+            {
+                var funcInfo = BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_scalar_function_get_extra_info(p));
+                var itemCount = checked((int)Methods.duckdb_data_chunk_get_size(chunk));
+                var colcount = checked((int)Methods.duckdb_data_chunk_get_column_count(chunk));
+
+                var argumentTuples = funcInfo.ScalarArgumentDeserializer((nint)chunk, new DuckDbDeserializationContext());
+                var returnClrType = funcInfo.Method.ReturnType;
+
+
+                var returnSerializer = SerializerCreationContext.Global.CreateRootVectorSerializer(returnClrType);
+                var returnVector = Array.CreateInstance(returnClrType, itemCount);
+
+                argsArray = new object[colcount];
+                for (int rowIdx = 0; rowIdx < itemCount; rowIdx++)
+                {
+                    for (int argIdx = 0; argIdx < colcount; argIdx++)
+                    {
+                        argsArray[argIdx] = ((ITuple)argumentTuples.GetValue(rowIdx))[argIdx];
+                    }
+
+                    var result = funcInfo.Method.Invoke(funcInfo.DelegateTarget, argsArray);
+                    returnVector.SetValue(result, rowIdx);
+                }
+
+
+                // 
+                // HACK: Scalar functions don't have a duckdb_init_info, so how do we dispose the arena after DuckDB finishes reading our data?
+                // For now, let's use reusable thread-locals.
+                // HACK: we also key by destination vector pointer, otherwise if we call two string functions for the same row, we overwrite the data for the first invocation.
+                t_scalarFunctionArenaForRecursionLevel ??= new Dictionary<nint, NativeArenaSlim>[64];
+                ref Dictionary<nint, NativeArenaSlim> arenaDict = ref t_scalarFunctionArenaForRecursionLevel[t_scalarFunctionRecursionLevel - 1];
+                arenaDict ??= new();
+                if (!arenaDict.TryGetValue((nint)vector, out var arena))
+                {
+#pragma warning disable CA2000 // Dispose objects before losing scope
+                    arena = new();
+#pragma warning restore CA2000 // Dispose objects before losing scope
+                    arenaDict.Add((nint)vector, arena);
+                }
+                
+                arena.Reset();
+                returnSerializer(returnVector, (nint)vector, arena);
+
+            }
+            catch (Exception ex)
+            {
+                using var error = (ScopedString)(ex.ToString() + (argsArray != null ? " - Provided arguments: " + string.Join(", ", argsArray.Select(x =>
+                {
+                    if (x == null) return "NULL";
+                    var str = x.ToString() ?? string.Empty;
+                    if (str.Length > 20) return string.Concat(str.AsSpan(0, 20), "...");
+                    return str;
+                })) : null));
+                Methods.duckdb_scalar_function_set_error(p, error);
+            }
+            finally
+            {
+                t_scalarFunctionRecursionLevel--;
+            }
+
+        }
+
+        internal static void FreeScalarFunctionArenasForCurrentThreadAndRecursionLevel()
+        {
+            if (t_scalarFunctionArenaForRecursionLevel == null) return;
+            var dict = t_scalarFunctionArenaForRecursionLevel[t_scalarFunctionRecursionLevel];
+            if (dict == null) return;
+            foreach (var item in dict.Values)
+            {
+                item.Dispose();
+            }
+            dict.Clear();
+        }
+        [ThreadStatic]
+        private static int t_scalarFunctionRecursionLevel;
+        [ThreadStatic]
+        private static Dictionary<nint, NativeArenaSlim>?[]? t_scalarFunctionArenaForRecursionLevel;
+
+        private static FunctionInfo RegisterTableFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget)
         {
             using var tableFunctionName = (ScopedString)name;
             var parameters = method.GetParameters();
@@ -127,14 +271,13 @@ namespace DuckDbSharp.Functions
                 var lt = DuckDbTypeCreator.CreateLogicalType(param.ParameterType, null);
                 Methods.duckdb_table_function_add_parameter(func, lt);
             }
-
             Methods.duckdb_table_function_set_init(func, &TableFunctionInit);
             Methods.duckdb_table_function_set_bind(func, &BindFunctionInit);
             Methods.duckdb_table_function_set_local_init(func, &TableLocalInit);
             Methods.duckdb_table_function_set_extra_info(func, CreateGcHandle(funcInfo), &BindingUtils.FreeGcHandle);
             Methods.duckdb_table_function_set_function(func, &EnumerateFunction);
             BindingUtils.CheckState(Methods.duckdb_register_table_function(conn, func));
-            funcInfo.Pointer = func;
+            funcInfo.PointerTableFn = func;
             return funcInfo;
         }
         private static Type? TryGetElementType(Type ienumerable)
@@ -317,13 +460,13 @@ namespace DuckDbSharp.Functions
         private readonly static MethodInfo EnumerateArrayGenericMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.EnumerateArrayGeneric), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         private readonly static MethodInfo EnumerateObjectArrayAsGenericMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.EnumerateObjectArrayAsGeneric), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
-        public static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Type type)
+        internal static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Type type)
         {
             var registered = new List<FunctionInfo>();
             RegisterFunctions(conn, type, registered);
             return registered;
         }
-        public static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Assembly assembly)
+        internal static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Assembly assembly)
         {
             var registered = new List<FunctionInfo>();
             Type[] types = GetTypesBestEffort(assembly);
@@ -359,10 +502,14 @@ namespace DuckDbSharp.Functions
                 //Console.WriteLine(  attribute);
                 //var a = method.GetCustomAttributes().FirstOrDefault();
                 //if (method.GetCustomAttribute(attribute) != null)
-                if (method.GetCustomAttributes().Any(x => x.GetType().FullName == "DuckDbSharp.DuckDbFunctionAttribute"))
+                // var attr = (DuckDbFunctionAttribute?)method.GetCustomAttributes().Where(x => x.GetType().FullName == "DuckDbSharp.DuckDbFunctionAttribute").FirstOrDefault(x => x != null);
+                var attr = (DuckDbFunctionAttribute?)method.GetCustomAttributes().OfType<DuckDbFunctionAttribute>().FirstOrDefault(x => x != null);
+
+                if (attr != null)
                 {
-                    var fi = FunctionUtils.RegisterFunction(conn, method);
-                    output.Add(fi);
+                    var isScalar = attr.IsScalar ?? TypeSniffedEnumerable.TryGetEnumerableElementType(method.ReturnType) == null;
+                    
+                    output.Add(isScalar ? RegisterScalarFunction(conn, method) : RegisterTableFunction(conn, method));
                 }
             }
         }
@@ -370,6 +517,7 @@ namespace DuckDbSharp.Functions
 
 
     public delegate int RootSerializer(IEnumerator enumerator, nint chunk, NativeArenaSlim arena);
+    public delegate void RootVectorSerializer(Array array, nint vector, NativeArenaSlim arena);
     public delegate Array RootDeserializer(nint chunk, DuckDbDeserializationContext deserializationContext);
 }
 

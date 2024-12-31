@@ -1,5 +1,7 @@
 using DuckDbSharp.Bindings;
+using DuckDbSharp.Reflection;
 using System;
+using System.Collections;
 using System.Reflection;
 
 namespace DuckDbSharp.Functions
@@ -11,19 +13,30 @@ namespace DuckDbSharp.Functions
         public ParameterInfo[] Parameters { get; internal set; }
         public Type? FinalElementType { get; internal set; }
         internal Func<object, object>? Transformer;
-        internal duckdb_table_function_ptr Pointer;
+        internal duckdb_table_function_ptr PointerTableFn;
+        internal duckdb_scalar_function_ptr PointerScalarFn;
 
+        internal DuckDbStructuralType ScalarArgumentChunkType;
+        public RootDeserializer ScalarArgumentDeserializer;
         public object? DelegateTarget { get; internal set; }
 
         public unsafe void Dispose()
         {
-            if (Pointer.ptr != null)
+            if (PointerTableFn.ptr != null)
             {
-                fixed (duckdb_table_function_ptr* ptr = &Pointer)
+                fixed (duckdb_table_function_ptr* ptr = &PointerTableFn)
                 {
                     Methods.duckdb_destroy_table_function(ptr);
                 }
-                Pointer = default;
+                PointerTableFn = default;
+            }
+            if (PointerScalarFn.ptr != null)
+            {
+                fixed (duckdb_scalar_function_ptr* ptr = &PointerScalarFn)
+                {
+                    Methods.duckdb_destroy_scalar_function(ptr);
+                }
+                PointerScalarFn = default;
             }
 
             this.Method = null!;

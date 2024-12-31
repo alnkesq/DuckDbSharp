@@ -6,6 +6,14 @@ namespace DuckDbSharp
     [AttributeUsage(AttributeTargets.Method)]
     public class DuckDbFunctionAttribute : Attribute
     {
+        internal bool? IsScalar;
+        public DuckDbFunctionAttribute()
+        { 
+        }
+        public DuckDbFunctionAttribute(bool isScalar)
+        {
+            this.IsScalar = isScalar;
+        }
     }
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class DuckDbIgnoreAttribute : Attribute

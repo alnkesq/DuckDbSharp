@@ -205,6 +205,7 @@ namespace DuckDbSharp
                             item.ValueByQueryToken.Remove(token);
                         }
                     }
+                    FunctionUtils.FreeScalarFunctionArenasForCurrentThreadAndRecursionLevel();
                 }
                 : null);
 
@@ -214,7 +215,7 @@ namespace DuckDbSharp
             }
             else
             {
-                using var result = OwnedDuckDbResult.Allocate(null);
+                using var result = OwnedDuckDbResult.Allocate(() => FunctionUtils.FreeScalarFunctionArenasForCurrentThreadAndRecursionLevel());
                 using var sqlBytes = (ScopedString)sql;
                 if (Methods.duckdb_query(conn, sqlBytes, result) != duckdb_state.DuckDBSuccess)
                     throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_result_error(result)));
@@ -238,7 +239,7 @@ namespace DuckDbSharp
                 {
                     slot = new EnumerableParameterSlot { ParameterId = parameterId };
 
-                    slot.Function = FunctionUtils.RegisterFunction(conn, funcname, (long token) =>
+                    slot.Function = FunctionUtils.RegisterTableFunction(conn, funcname, (long token) =>
                     {
                         lock (slots)
                         {
@@ -328,6 +329,11 @@ namespace DuckDbSharp
         {
             var structural = DuckDbStructuralType.CreateStructuralType(clrType);
             return structural.Hash;
+        }
+        public static DUCKDB_TYPE GetStructuralTypeKind(Type clrType)
+        {
+            var structural = DuckDbStructuralType.CreateStructuralType(clrType);
+            return structural.Kind;
         }
 
         private static IEnumerable<T> EnumerateResultsCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, List<EnumerableParameterSlot?> enumerableParameterSlots)
