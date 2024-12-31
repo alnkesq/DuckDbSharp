@@ -61,7 +61,7 @@ namespace DuckDbSharp.Tests
         }
 
         [Fact]
-        public void RegisterFunction()
+        public void RegisterTableFunction()
         {
             db.RegisterTableFunction("myfunc", (int a, string b) => new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
             Assert.Equal("[{'Col1':7,'Col2':8}]", Serialize(db.Execute<SomeRow>("select * from myfunc(?, ?)", 7, "8")));
@@ -77,28 +77,28 @@ namespace DuckDbSharp.Tests
         }
 
         [Fact]
-        public void RegisterFunctionUntyped()
+        public void RegisterTableFunctionUntyped()
         {
             db.RegisterTableFunction("myfunc", (int a, string b) => (object)new[] { new SomeRow { Col1 = a, Col2 = int.Parse(b) } });
             Assert.Equal("[{'Col1':7,'Col2':8}]", Serialize(db.Execute<SomeRow>("select * from myfunc(?, ?)", 7, "8")));
         }
 
         [Fact]
-        public void RegisterFunctionListOfScalars()
+        public void RegisterTableFunctionListOfScalars()
         {
             db.RegisterTableFunction("myfunc", (int a, string b) => new[] { a, int.Parse(b) });
             Assert.Equal(new[] { 7, 8 }, db.Execute<int>("select v.Value from myfunc(?, ?) v order by v", 7, "8"));
         }
 
         [Fact]
-        public void RegisterFunctionReturningStructs()
+        public void RegisterTableFunctionReturningStructs()
         {
             db.RegisterTableFunction("myfunc", (int a, string b) => new[] { new { a, b } });
             Assert.Equal("[{'a':7,'b':'8'}]", Serialize(db.Execute("select * from myfunc(?, ?)", 7, "8")));
         }
 
         [Fact]
-        public void RegisterFunctionTwiceButIdentical()
+        public void RegisterTableFunctionTwiceButIdentical()
         {
             var deleg = () => new[] { 5 };
             db.RegisterTableFunction("myfunc", deleg);
@@ -106,7 +106,7 @@ namespace DuckDbSharp.Tests
         }
 
         [Fact]
-        public void RegisterFunctionTwiceAndDifferent()
+        public void RegisterTableFunctionTwiceAndDifferent()
         {
             db.RegisterTableFunction("myfunc", () => new[] { 6 });
             Assert.Throws<ArgumentException>(() => db.RegisterTableFunction("myfunc", () => new[] { 7 }));
