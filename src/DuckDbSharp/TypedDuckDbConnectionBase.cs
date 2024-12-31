@@ -49,6 +49,7 @@ namespace DuckDbSharp
 
         public long DeleteRange<TKey>(string destinationTable, string keyFieldName, IEnumerable<TKey> keys)
         {
+            if (keys.TryGetNonEnumeratedCount(out var count) && count == 0) return 0;
             return ExecuteScalar<long>($"delete from {destinationTable} where {keyFieldName} in (select k.Value from table_parameter_1() k)", new object[] { keys });
         }
 
