@@ -479,7 +479,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfIntInner(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             int[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -569,7 +569,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfOptIntInner(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             int?[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -632,7 +632,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfObjs(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             DuckDbSharp.FuzzingTypes.EvenInner[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -743,7 +743,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfNonNullStructs(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             DuckDbSharp.FuzzingTypes.EvenInnerStruct[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -854,7 +854,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfOptionalStructs(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1001,7 +1001,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfInt(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             int[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1064,7 +1064,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfOptInt(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             int?[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1155,7 +1155,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfObjs(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             DuckDbSharp.FuzzingTypes.EvenInner[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1218,7 +1218,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfNonNullStructs(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             DuckDbSharp.FuzzingTypes.EvenInnerStruct[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1281,7 +1281,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfOptionalStructs(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1344,7 +1344,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListWithNullishDefault(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int sublistLength, innerRelIdx;
+            int innerRelIdx, sublistLength;
             DuckDbSharp.FuzzingTypes.WithNullishDefault[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
