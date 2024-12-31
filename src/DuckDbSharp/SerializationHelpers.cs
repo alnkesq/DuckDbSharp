@@ -375,6 +375,11 @@ namespace DuckDbSharp
             source.AsSpan(offset, length).CopyTo(bufferAsSpan);
             return buffer;
         }
+        public static void CopyFromFixedLengthArray<TBuffer, TItem>(TBuffer buffer, TItem[] destination, int offset, int length) where TBuffer : new()
+        {
+            var bufferAsSpan = MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TItem>(ref buffer), length);
+            bufferAsSpan.CopyTo(destination.AsSpan(offset));
+        }
     }
 }
 
