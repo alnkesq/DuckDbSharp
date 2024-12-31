@@ -18,12 +18,14 @@ namespace DuckDbSharp.Reflection
         private readonly HashSet<string> UsedNames = new();
         internal ConcurrentDictionary<TypeKey, Type>? ClrTypeCache;
         public string Namespace = "GeneratedDuckDbTypes";
-        public TypeGenerationContext(bool forNullnessCheck = false)
+        private bool AllowInvalidCSharpIdentifiers;
+        public TypeGenerationContext(bool forNullnessCheck = false, bool allowInvalidCSharpIdentifiers = false)
         {
             var asmnameStr = "DuckDbDynamic_";
             var asmname = new AssemblyName(asmnameStr);
             AssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(asmname, AssemblyBuilderAccess.Run);
             ModuleBuilder = AssemblyBuilder.DefineDynamicModule(asmnameStr);
+            this.AllowInvalidCSharpIdentifiers = allowInvalidCSharpIdentifiers;
             if (forNullnessCheck) Paths = new();
             else ClrTypeCache = new();
         }
@@ -113,7 +115,7 @@ namespace DuckDbSharp.Reflection
             foreach (var member in members)
             {
                 var name = member.Name;
-                if (!IsValidCSharpIdentifier(name)) throw new NotSupportedException($"Detected column or field with an invalid name: '{name}'. Consider adding column aliases.");
+                if (!IsValidCSharpIdentifier(name, AllowInvalidCSharpIdentifiers)) throw new NotSupportedException($"Detected column or field with an invalid name: '{name}'. Consider adding column aliases.");
                 var couldBeNull = neverNullFields == null || !neverNullFields.Contains(name);
                 var type = CreateClrType(member.FieldType, name, new TypePath { Parent = path, StructField = name });
                 if (couldBeNull && type.IsValueType && !SerializerCreationContext.IsDefaultIsNullishValueType(type))
@@ -133,9 +135,9 @@ namespace DuckDbSharp.Reflection
             return t;
         }
 
-        private static bool IsValidCSharpIdentifier(string? name)
+        private static bool IsValidCSharpIdentifier(string? name, bool allowInvalidCSharpIdentifiers)
         {
-            return !string.IsNullOrEmpty(name) && Regex.IsMatch(name, @"^[\p{L}_]\w*$");
+            return !string.IsNullOrEmpty(name) && (allowInvalidCSharpIdentifiers || Regex.IsMatch(name, @"^[\p{L}_]\w*$"));
         }
 
         internal (Type Type, DuckDbStructuralType StructuralType) GenerateCSharpTypeForQuery(TypedDuckDbConnectionBase conn, string? nameHint, string sql, QueryParameterInfo[]? parameters, CodeGenerationOptions options, SerializerSpecification spec)
@@ -247,7 +249,7 @@ namespace DuckDbSharp.Reflection
             this.ClrTypeCache!.TryAdd(structural.GetTypeKey(), type);
         }
 
-        public readonly static TypeGenerationContext Global = new();
+        public readonly static TypeGenerationContext Global = new(allowInvalidCSharpIdentifiers: true);
 
     }
 }
