@@ -36,6 +36,7 @@ namespace DuckDbSharp.Reflection
             new(typeof(ulong), DUCKDB_TYPE.DUCKDB_TYPE_UBIGINT),
 
             new(typeof(Int128), DUCKDB_TYPE.DUCKDB_TYPE_HUGEINT),
+            new(typeof(UInt128), DUCKDB_TYPE.DUCKDB_TYPE_UHUGEINT),
             new(typeof(DuckDbUuid), DUCKDB_TYPE.DUCKDB_TYPE_UUID),
             new(typeof(Guid), DUCKDB_TYPE.DUCKDB_TYPE_UUID, nameof(SerializationHelpers.SerializeGuid), nameof(SerializationHelpers.DeserializeGuid)),
             new(typeof(double), DUCKDB_TYPE.DUCKDB_TYPE_DOUBLE),
