@@ -77,8 +77,8 @@ namespace DuckDbSharp.Reflection
         private readonly static MethodInfo GetSublistOffsetMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistOffset), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
 
-        private readonly Dictionary<SerializerCacheKey, GeneratedMethodInfo> serializerCache = new();
-        private readonly Dictionary<DeserializerCacheKey, GeneratedMethodInfo> deserializerCache = new();
+        private readonly ConcurrentDictionary<SerializerCacheKey, GeneratedMethodInfo> serializerCache = new();
+        private readonly ConcurrentDictionary<DeserializerCacheKey, GeneratedMethodInfo> deserializerCache = new();
 
         internal List<GeneratedMethodInfo>? GeneratedMethods;
 
@@ -87,20 +87,21 @@ namespace DuckDbSharp.Reflection
             var key = new DeserializerCacheKey(outputArrayElementType, outputArrayStructuralType, getter?.CacheKey ?? default, true);
             if (!deserializerCache.TryGetValue(key, out var deleg))
             {
-                deleg = CreateFieldDeserializerCore(outputArrayElementType, outputArrayStructuralType, getter);
-                deserializerCache.Add(key, deleg);
+                return deserializerCache.GetOrAdd(key, key =>
+                {
+                    return CreateFieldDeserializerCore(outputArrayElementType, outputArrayStructuralType, getter);
+                });
             }
             return deleg;
         }
 
 
-        private GeneratedMethodInfo CreateFieldSerializer(Type inputArrayElementType, StructureFieldInfo? getter)
+        internal GeneratedMethodInfo CreateFieldSerializer(Type inputArrayElementType, StructureFieldInfo? getter)
         {
             var key = new SerializerCacheKey(inputArrayElementType, getter?.CacheKey ?? default, true);
             if (!serializerCache.TryGetValue(key, out var deleg))
             {
-                deleg = CreateFieldSerializerCore(inputArrayElementType, getter);
-                serializerCache.Add(key, deleg);
+                return serializerCache.GetOrAdd(key, key => CreateFieldSerializerCore(inputArrayElementType, getter));
             }
             return deleg;
         }
@@ -276,10 +277,11 @@ namespace DuckDbSharp.Reflection
 
         private Expression CreateListFieldSerializer(SerializerParameters p, StructureFieldInfo? getter, Type sublistElementType, int? arrayFixedLength)
         {
-            if (arrayFixedLength != null) throw new NotImplementedException();
+            var isFixedArray = arrayFixedLength != null;
+            if (isFixedArray) throw new NotImplementedException("TODO: nullable fixed-size array");
             var sublistType = getter != null ? getter.FieldType : p.InputArrayElementType;
-
-            var offsetsAndLengths = Expression.Variable(typeof(Span<>).MakeGenericType(typeof(OffsetAndCount)), "offsetsAndLengths");
+            sublistType = Nullable.GetUnderlyingType(sublistType) ?? sublistType;
+            var offsetsAndLengths = isFixedArray ? null : Expression.Variable(typeof(Span<>).MakeGenericType(typeof(OffsetAndCount)), "offsetsAndLengths");
             var totalCount = Expression.Variable(typeof(int), "totalCount");
             var rowId = Expression.Variable(typeof(int), "rowId");
             var innerRelIdx = Expression.Variable(typeof(int), "innerRelIdx");
@@ -289,19 +291,23 @@ namespace DuckDbSharp.Reflection
             var subobjects = Expression.Variable(sublistElementType.MakeArrayType(), "subobjects");
             var body = new List<Expression>();
             body.Add(Expression.Assign(totalCount, Expression.Constant(0)));
-            body.Add(Expression.Assign(offsetsAndLengths, Expression.Call(null, GetVectorDataMethod.MakeGenericMethod(typeof(OffsetAndCount)), p.VectorPtr, p.ObjectsLength)));
+            if (!isFixedArray)
+                body.Add(Expression.Assign(offsetsAndLengths, Expression.Call(null, GetVectorDataMethod.MakeGenericMethod(typeof(OffsetAndCount)), p.VectorPtr, p.ObjectsLength)));
 
             var variables = new[]
             {
-                offsetsAndLengths,
-                sublistLength,
                 totalCount,
                 rowId,
-                sublist,
                 subobjects,
                 innerRelIdx,
                 innerAbsIdx
             }.ToList();
+            if (!isFixedArray)
+            {
+                variables.Add(sublist);
+                variables.Add(sublistLength);
+                variables.Add(offsetsAndLengths);
+            }
 
             var inputObject = Expression.ArrayIndex(p.Objects, rowId);
             var (inputSublistExpr, hasInputSublist) = UnwrapNullable(p.ParentValidity, rowId, inputObject, getter);
@@ -314,26 +320,55 @@ namespace DuckDbSharp.Reflection
                 body.Add(SerializerCreationContext.CreateValidityVectorInitialization(validityVector, p.VectorPtr));
             }
 
-            var offsetsLoopBody = SerializerCreationContext.MaybeIf(hasInputSublist, Expression.Block(
-                    Expression.Assign(sublist, inputSublistExpr),
-                    Expression.Assign(sublistLength, GetListCountExpression(sublist)),
-                    Expression.Call(null, AssignSpanItemMethod.MakeGenericMethod(typeof(OffsetAndCount)), offsetsAndLengths, rowId, Expression.New(OffsetAndCountCtor, totalCount, sublistLength)),
-                    Expression.AddAssignChecked(totalCount, sublistLength)
-                ),
-                CreateSetNotPresent(validityVector, rowId));
+            if (isFixedArray)
+            {
+                var offsetsLoopBody = SerializerCreationContext.MaybeIf(hasInputSublist, Expression.Block(
+                        //Expression.Call(null, AssignSpanItemMethod.MakeGenericMethod(typeof(OffsetAndCount)), offsetsAndLengths, rowId, Expression.New(OffsetAndCountCtor, totalCount, sublistLength)),
+                        Expression.AddAssignChecked(totalCount, Expression.Constant(arrayFixedLength.Value))
+                    ),
+                    CreateSetNotPresent(validityVector, rowId));
 
-            body.Add(SerializerCreationContext.CreateForLoop(rowId, p.ObjectsLength, offsetsLoopBody));
+                body.Add(SerializerCreationContext.CreateForLoop(rowId, p.ObjectsLength, offsetsLoopBody));
+            }
+            else
+            {
+                var offsetsLoopBody = SerializerCreationContext.MaybeIf(hasInputSublist, Expression.Block(
+                        Expression.Assign(sublist, inputSublistExpr),
+                        Expression.Assign(sublistLength, GetListCountExpression(sublist)),
+                        Expression.Call(null, AssignSpanItemMethod.MakeGenericMethod(typeof(OffsetAndCount)), offsetsAndLengths, rowId, Expression.New(OffsetAndCountCtor, totalCount, sublistLength)),
+                        Expression.AddAssignChecked(totalCount, sublistLength)
+                    ),
+                    CreateSetNotPresent(validityVector, rowId));
 
+                body.Add(SerializerCreationContext.CreateForLoop(rowId, p.ObjectsLength, offsetsLoopBody));
+            }
             body.Add(Expression.Assign(subobjects, CreateRentArrayExpression(sublistElementType, totalCount)));
             body.Add(Expression.Assign(innerAbsIdx, Expression.Constant(0)));
-            body.Add(SerializerCreationContext.CreateForLoop(rowId, p.ObjectsLength, Expression.Block(
-                Expression.IfThen(hasInputSublist, Expression.Block(
+
+            Expression loopBodyInner;
+            if (isFixedArray)
+            {
+
+                loopBodyInner = Expression.Block(
+                    Expression.Call(CopyFromFixedLengthArrayMethod.MakeGenericMethod(sublistType, sublistElementType), inputSublistExpr, subobjects, innerAbsIdx, Expression.Constant(arrayFixedLength.Value)),
+                    Expression.AddAssignChecked(innerAbsIdx, Expression.Constant(arrayFixedLength.Value))
+                ); 
+            }
+            else
+            {
+                loopBodyInner = Expression.Block(
                     Expression.Assign(sublist, inputSublistExpr),
                     Expression.Assign(sublistLength, GetListCountExpression(sublist)),
                     CreateForLoop(innerRelIdx, sublistLength,
                         Expression.Assign(Expression.ArrayAccess(subobjects, Expression.PostIncrementAssign(innerAbsIdx)), CreateListItemExpression(sublist, innerRelIdx))
                     )
-                ))
+                );
+            }
+
+            
+
+            body.Add(SerializerCreationContext.CreateForLoop(rowId, p.ObjectsLength, Expression.Block(
+                Expression.IfThen(hasInputSublist, loopBodyInner)
            )));
             var sublistItemSerializer = CreateFieldSerializer(sublistElementType, null);
             body.Add(CreateCall(sublistItemSerializer, Expression.Call(null, GetSublistChildVectorAndReserveMethod, p.VectorPtr, totalCount), subobjects, totalCount, Expression.Constant((nint)0), p.Arena));
@@ -360,6 +395,7 @@ namespace DuckDbSharp.Reflection
 
         private readonly static MethodInfo CreateArrayMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.CreateArray), BindingFlags.Public | BindingFlags.Static);
         private readonly static MethodInfo CopyToFixedLengthArrayMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.CopyToFixedLengthArray), BindingFlags.Public | BindingFlags.Static);
+        private readonly static MethodInfo CopyFromFixedLengthArrayMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.CopyFromFixedLengthArray), BindingFlags.Public | BindingFlags.Static);
 
         private Expression CreateListFieldDeserializer(DeserializerParameters p, StructureFieldInfo? getter, Type sublistElementType, DuckDbStructuralType sublistStructuralElementType, int? fixedArrayLength)
         {
@@ -593,19 +629,21 @@ namespace DuckDbSharp.Reflection
         private GeneratedMethodInfo CreateSerializer(Type inputArrayElementType, string prefix, Func<SerializerParameters, Expression> impl, StructureFieldInfo? fieldName)
         {
             var key = new SerializerCacheKey(inputArrayElementType, fieldName?.CacheKey ?? default, false);
-            if (!serializerCache.TryGetValue(key, out var r))
+            if (!serializerCache.TryGetValue(key, out var deleg))
             {
-                var paramVectorPtr = Expression.Parameter(typeof(nint), "vectorPtr");
-                var paramObjects = Expression.Parameter(inputArrayElementType.MakeArrayType(), "objects");
-                var paramObjectsLength = Expression.Parameter(typeof(int), "objectsLength");
-                var paramParentValidity = Expression.Parameter(typeof(nint), "parentValidity");
-                var paramArena = Expression.Parameter(typeof(NativeArenaSlim), "arena");
-                var body = impl(new SerializerParameters(inputArrayElementType, paramVectorPtr, paramObjects, paramObjectsLength, paramParentValidity, paramArena));
-                var name = prefix + CreateSpeakableTypeName(inputArrayElementType, null, fieldName);
-                r = CreateMethod(name, null, null, null, body, paramVectorPtr, paramObjects, paramObjectsLength, paramParentValidity, paramArena);
-                serializerCache.Add(key, r);
+                return serializerCache.GetOrAdd(key, key =>
+                {
+                    var paramVectorPtr = Expression.Parameter(typeof(nint), "vectorPtr");
+                    var paramObjects = Expression.Parameter(inputArrayElementType.MakeArrayType(), "objects");
+                    var paramObjectsLength = Expression.Parameter(typeof(int), "objectsLength");
+                    var paramParentValidity = Expression.Parameter(typeof(nint), "parentValidity");
+                    var paramArena = Expression.Parameter(typeof(NativeArenaSlim), "arena");
+                    var body = impl(new SerializerParameters(inputArrayElementType, paramVectorPtr, paramObjects, paramObjectsLength, paramParentValidity, paramArena));
+                    var name = prefix + CreateSpeakableTypeName(inputArrayElementType, null, fieldName);
+                    return CreateMethod(name, null, null, null, body, paramVectorPtr, paramObjects, paramObjectsLength, paramParentValidity, paramArena);
+                });
             }
-            return r;
+            return deleg;
         }
 
         private static string CreateSpeakableTypeName(Type type, DuckDbStructuralType? structuralType, StructureFieldInfo? field)
@@ -630,17 +668,19 @@ namespace DuckDbSharp.Reflection
         private GeneratedMethodInfo CreateDeserializer(Type outputArrayElementType, string prefix, DuckDbStructuralType outputArrayElementStructuralType, Func<DeserializerParameters, Expression> impl, StructureFieldInfo? field)
         {
             var cacheKey = new DeserializerCacheKey(outputArrayElementType, outputArrayElementStructuralType, field?.CacheKey ?? default, false);
-            if (!deserializerCache.TryGetValue(cacheKey, out var r))
+            if (!deserializerCache.TryGetValue(cacheKey, out var deleg))
             {
-                var paramVectorPtr = Expression.Parameter(typeof(nint), "vectorPtr");
-                var paramObjects = Expression.Parameter(outputArrayElementType.MakeArrayType(), "objects");
-                var paramObjectsLength = Expression.Parameter(typeof(int), "objectsLength");
-                var paramDeserializationContext = Expression.Parameter(typeof(DuckDbDeserializationContext), "deserializationCtx");
-                var body = impl(new DeserializerParameters(outputArrayElementType, outputArrayElementStructuralType, paramVectorPtr, paramObjects, paramObjectsLength, paramDeserializationContext));
-                r = CreateMethod(prefix + CreateSpeakableTypeName(outputArrayElementType, outputArrayElementStructuralType, field), null, null, null, body, paramVectorPtr, paramObjects, paramObjectsLength, paramDeserializationContext);
-                deserializerCache.Add(cacheKey, r);
+                return deserializerCache.GetOrAdd(cacheKey, cacheKey =>
+                {
+                    var paramVectorPtr = Expression.Parameter(typeof(nint), "vectorPtr");
+                    var paramObjects = Expression.Parameter(outputArrayElementType.MakeArrayType(), "objects");
+                    var paramObjectsLength = Expression.Parameter(typeof(int), "objectsLength");
+                    var paramDeserializationContext = Expression.Parameter(typeof(DuckDbDeserializationContext), "deserializationCtx");
+                    var body = impl(new DeserializerParameters(outputArrayElementType, outputArrayElementStructuralType, paramVectorPtr, paramObjects, paramObjectsLength, paramDeserializationContext));
+                    return CreateMethod(prefix + CreateSpeakableTypeName(outputArrayElementType, outputArrayElementStructuralType, field), null, null, null, body, paramVectorPtr, paramObjects, paramObjectsLength, paramDeserializationContext);
+                });
             }
-            return r;
+            return deleg;
 
         }
 
@@ -996,8 +1036,16 @@ namespace DuckDbSharp.Reflection
             var lambda = delegateType != null ? Expression.Lambda(delegateType, body, name, parameters) : Expression.Lambda(body, name, parameters);
             var deleg = lambda.Compile();
             var m = new GeneratedMethodInfo(name, deleg, isRootForType, isRootForStructuralType, body, parameters, null, null);
-            GeneratedMethods?.Add(m);
+            AddGeneratedMethod(m);
             return m;
+        }
+
+        private void AddGeneratedMethod(GeneratedMethodInfo m)
+        {
+            lock (this)
+            {
+                GeneratedMethods?.Add(m);
+            }
         }
 
         private static Expression MaybeConvertToNullable(Expression objNonNull, Type destType)
@@ -1136,7 +1184,7 @@ namespace DuckDbSharp.Reflection
             emitter(generator);
             var delegateType = GetDelegateType(returnType, parameterTypes);
             var deleg = methodBuilder.CreateDelegate(delegateType);
-            GeneratedMethods?.Add(new GeneratedMethodInfo(name, deleg, null, null, null, null, csharpVersion(), csharpParameterNames));
+            AddGeneratedMethod(new GeneratedMethodInfo(name, deleg, null, null, null, null, csharpVersion(), csharpParameterNames));
             return deleg;
             /*
             var type = typeBuilder.CreateType();
