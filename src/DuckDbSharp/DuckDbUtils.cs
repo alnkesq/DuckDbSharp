@@ -112,6 +112,8 @@ namespace DuckDbSharp
 
         internal unsafe static OwnedDuckDbResult ExecuteCore(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, CommandOptions commandOptions)
         {
+            if (!(commandOptions is CommandOptions.UseStreaming or CommandOptions.NoStreaming))
+                throw new ArgumentException("Invalid CommandOptions.");
             if ((parameters != null && parameters.Length != 0) || commandOptions == CommandOptions.UseStreaming)
             {
                 var token = new EnumerableParametersInvocationToken(Interlocked.Increment(ref lastGeneratedToken));
@@ -911,11 +913,20 @@ namespace DuckDbSharp
             }).ToArray() : null;
         }
 
+
         public static IEnumerable<T> QueryParquet<T>(string parquetPath, string? query = null, params object[]? parameters)
+        {
+            return QueryParquetWithOptions<T>(query == null ? CommandOptions.UseStreaming : default, parquetPath, query, parameters);
+        }
+        public static IEnumerable<T> QueryParquetStreamed<T>(string parquetPath, string? query = null, params object[]? parameters)
+        {
+            return QueryParquetWithOptions<T>(CommandOptions.UseStreaming, parquetPath, query, parameters);
+        }
+        public static IEnumerable<T> QueryParquetWithOptions<T>(CommandOptions options, string parquetPath, string? query = null, params object[]? parameters)
         {
             using var db = ThreadSafeTypedDuckDbConnection.CreateInMemory();
             db.ExecuteNonQuery($"CREATE TEMP VIEW data AS SELECT * FROM read_parquet('{parquetPath}') ");
-            foreach (var item in db.Execute<T>(query ?? "select * from data", parameters))
+            foreach (var item in db.ExecuteWithOptions<T>(options, query ?? "select * from data", parameters))
             {
                 yield return item;
             }

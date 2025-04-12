@@ -28,8 +28,8 @@ namespace DuckDbSharp
             this.database = database;
         }
 		public TypeGenerationContext TypeGenerationContext { get; set; } = TypeGenerationContext.Global;
-        
-        public CommandOptions DefaultOptions { get; set; }
+
+        public CommandOptions DefaultCommandOptions { get; set; } = CommandOptions.NoStreaming; // Streaming uses less RAM, but can be slower
 
 		public DuckDbDatabase Database => database;
         public virtual void Dispose()
@@ -64,8 +64,22 @@ namespace DuckDbSharp
         }
 
         public abstract long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items);
-        public abstract IEnumerable<T> Execute<T>(string sql, params object[]? parameters);
-        public abstract IEnumerable Execute(string sql, params object[]? parameters);
+        public abstract IEnumerable<T> ExecuteWithOptions<T>(CommandOptions options, string sql, params object[]? parameters);
+        public abstract IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object[]? parameters);
+
+        public IEnumerable<T> Execute<T>(string sql, params object[]? parameters) => ExecuteWithOptions<T>(default, sql, parameters);
+        public IEnumerable Execute(string sql, params object[]? parameters) => ExecuteWithOptions(default, sql, parameters);
+
+        public IEnumerable<T> ExecuteStreamed<T>(string sql, params object[]? parameters) => ExecuteWithOptions<T>(CommandOptions.UseStreaming, sql, parameters);
+        public IEnumerable<T> ExecuteNonStreamed<T>(string sql, params object[]? parameters) => ExecuteWithOptions<T>(CommandOptions.NoStreaming, sql, parameters);
+        public IEnumerable ExecuteStreamed(string sql, params object[]? parameters) => ExecuteWithOptions(CommandOptions.UseStreaming, sql, parameters);
+        public IEnumerable ExecuteNonStreamed(string sql, params object[]? parameters) => ExecuteWithOptions(CommandOptions.NoStreaming, sql, parameters);
+
+        protected void InitOptions(ref CommandOptions options)
+        {
+            if (options == default)
+                options = DefaultCommandOptions;
+        }
 
         public abstract T ExecuteScalar<T>(string sql, params object[]? parameters);
         public abstract object ExecuteScalar(string sql, params object[]? parameters);
@@ -228,11 +242,12 @@ namespace DuckDbSharp
             CheckDisposed();
             DuckDbUtils.CreateEnumType(Handle, t);
         }
-        public abstract OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters);
+        public abstract OwnedDuckDbResult ExecuteUnsafeWithOptions(CommandOptions options, string sql, params object?[]? parameters);
+        public OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters) => ExecuteUnsafeWithOptions(default, sql, parameters);
 
         public Type GetRowTypeForQuery(string sql, params object?[]? parameters)
         {
-            var zeroResults = Execute($"from ({sql}) limit 0", parameters);
+            var zeroResults = ExecuteWithOptions(CommandOptions.NoStreaming, $"from ({sql}) limit 0", parameters);
             using ((IDisposable)zeroResults)
             {
                 return TypeSniffedEnumerable.TryGetEnumerableElementType(zeroResults.GetType())!;

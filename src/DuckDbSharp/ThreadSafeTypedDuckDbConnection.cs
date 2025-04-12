@@ -42,14 +42,15 @@ namespace DuckDbSharp
         }
 
 
-        public override IEnumerable<T> Execute<T>(string sql, params object?[]? parameters)
+        public override IEnumerable<T> ExecuteWithOptions<T>(CommandOptions options, string sql, params object?[]? parameters)
         {
+            InitOptions(ref options);
             IEnumerator<T[]> enumerator;
             lock (this)
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, DefaultOptions).GetEnumerator();
+                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options).GetEnumerator();
             }
             try
             {
@@ -76,26 +77,28 @@ namespace DuckDbSharp
                 }
             }
         }
-        public override OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters)
+        public override OwnedDuckDbResult ExecuteUnsafeWithOptions(CommandOptions options, string sql, params object?[]? parameters)
         {
+            InitOptions(ref options);
             lock (this)
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, DefaultOptions);
+                return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options);
             }
         }
 
 
-		public override IEnumerable Execute(string sql, params object?[]? parameters)
+		public override IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object?[]? parameters)
         {
+            InitOptions(ref options);
             IEnumerator enumerator;
             Type elementType;
             lock (this)
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, DefaultOptions);
+                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options);
                 elementType = TypeSniffedEnumerable.TryGetEnumerableElementType(enumerable.GetType())!;
                 enumerator = enumerable.GetEnumerator();
             }

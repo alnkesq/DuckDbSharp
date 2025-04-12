@@ -30,18 +30,20 @@ namespace DuckDbSharp
             return DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
         }
 
-        public override IEnumerable<T> Execute<T>(string sql, params object[]? parameters)
+        public override IEnumerable<T> ExecuteWithOptions<T>(CommandOptions options, string sql, params object[]? parameters)
         {
+            InitOptions(ref options);
             CheckDisposed();
             MaybeLog(sql);
-            return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, DefaultOptions);
+            return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options);
         }
 
-        public override IEnumerable Execute(string sql, params object[]? parameters)
+        public override IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object[]? parameters)
         {
+            InitOptions(ref options);
             CheckDisposed();
             MaybeLog(sql);
-            return DuckDbUtils.Execute(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, DefaultOptions);
+            return DuckDbUtils.Execute(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options);
         }
 
         public override T ExecuteScalar<T>(string sql, params object[]? parameters)
@@ -57,11 +59,12 @@ namespace DuckDbSharp
             MaybeLog(sql);
             return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
 		}
-		public override OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters)
+		public override OwnedDuckDbResult ExecuteUnsafeWithOptions(CommandOptions options, string sql, params object?[]? parameters)
 		{
-			CheckDisposed();
+            InitOptions(ref options);
+            CheckDisposed();
 			MaybeLog(sql);
-			return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, DefaultOptions);
+			return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options);
 		}
 
 	}
