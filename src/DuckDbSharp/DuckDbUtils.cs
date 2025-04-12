@@ -210,7 +210,7 @@ namespace DuckDbSharp
                 }
                 : null);
 
-                if (Methods.duckdb_execute_prepared(prepared, result.Pointer) != duckdb_state.DuckDBSuccess)
+                if (Methods.duckdb_execute_prepared_streaming(prepared, result.Pointer) != duckdb_state.DuckDBSuccess)
                     throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_result_error(result)));
                 return result.Move();
             }
