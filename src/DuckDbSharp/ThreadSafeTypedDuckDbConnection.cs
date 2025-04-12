@@ -42,7 +42,6 @@ namespace DuckDbSharp
         }
 
 
-
         public override IEnumerable<T> Execute<T>(string sql, params object?[]? parameters)
         {
             IEnumerator<T[]> enumerator;
@@ -50,7 +49,7 @@ namespace DuckDbSharp
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext).GetEnumerator();
+                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, DefaultOptions).GetEnumerator();
             }
             try
             {
@@ -83,7 +82,7 @@ namespace DuckDbSharp
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots);
+                return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, DefaultOptions);
             }
         }
 
@@ -96,7 +95,7 @@ namespace DuckDbSharp
             {
                 CheckDisposed();
                 MaybeLog(sql);
-                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
+                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, DefaultOptions);
                 elementType = TypeSniffedEnumerable.TryGetEnumerableElementType(enumerable.GetType())!;
                 enumerator = enumerable.GetEnumerator();
             }

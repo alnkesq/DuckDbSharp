@@ -1,6 +1,7 @@
 using DuckDbSharp.Bindings;
 using DuckDbSharp.Functions;
 using DuckDbSharp.Reflection;
+using DuckDbSharp.Types;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,6 +29,8 @@ namespace DuckDbSharp
         }
 		public TypeGenerationContext TypeGenerationContext { get; set; } = TypeGenerationContext.Global;
         
+        public CommandOptions DefaultOptions { get; set; }
+
 		public DuckDbDatabase Database => database;
         public virtual void Dispose()
         {

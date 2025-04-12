@@ -44,7 +44,7 @@ namespace DuckDbSharp.Reflection
             {
                 root = root.Parent;
             }
-            using var r = DuckDbUtils.ExecuteCore(conn.Handle, testsql, DuckDbUtils.GetExampleParameterValues(root.RootParameters, options, root.RootSpec?.GetSql()), conn.EnumerableParameterSlots);
+            using var r = DuckDbUtils.ExecuteCore(conn.Handle, testsql, DuckDbUtils.GetExampleParameterValues(root.RootParameters, options, root.RootSpec?.GetSql()), conn.EnumerableParameterSlots, CommandOptions.NoStreaming);
             using var chunk = (OwnedDuckDbDataChunk)Methods.duckdb_result_get_chunk(*r.Pointer, 0);
             bool alwaysNonNull = true;
             if (chunk.Pointer != null)
