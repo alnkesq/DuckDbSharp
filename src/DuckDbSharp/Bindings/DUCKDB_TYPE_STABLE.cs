@@ -51,6 +51,8 @@ namespace DuckDbSharp.Bindings
         DUCKDB_TYPE_ANY,
         DUCKDB_TYPE_VARINT,
         DUCKDB_TYPE_SQLNULL,
+        DUCKDB_TYPE_STRING_LITERAL,
+        DUCKDB_TYPE_INTEGER_LITERAL,
     }
 }
 
