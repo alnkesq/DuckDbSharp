@@ -21,7 +21,8 @@ namespace DuckDbSharp
         {
             using var fuzzing = new Fuzzing<DuckDbSharp.FuzzingTypes.MyClass>();
             fuzzing.GenerateCode("DuckDbFuzzingGeneratedTypes");
-            fuzzing.TestRoundtrips(100, 1000);
+            fuzzing.TestRoundtrips(CommandOptions.NoStreaming, 100, 1000);
+            fuzzing.TestRoundtrips(CommandOptions.UseStreaming, 100, 1000);
         }
     }
 
@@ -130,12 +131,12 @@ namespace DuckDbSharp
         }
 
 
-        public void TestRoundtrip(T[] data)
+        public void TestRoundtrip(T[] data, CommandOptions options)
         {
             Expected = data;
-            TestRoundtrip(-1);
+            TestRoundtrip(-1, options);
         }
-        private void TestRoundtrip(int seedForDebugging)
+        private void TestRoundtrip(int seedForDebugging, CommandOptions options)
         {
 
             var expectedAsJson = JsonConvert.SerializeObject(Expected, Formatting.Indented, JsonSettings);
@@ -157,7 +158,7 @@ namespace DuckDbSharp
                 nativeJsonIsEqual = true;
                 actualAsDuckDbJson = null;
             }
-            var actualFromQuery = Connection.Execute<T>("select * from myfunc()").ToArray();
+            var actualFromQuery = Connection.ExecuteWithOptions<T>(options, "select * from myfunc()").ToArray();
             var actualFromQueryAsJson = JsonConvert.SerializeObject(actualFromQuery, Formatting.Indented, JsonSettings);
             var isEqual2 = actualFromQueryAsJson == expectedAsJson;
             if (!isEqual2)
@@ -206,7 +207,7 @@ namespace DuckDbSharp
         }
 
 
-        public void TestRoundtrips(int iterations = 1000, int avgArrayLength = 100)
+        public void TestRoundtrips(CommandOptions options, int iterations = 1000, int avgArrayLength = 100)
         {
             var sw = Stopwatch.StartNew();
             for (int i = 0; i < iterations; i++)
@@ -217,7 +218,7 @@ namespace DuckDbSharp
                     sw.Restart();
                 }
                 PopulateWithRandomData(new Random(i), 0, avgArrayLength * 2);
-                TestRoundtrip(i);
+                TestRoundtrip(i, options);
             }
         }
 
@@ -279,4 +280,5 @@ namespace DuckDbSharp
         }
     }
 }
+
 
