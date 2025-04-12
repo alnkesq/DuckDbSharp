@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,12 +11,19 @@ namespace DuckDbSharp.Bindings
 
     public unsafe class NativeArenaSlim : IDisposable
     {
+        [Obsolete("Only for ObjectPool<> compatibility.", error: true)]
+        public NativeArenaSlim() => throw new InvalidOperationException();
+        public NativeArenaSlim(int initialSize)
+        {
+            lastChunkSize = initialSize / 2;
+
+        }
+
         private List<(nuint Start, int Length)> chunks = new();
         private byte* nextAllocation;
         private byte* nextAllocationThreshold;
-        const int INITIAL_CHUNK_SIZE = 8192;
 
-        private int lastChunkSize = INITIAL_CHUNK_SIZE / 2; // will be doubled on first alloc
+        private int lastChunkSize;
         private int consumedChunks;
         public byte* NextAllocation => nextAllocation;
 
@@ -69,6 +77,9 @@ namespace DuckDbSharp.Bindings
             return nextAllocation;
         }
 
+        public long TotalAllocatedSize => chunks.Sum(x => (long)x.Length);
+
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private byte* GrowAndAllocate(int size)
         {
@@ -99,7 +110,7 @@ namespace DuckDbSharp.Bindings
             Dispose(false);
         }
 
-        internal void Reset()
+        public void Reset()
         {
             consumedChunks = 0;
             nextAllocation = null;
@@ -109,4 +120,5 @@ namespace DuckDbSharp.Bindings
 
     }
 }
+
 

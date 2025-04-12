@@ -197,7 +197,7 @@ namespace DuckDbSharp.Functions
                 if (!arenaDict.TryGetValue((nint)vector, out var arena))
                 {
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                    arena = new();
+                    arena = new(DuckDbUtils.INITIAL_ARENA_SIZE);
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     arenaDict.Add((nint)vector, arena);
                 }
@@ -408,7 +408,7 @@ namespace DuckDbSharp.Functions
                 var bind = BindingUtils.ReadGcHandle<BindContext>(Methods.duckdb_function_get_bind_data(p));
                 var initCtx = BindingUtils.ReadGcHandle<FunctionInitContext>(Methods.duckdb_function_get_init_data(p));
 
-                initCtx.Arena ??= new();
+                initCtx.Arena ??= new(DuckDbUtils.INITIAL_ARENA_SIZE);
                 initCtx.Arena.Reset();
 
                 if (initCtx.Enumerator == null)

@@ -108,6 +108,7 @@ namespace DuckDbSharp
 
 
         private static long lastGeneratedToken;
+        internal const int INITIAL_ARENA_SIZE = 8192;
 
         internal unsafe static OwnedDuckDbResult ExecuteCore(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots)
         {
@@ -838,7 +839,7 @@ namespace DuckDbSharp
             }
             using var enumerator = items.GetEnumerator();
             var cols = DuckDbTypeCreator.GetFields(typeof(T));
-            using var arena = new NativeArenaSlim();
+            using var arena = new NativeArenaSlim(INITIAL_ARENA_SIZE);
             var colTypes = BindingUtils.ToPointerArray<FieldInfo2, _duckdb_logical_type>(cols.ToArray(), x => DuckDbTypeCreator.CreateLogicalType(x.FieldType, null));
             long insertedItems = 0;
             fixed (_duckdb_logical_type** types = colTypes)
