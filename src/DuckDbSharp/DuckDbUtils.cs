@@ -350,10 +350,9 @@ namespace DuckDbSharp
             try
             {
                 var deserializer = CreateRootDeserializer<T>(duckType);
-                ulong chunkIdx = 0;
                 while (true)
                 {
-                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++, deserializationContext);
+                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, deserializationContext);
                     if (array == null) break;
                     foreach (var item in array)
                     {
@@ -376,10 +375,9 @@ namespace DuckDbSharp
             try
             {
                 var deserializer = CreateRootDeserializer<T>(duckType);
-                ulong chunkIdx = 0;
                 while (true)
                 {
-                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++, deserializationContext);
+                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, deserializationContext);
                     if (array == null) break;
                     yield return array;
                 }
@@ -403,9 +401,10 @@ namespace DuckDbSharp
 
 
 
-        private unsafe static T[]? FetchAndDeserializeChunk<T>(RootDeserializer deserializer, nint result, ulong chunkIndex, DuckDbDeserializationContext deserializationContext)
+        private unsafe static T[]? FetchAndDeserializeChunk<T>(RootDeserializer deserializer, nint result, DuckDbDeserializationContext deserializationContext)
         {
-            using var chunk = (OwnedDuckDbDataChunk)Methods.duckdb_result_get_chunk(*(duckdb_result*)result, chunkIndex);
+            //using var chunk = (OwnedDuckDbDataChunk)Methods.duckdb_result_get_chunk(*(duckdb_result*)result, chunkIndex);
+            using var chunk = (OwnedDuckDbDataChunk)Methods.duckdb_fetch_chunk(*(duckdb_result*)result); 
             if (chunk.Pointer == null) return null;
             if (deserializationContext.CacheEntries != null)
                 Array.Clear(deserializationContext.CacheEntries);
