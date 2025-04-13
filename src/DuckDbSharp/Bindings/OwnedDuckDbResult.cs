@@ -22,6 +22,7 @@ namespace DuckDbSharp.Bindings
             BindingUtils.Free(Pointer);
             OnDispose?.Invoke();
             Pointer = null;
+            Disposed?.Invoke();
         }
 
         internal static OwnedDuckDbResult Allocate(Action? onDispose)
@@ -35,6 +36,8 @@ namespace DuckDbSharp.Bindings
             this = default;
             return copy;
         }
+
+        public event Action? Disposed;
     }
 }
 

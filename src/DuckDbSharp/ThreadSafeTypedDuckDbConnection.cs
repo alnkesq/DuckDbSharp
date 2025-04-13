@@ -16,7 +16,7 @@ namespace DuckDbSharp
         }
         public static ThreadSafeTypedDuckDbConnection Create(DuckDbDatabase db)
         {
-            return new ThreadSafeTypedDuckDbConnection(DuckDbDatabase.Connect(db.Path, db), db);
+            return new ThreadSafeTypedDuckDbConnection(DuckDbDatabase.Connect(db), db);
         }
         public static ThreadSafeTypedDuckDbConnection Create(string? path)
         {
@@ -48,8 +48,7 @@ namespace DuckDbSharp
             IEnumerator<T[]> enumerator;
             lock (this)
             {
-                CheckDisposed();
-                MaybeLog(sql);
+                OnBeforeExecute(sql);
                 enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options).GetEnumerator();
             }
             try
@@ -82,8 +81,7 @@ namespace DuckDbSharp
             InitOptions(ref options);
             lock (this)
             {
-                CheckDisposed();
-                MaybeLog(sql);
+                OnBeforeExecute(sql);
                 return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options);
             }
         }
@@ -96,9 +94,8 @@ namespace DuckDbSharp
             Type elementType;
             lock (this)
             {
-                CheckDisposed();
-                MaybeLog(sql);
-                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options);
+                OnBeforeExecute(sql);
+                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this);
                 elementType = TypeSniffedEnumerable.TryGetEnumerableElementType(enumerable.GetType())!;
                 enumerator = enumerable.GetEnumerator();
             }
@@ -141,8 +138,7 @@ namespace DuckDbSharp
         {
             lock (this)
             {
-                CheckDisposed();
-                MaybeLog(sql);
+                OnBeforeExecute(sql);
                 return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
             }
         }
@@ -151,8 +147,7 @@ namespace DuckDbSharp
         {
             lock (this)
             {
-                CheckDisposed();
-                MaybeLog(sql);
+                OnBeforeExecute(sql);
                 return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
             }
         }
@@ -160,8 +155,7 @@ namespace DuckDbSharp
         {
             lock (this)
             {
-                CheckDisposed();
-                MaybeLog(sql);
+                OnBeforeExecute(sql);
                 DuckDbUtils.ExecuteNonQuery(conn, sql, parameters, EnumerableParameterSlots);
             }
         }
@@ -170,6 +164,7 @@ namespace DuckDbSharp
         {
             lock (this)
             {
+                OnBeforeExecute(null);
                 base.CreateEnum(t);
             }
         }
@@ -178,11 +173,14 @@ namespace DuckDbSharp
         {
             lock (this)
             {
+                OnBeforeExecute(null);
                 base.CreateTable<T>(name, replaceIfExisting, primaryKey);
             }
         }
 
         private nint Pointer => (nint)conn.Pointer;
+
+        public virtual ThreadSafeTypedDuckDbConnection Clone() => Create(Database);
     }
 }
 

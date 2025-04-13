@@ -49,12 +49,12 @@ namespace DuckDbSharp
                         dbs.Add(path, db);
                 }
                 ownerDb = db;
-                return Connect(path, db);
+                return Connect(db);
             }
 
         }
 
-        internal static unsafe OwnedDuckDbConnection Connect(string path, DuckDbDatabase db)
+        public static unsafe OwnedDuckDbConnection Connect(DuckDbDatabase db)
         {
             lock (dbs)
             {
@@ -86,8 +86,8 @@ namespace DuckDbSharp
 
 
                             db.database.Dispose();
-                            if (path != null)
-                                dbs.Remove(path);
+                            if (db.Path != null)
+                                dbs.Remove(db.Path);
                         }
                     }
                 });

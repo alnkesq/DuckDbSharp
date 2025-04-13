@@ -254,6 +254,18 @@ namespace DuckDbSharp
             }
         }
 
+        protected void OnBeforeExecute(string? sql)
+        {
+            CheckDisposed();
+            if (sql != null)
+                MaybeLog(sql);
+            // this is a per-connection problem, not a per-database problem.
+            if (IsExecutingStreamingQuery != 0)
+                throw new NotSupportedException("Executing a command while a streaming query is open is not supported.");
+        }
+
+        internal long IsExecutingStreamingQuery;
+
 
     }
 }

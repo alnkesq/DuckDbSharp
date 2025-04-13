@@ -277,13 +277,13 @@ namespace DuckDbSharp
             return TypeSniffedEnumerable.TryGetEnumerableElementType(type) != null;
         }
 
-        internal static IEnumerable Execute(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions);
-        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions);
+        internal static IEnumerable Execute(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
+        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
 
-        public static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions)
+        public static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
             PrepareExecute<T>(conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, typeGenerationContext, commandOptions);
-            var enumerable = EnumerateResultsCore<T>(result, structuralType, enumerableParameterSlots);
+            var enumerable = EnumerateResultsCore<T>(result, structuralType, enumerableParameterSlots, ownerConnection);
             result.Move();
             return enumerable;
         }
@@ -314,12 +314,12 @@ namespace DuckDbSharp
             using var _ = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming);
         }
 
-        public static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions)
+        public static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
-            return Execute(conn, sql, parameters, expectSingleColumn: false, enumerableParameterSlots, typeGenerationContext, commandOptions);
+            return Execute(conn, sql, parameters, expectSingleColumn: false, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
         }
 
-        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, bool expectSingleColumn, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions)
+        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, bool expectSingleColumn, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
             using var result = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions);
 
@@ -331,7 +331,8 @@ namespace DuckDbSharp
                     resultType = typeGenerationContext.CreateClrType(resultStructuralType, null, null);
                 }
             }
-            var enumerable = (IEnumerable)EnumerateResultsCoreMethod.MakeGenericMethod(resultType).Invoke(null, new object[] { result, resultStructuralType, enumerableParameterSlots })!;
+
+            var enumerable = (IEnumerable)EnumerateResultsCoreMethod.MakeGenericMethod(resultType).Invoke(null, new object[] { result, resultStructuralType, enumerableParameterSlots, ownerConnection })!;
             result.Move();
             return enumerable;
         }
@@ -347,8 +348,17 @@ namespace DuckDbSharp
             return structural.Kind;
         }
 
-        private static IEnumerable<T> EnumerateResultsCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, List<EnumerableParameterSlot?> enumerableParameterSlots)
+        private unsafe static IEnumerable<T> EnumerateResultsCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, List<EnumerableParameterSlot?> enumerableParameterSlots, TypedDuckDbConnectionBase? ownerConnection)
         {
+            if (ownerConnection != null && Methods.duckdb_result_is_streaming(*result.Pointer) != 0)
+            {
+                Interlocked.Increment(ref ownerConnection.IsExecutingStreamingQuery);
+                result.Disposed += () =>
+                {
+                    Interlocked.Decrement(ref ownerConnection.IsExecutingStreamingQuery);
+                };
+            }
+
             return EnumerateResultsCore2<T>(result, duckType, new StrongBox<bool>(), enumerableParameterSlots);
         }
 
@@ -885,14 +895,14 @@ namespace DuckDbSharp
 
         public static object? ExecuteScalar(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
         {
-            var box = DuckDbUtils.Execute(conn, sql, parameters, expectSingleColumn: true, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming).Cast<object>().Single();
+            var box = DuckDbUtils.Execute(conn, sql, parameters, expectSingleColumn: true, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Cast<object>().Single();
             var fields = box.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
             if (fields.Length != 1) throw new Exception($"A scalar query returned {fields.Length} columns.");
             return fields[0].GetValue(box);
         }
         internal static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
         {
-            return Execute<T>(conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming).Single();
+            return Execute<T>(conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Single();
         }
 
         public static void LoadDuckDbDll()
