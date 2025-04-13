@@ -435,7 +435,12 @@ namespace DuckDbSharp
                 isStreamed 
                     ? (OwnedDuckDbDataChunk)Methods.duckdb_fetch_chunk(*(duckdb_result*)result)
                     : (OwnedDuckDbDataChunk)Methods.duckdb_result_get_chunk(*(duckdb_result*)result, chunkIndex);
-            if (chunk.Pointer == null) return null;
+            if (chunk.Pointer == null)
+            {
+                var error = ToStringUtf8(Methods.duckdb_result_error((duckdb_result*)result));
+                if (error != null) throw new DuckDbException(error);
+                return null;
+            }
             if (deserializationContext.CacheEntries != null)
                 Array.Clear(deserializationContext.CacheEntries);
             var array = (T[])deserializer((nint)chunk.Pointer, deserializationContext);
