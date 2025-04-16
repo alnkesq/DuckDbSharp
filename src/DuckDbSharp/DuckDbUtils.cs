@@ -119,13 +119,16 @@ namespace DuckDbSharp
                 var token = new EnumerableParametersInvocationToken(Interlocked.Increment(ref lastGeneratedToken));
 
                 var simpleParameters = new List<object?>();
-                for (int i = 0; i < parameters.Length; i++)
+                if (parameters != null)
                 {
-                    if (IsEnumerableParameter(parameters[i]))
+                    for (int i = 0; i < parameters.Length; i++)
                     {
-                        RegisterQueryParameterFunction(conn, token, i - simpleParameters.Count, enumerableParameterSlots, parameters[i]);
+                        if (IsEnumerableParameter(parameters[i]))
+                        {
+                            RegisterQueryParameterFunction(conn, token, i - simpleParameters.Count, enumerableParameterSlots, parameters[i]);
+                        }
+                        else simpleParameters.Add(parameters[i]);
                     }
-                    else simpleParameters.Add(parameters[i]);
                 }
                 using var prepared = CreatePreparedStatement(conn, sql);
                 var simpleParamCount = Methods.duckdb_nparams(prepared);
@@ -199,7 +202,8 @@ namespace DuckDbSharp
                     else throw new DuckDbException($"Don't know how to bind parameter of type {val.GetType()}.");
                 }
 
-                using var result = OwnedDuckDbResult.Allocate(simpleParamCount != (ulong)parameters.Length ? () =>
+                var parameterCount = parameters != null ? (ulong)parameters.Length : 0;
+                using var result = OwnedDuckDbResult.Allocate(simpleParamCount != parameterCount ? () =>
                 {
                     lock (enumerableParameterSlots!)
                     {
