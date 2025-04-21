@@ -49,7 +49,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options).GetEnumerator();
+                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this).GetEnumerator();
             }
             try
             {

@@ -292,9 +292,11 @@ namespace DuckDbSharp
             return enumerable;
         }
 
-        internal static IEnumerable<T[]> ExecuteBatched<T>(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot?> enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions)
+        internal static IEnumerable<T[]> ExecuteBatched<T>(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot?> enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
             PrepareExecute<T>((_duckdb_connection*)conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, typeGenerationContext, commandOptions);
+
+            SetUpDoubleStreamingCheck(result, ownerConnection);
             var enumerable = EnumerateResultsBatchedCore<T>(result, structuralType, new StrongBox<bool>(), enumerableParameterSlots);
             result.Move();
             return enumerable;
@@ -354,6 +356,12 @@ namespace DuckDbSharp
 
         private unsafe static IEnumerable<T> EnumerateResultsCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, List<EnumerableParameterSlot?> enumerableParameterSlots, TypedDuckDbConnectionBase? ownerConnection)
         {
+            SetUpDoubleStreamingCheck(result, ownerConnection);
+            return EnumerateResultsCore2<T>(result, duckType, new StrongBox<bool>(), enumerableParameterSlots);
+        }
+
+        private static void SetUpDoubleStreamingCheck(OwnedDuckDbResult result, TypedDuckDbConnectionBase? ownerConnection)
+        {
             if (ownerConnection != null && Methods.duckdb_result_is_streaming(*result.Pointer) != 0)
             {
                 Interlocked.Increment(ref ownerConnection.IsExecutingStreamingQuery);
@@ -362,8 +370,6 @@ namespace DuckDbSharp
                     Interlocked.Decrement(ref ownerConnection.IsExecutingStreamingQuery);
                 };
             }
-
-            return EnumerateResultsCore2<T>(result, duckType, new StrongBox<bool>(), enumerableParameterSlots);
         }
 
         private static IEnumerable<T> EnumerateResultsCore2<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, StrongBox<bool> used, List<EnumerableParameterSlot?> enumerableParameterSlots)
