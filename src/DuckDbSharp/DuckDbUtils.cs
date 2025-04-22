@@ -296,7 +296,7 @@ namespace DuckDbSharp
         {
             PrepareExecute<T>((_duckdb_connection*)conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, typeGenerationContext, commandOptions);
 
-            SetUpDoubleStreamingCheck(result, ownerConnection);
+            SetUpDoubleStreamingCheck(ref result, ownerConnection);
             var enumerable = EnumerateResultsBatchedCore<T>(result, structuralType, new StrongBox<bool>(), enumerableParameterSlots);
             result.Move();
             return enumerable;
@@ -356,18 +356,19 @@ namespace DuckDbSharp
 
         private unsafe static IEnumerable<T> EnumerateResultsCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, List<EnumerableParameterSlot?> enumerableParameterSlots, TypedDuckDbConnectionBase? ownerConnection)
         {
-            SetUpDoubleStreamingCheck(result, ownerConnection);
+            SetUpDoubleStreamingCheck(ref result, ownerConnection);
             return EnumerateResultsCore2<T>(result, duckType, new StrongBox<bool>(), enumerableParameterSlots);
         }
 
-        private static void SetUpDoubleStreamingCheck(OwnedDuckDbResult result, TypedDuckDbConnectionBase? ownerConnection)
+        private static void SetUpDoubleStreamingCheck(ref OwnedDuckDbResult result, TypedDuckDbConnectionBase? ownerConnection)
         {
             if (ownerConnection != null && Methods.duckdb_result_is_streaming(*result.Pointer) != 0)
             {
                 Interlocked.Increment(ref ownerConnection.IsExecutingStreamingQuery);
                 result.Disposed += () =>
                 {
-                    Interlocked.Decrement(ref ownerConnection.IsExecutingStreamingQuery);
+                    if (Interlocked.Decrement(ref ownerConnection.IsExecutingStreamingQuery) < 0)
+                        throw new InvalidOperationException("IsExecutingStreamingQuery < 0");
                 };
             }
         }
