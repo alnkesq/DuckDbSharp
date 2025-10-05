@@ -1066,7 +1066,7 @@ namespace DuckDbSharp
             if (rows == null) throw new ArgumentNullException();
 
             using var conn = ThreadSafeTypedDuckDbConnection.CreateInMemory();
-            conn.ExecuteNonQuery($"COPY (select * from table_parameter_1() {(orderBy != null ? "ORDER BY " + orderBy : null)}) TO '{destinationFile}' (FORMAT PARQUET, COMPRESSION ZSTD, USE_TMP_FILE 1)", rows);
+            conn.ExecuteNonQuery($"COPY (select * from table_parameter_1() {(orderBy != null ? "ORDER BY " + orderBy : null)}) TO '{destinationFile}' (FORMAT PARQUET, PARQUET_VERSION V2, COMPRESSION ZSTD, USE_TMP_FILE 1)", rows);
             
         }
     }
