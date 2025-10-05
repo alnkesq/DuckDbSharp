@@ -8,11 +8,10 @@ namespace DuckDbSharp.Bindings
         //public static explicit operator OwnedDuckDbResult(duckdb_result* ptr) => new OwnedDuckDbResult(ptr);
         public duckdb_result* Pointer;
         public nint PointerAsIntPtr => (nint)Pointer;
-        internal Action? OnDispose;
-        public OwnedDuckDbResult(duckdb_result* ptr, Action? onDispose)
+        public event Action? Disposed;
+        public OwnedDuckDbResult(duckdb_result* ptr)
         {
             this.Pointer = ptr;
-            this.OnDispose = onDispose;
         }
 
         public void Dispose()
@@ -20,14 +19,15 @@ namespace DuckDbSharp.Bindings
             if (Pointer == null) return;
             Methods.duckdb_destroy_result(Pointer);
             BindingUtils.Free(Pointer);
-            OnDispose?.Invoke();
             Pointer = null;
             Disposed?.Invoke();
         }
 
         internal static OwnedDuckDbResult Allocate(Action? onDispose)
         {
-            return new(BindingUtils.Alloc<duckdb_result>(), onDispose);
+            var result = new OwnedDuckDbResult(BindingUtils.Alloc<duckdb_result>());
+            result.Disposed += onDispose;
+            return result;
         }
 
         public OwnedDuckDbResult Move()
@@ -37,7 +37,6 @@ namespace DuckDbSharp.Bindings
             return copy;
         }
 
-        public event Action? Disposed;
     }
 }
 
