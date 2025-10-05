@@ -53,6 +53,7 @@ namespace DuckDbSharp.Bindings
         DUCKDB_TYPE_SQLNULL,
         DUCKDB_TYPE_STRING_LITERAL,
         DUCKDB_TYPE_INTEGER_LITERAL,
+        DUCKDB_TYPE_TIME_NS,
     }
 }
 

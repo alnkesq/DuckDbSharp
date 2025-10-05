@@ -36,7 +36,9 @@ namespace DuckDbSharp.Reflection
             var nonStableToStable = new DUCKDB_TYPE_STABLE[nonStableValues.Max(x => (int)x) + 1];
             foreach (var nonStable in nonStableValues)
             {
-                var stable = Enum.Parse<DUCKDB_TYPE_STABLE>(nonStable.ToString());
+                var stable = 
+                    nonStable == DUCKDB_TYPE.DUCKDB_TYPE_BIGNUM ? DUCKDB_TYPE_STABLE.DUCKDB_TYPE_VARINT :
+                    Enum.Parse<DUCKDB_TYPE_STABLE>(nonStable.ToString());
                 nonStableToStable[(int)nonStable] = stable;
             }
             DuckDbTypeToDuckDbTypeStable = nonStableToStable;
