@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/DuckDbSharp/DuckDbSharp.csproj" />
+  <Project Path="tests/DuckDbSharp.Benchmarks/DuckDbSharp.Benchmarks.csproj" />
+  <Project Path="tests/DuckDbSharp.Example/DuckDbSharp.Example.csproj" />
+  <Project Path="tests/DuckDbSharp.Tests/DuckDbSharp.Tests.csproj" />
+</Solution>
