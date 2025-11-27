@@ -66,14 +66,14 @@ namespace DuckDbSharp
         }
 
 
-        public static T MakeRandom(Random r, bool allowNull = true) => (T)MakeRandom(typeof(T), r, allowNull: allowNull);
-        public static object MakeRandom(Type t, Random r, bool allowNull = true)
+        public static T? MakeRandom(Random r, bool allowNull = true) => (T?)MakeRandom(typeof(T), r, allowNull: allowNull);
+        public static object? MakeRandom(Type t, Random r, bool allowNull = true)
         {
             if (t.IsArray)
             {
                 if (allowNull && r.NextDouble() < 0.2) return null;
                 var len = r.Next(16);
-                var elementType = t.GetElementType();
+                var elementType = t.GetElementType()!;
                 var arr = Array.CreateInstance(elementType, len);
                 for (int i = 0; i < len; i++)
                 {
@@ -113,7 +113,7 @@ namespace DuckDbSharp
             else
             {
                 var parameters = ctor.GetParameters();
-                var args = new object[parameters.Length];
+                var args = new object?[parameters.Length];
                 for (int i = 0; i < args.Length; i++)
                 {
                     args[i] = MakeRandom(parameters[i].ParameterType, r);
@@ -127,7 +127,7 @@ namespace DuckDbSharp
 
         private void PopulateWithRandomData(Random r, int minArrayLength, int maxArrayLength)
         {
-            Expected = Enumerable.Range(0, r.Next(minArrayLength, maxArrayLength)).Select(x => MakeRandom(r, false)).ToArray();
+            Expected = Enumerable.Range(0, r.Next(minArrayLength, maxArrayLength)).Select(x => MakeRandom(r, false)!).ToArray();
         }
 
 
@@ -261,7 +261,7 @@ namespace DuckDbSharp
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            var type = value.GetType();
+            var type = value!.GetType();
             var flagsAttr = type.GetCustomAttribute<FlagsAttribute>();
             if (flagsAttr == null)
             {

@@ -5,7 +5,7 @@ namespace DuckDbSharp.FuzzingTypes
     public class MyClass3
     {
         //public InnerObj2? InnerObj;
-        public EvenInnerStruct?[] TheArray;
+        public EvenInnerStruct?[]? TheArray;
     }
 
     public record MyClass4(SomeStruct? SomeOptionalStruct);

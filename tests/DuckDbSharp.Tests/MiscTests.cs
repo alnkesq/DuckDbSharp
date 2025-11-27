@@ -11,6 +11,7 @@ using Xunit;
 
 namespace DuckDbSharp.Tests
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1052:Static holder types should be Static or NotInheritable", Justification = "Test class")]
     public class MiscTests
     {
         [Fact]

@@ -36,7 +36,7 @@ namespace DuckDbSharp.Reflection
         public string GetNewTypeName(string hint, IEnumerable<string>? forbiddenNames, string? disambiguationSuffix)
         {
             hint = DuckDbUtils.ToPascalCase(hint);
-            if (disambiguationSuffix != null && forbiddenNames.Any(x => x == hint))
+            if (disambiguationSuffix != null && forbiddenNames!.Any(x => x == hint))
                 hint += "Type";  // Field names can't have the same name of the declaring type.
             var name = hint;
 
@@ -180,7 +180,7 @@ namespace DuckDbSharp.Reflection
                     }
 
                     WriteWarning($"Could not get result type for {sql}: {ex}. Using previously cached type.");
-                    structuralType = ToStructuralType(cached.JsonStructuralTypeReference!, options.QueryTypeCache);
+                    structuralType = ToStructuralType(cached.JsonStructuralTypeReference, options.QueryTypeCache);
                 }
             }
             if (cached == null)

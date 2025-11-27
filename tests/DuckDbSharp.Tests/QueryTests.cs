@@ -237,9 +237,9 @@ namespace DuckDbSharp.Tests
     }
     public class MyResult
     {
-        public string A;
-        public string B;
-        public string NeverSetStr;
+        public string? A;
+        public string? B;
+        public string? NeverSetStr;
         public int Number;
         public bool IsMultipleOfThree;
         public DateTimeKind Kind;
