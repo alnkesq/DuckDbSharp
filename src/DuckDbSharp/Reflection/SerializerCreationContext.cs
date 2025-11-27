@@ -1240,7 +1240,7 @@ namespace DuckDbSharp.Reflection
             return null;
         }
 
-        private int lastIlGeneratedMethodId;
+        //private int lastIlGeneratedMethodId;
         //private AssemblyBuilder? assemblyBuilder;
         //private ModuleBuilder? moduleBuilder;
 

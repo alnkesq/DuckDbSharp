@@ -504,6 +504,7 @@ namespace DuckDbSharp
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1869:Cache and reuse 'JsonSerializerOptions' instances", Justification = "Runs only once")]
         public static void GenerateCSharpTypes(CodeGenerationOptions options)
         {
             var conn = options.Connection;
@@ -707,7 +708,9 @@ namespace DuckDbSharp
             File.WriteAllText(options.DestinationPath, sw.ToString());
             var jsonSettings = new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, WriteIndented = true };
             jsonSettings.Converters.Add(new JsonStringEnumConverter());
-            File.WriteAllText(options.QueryTypeCachePath, JsonSerializer.Serialize(options.QueryTypeCache, jsonSettings).Replace("\r", null));
+            File.WriteAllText(options.QueryTypeCachePath, JsonSerializer.Serialize(options.QueryTypeCache, jsonSettings)
+                //.Replace("\r", null)
+                );
         }
 
 

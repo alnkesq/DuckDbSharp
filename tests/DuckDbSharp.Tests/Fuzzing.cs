@@ -281,4 +281,3 @@ namespace DuckDbSharp
     }
 }
 
-
