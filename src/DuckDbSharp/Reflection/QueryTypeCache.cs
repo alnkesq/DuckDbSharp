@@ -7,16 +7,16 @@ namespace DuckDbSharp.Reflection
     {
         public List<QueryInfoCache> Queries { get; set; } = new();
         public List<JsonStructuralType> Types { get; set; } = new();
-        public Dictionary<string, JsonStructuralType> TypesById;
+        public Dictionary<string, JsonStructuralType>? TypesById;
     }
 
     internal class JsonStructuralType
     {
         public string Id { get; set; }
         public DUCKDB_TYPE Kind { get; set; }
-        public List<string> EnumMembers { get; set; }
-        public string ElementTypeId { get; set; }
-        public List<JsonStructuralTypeStructureField> StructureFields { get; set; }
+        public List<string>? EnumMembers { get; set; }
+        public string? ElementTypeId { get; set; }
+        public List<JsonStructuralTypeStructureField>? StructureFields { get; set; }
     }
 
     internal record struct JsonStructuralTypeStructureField(string Name, string FieldTypeId);

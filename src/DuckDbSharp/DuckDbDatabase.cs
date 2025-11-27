@@ -9,7 +9,7 @@ namespace DuckDbSharp
     public class DuckDbDatabase
     {
         private readonly static Dictionary<string, DuckDbDatabase> dbs = new();
-        internal List<EnumerableParameterSlot> EnumerableParameterSlots = new();
+        internal List<EnumerableParameterSlot?> EnumerableParameterSlots = new();
         internal HashSet<Type> didRegisterFunctionsInTypes = new();
         internal List<IDisposable>? ToDispose;
         private OwnedDuckDbDatabase database;

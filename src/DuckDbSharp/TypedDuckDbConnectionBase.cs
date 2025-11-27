@@ -17,7 +17,7 @@ namespace DuckDbSharp
     {
         protected OwnedDuckDbConnection conn;
 
-        internal protected List<EnumerableParameterSlot> EnumerableParameterSlots => database.EnumerableParameterSlots;
+        internal List<EnumerableParameterSlot?> EnumerableParameterSlots => database.EnumerableParameterSlots;
 
         protected DuckDbDatabase database;
         public OwnedDuckDbConnection Handle => conn;

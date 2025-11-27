@@ -31,7 +31,7 @@ namespace DuckDbSharp.Reflection
         }
 
         internal List<(Type Type, TypeKey TypeKey, TypePath Path)>? Paths;
-        internal Dictionary<TypeKey, List<string>> NeverNullFields { get; init; }
+        internal Dictionary<TypeKey, List<string>>? NeverNullFields { get; init; }
 
         public string GetNewTypeName(string hint, IEnumerable<string>? forbiddenNames, string? disambiguationSuffix)
         {
@@ -74,7 +74,7 @@ namespace DuckDbSharp.Reflection
 
         private Type CreateClrListTypeCore(DuckDbStructuralType lt, string? nameHint, TypePath path)
         {
-            return CreateClrType(lt.ElementType, nameHint, new TypePath { ListElement = true, Parent = path }).MakeArrayType();
+            return CreateClrType(lt.ElementType!, nameHint, new TypePath { ListElement = true, Parent = path }).MakeArrayType();
 
         }
         private Type CreateClrFixedArrayTypeCore(DuckDbStructuralType lt, string? nameHint, TypePath path)
@@ -104,9 +104,9 @@ namespace DuckDbSharp.Reflection
         }
 
 
-        private Type CreateClrStructureTypeCore(DuckDbStructuralType structural, string? nameHint, TypePath path)
+        private Type CreateClrStructureTypeCore(DuckDbStructuralType structural, string? nameHint, TypePath? path)
         {
-            var members = structural.StructureFields;
+            var members = structural.StructureFields!;
             var classBuilder = ModuleBuilder.DefineType(GetNewTypeName(nameHint ?? "AnonymousType", members.Select(x => x.Name), "Type"), TypeAttributes.Public);
 
             var typeKey = structural.GetTypeKey(nameHint);
@@ -125,10 +125,10 @@ namespace DuckDbSharp.Reflection
                 var fieldBuilder = classBuilder.DefineField(name, type, FieldAttributes.Public);
                 if (!type.IsValueType)
                 {
-                    if (couldBeNull) fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(MaybeNullAttribute).GetConstructor(Array.Empty<Type>()), Array.Empty<object>()));
-                    else fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(NotNullAttribute).GetConstructor(Array.Empty<Type>()), Array.Empty<object>()));
+                    if (couldBeNull) fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(MaybeNullAttribute).GetConstructor([])!, Array.Empty<object>()));
+                    else fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(NotNullAttribute).GetConstructor([])!, Array.Empty<object>()));
                 }
-                fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(DuckDbIncludeAttribute).GetConstructor(new[] { typeof(string) }), new object[] { name }));
+                fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(DuckDbIncludeAttribute).GetConstructor([typeof(string)])!, new object[] { name }));
             }
             var t = classBuilder.CreateType();
             Paths?.Add((t, typeKey, path));
@@ -203,7 +203,7 @@ namespace DuckDbSharp.Reflection
 
         private static DuckDbStructuralType ToStructuralType(string id, QueryTypeCache queryTypeCache)
         {
-            var s = queryTypeCache.TypesById[id];
+            var s = queryTypeCache.TypesById![id];
             var hash = StructuralTypeHash.Parse(id);
             return DuckDbStructuralType.CreateOrReuseStructuralType(hash, () =>
             {
@@ -213,7 +213,7 @@ namespace DuckDbSharp.Reflection
                 };
                 if (s.Kind == DUCKDB_TYPE.DUCKDB_TYPE_LIST) return new DuckDbStructuralType(hash, s.Kind)
                 {
-                    ElementType = ToStructuralType(s.ElementTypeId, queryTypeCache)
+                    ElementType = ToStructuralType(s.ElementTypeId!, queryTypeCache)
                 };
                 if (s.Kind == DUCKDB_TYPE.DUCKDB_TYPE_STRUCT) return new DuckDbStructuralType(hash, s.Kind)
                 {

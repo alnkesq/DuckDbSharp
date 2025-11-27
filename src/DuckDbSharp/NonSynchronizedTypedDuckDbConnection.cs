@@ -53,7 +53,7 @@ namespace DuckDbSharp
             return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
         }
 
-        public override object ExecuteScalar(string sql, params object[]? parameters)
+        public override object? ExecuteScalar(string sql, params object[]? parameters)
         {
             OnBeforeExecute(sql);
             return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);

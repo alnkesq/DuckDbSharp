@@ -5,6 +5,7 @@ using DuckDbSharp.Types;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -110,7 +111,7 @@ namespace DuckDbSharp
         private static long lastGeneratedToken;
         internal const int INITIAL_ARENA_SIZE = 8192;
 
-        internal unsafe static OwnedDuckDbResult ExecuteCore(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, CommandOptions commandOptions)
+        internal unsafe static OwnedDuckDbResult ExecuteCore(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions)
         {
             if (!(commandOptions is CommandOptions.UseStreaming or CommandOptions.NoStreaming))
                 throw new ArgumentException("Invalid CommandOptions.");
@@ -123,11 +124,12 @@ namespace DuckDbSharp
                 {
                     for (int i = 0; i < parameters.Length; i++)
                     {
-                        if (IsEnumerableParameter(parameters[i]))
+                        var p = parameters[i];
+                        if (IsEnumerableParameter(p))
                         {
-                            RegisterQueryParameterFunction(conn, token, i - simpleParameters.Count, enumerableParameterSlots, parameters[i]);
+                            RegisterQueryParameterFunction(conn, token, i - simpleParameters.Count, enumerableParameterSlots!, p);
                         }
-                        else simpleParameters.Add(parameters[i]);
+                        else simpleParameters.Add(p);
                     }
                 }
                 using var prepared = CreatePreparedStatement(conn, sql);
@@ -252,7 +254,7 @@ namespace DuckDbSharp
                 var slot = slots[i];
                 if (slot == null)
                 {
-                    slot = new EnumerableParameterSlot { ParameterId = parameterId };
+                    slot = new EnumerableParameterSlot { ParameterId = parameterId, Function = null! };
 
                     slot.Function = FunctionUtils.RegisterTableFunction(conn, funcname, (long token) =>
                     {
@@ -274,7 +276,7 @@ namespace DuckDbSharp
         }
 
 
-        private static bool IsEnumerableParameter(object? v)
+        private static bool IsEnumerableParameter([NotNullWhen(true)] object? v)
         {
             if (v == null) return false;
             var type = v.GetType();
@@ -284,7 +286,7 @@ namespace DuckDbSharp
         internal static IEnumerable Execute(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
         internal static IEnumerable<T> Execute<T>(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
 
-        public static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
             PrepareExecute<T>(conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, typeGenerationContext, commandOptions);
             var enumerable = EnumerateResultsCore<T>(result, structuralType, enumerableParameterSlots, ownerConnection);
@@ -315,12 +317,12 @@ namespace DuckDbSharp
             return structuralType;
         }
 
-        public static void ExecuteNonQuery(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots)
+        internal static void ExecuteNonQuery(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots)
         {
             using var _ = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming);
         }
 
-        public static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
             return Execute(conn, sql, parameters, expectSingleColumn: false, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
         }
@@ -338,7 +340,7 @@ namespace DuckDbSharp
                 }
             }
 
-            var enumerable = (IEnumerable)EnumerateResultsCoreMethod.MakeGenericMethod(resultType).Invoke(null, new object[] { result, resultStructuralType, enumerableParameterSlots, ownerConnection })!;
+            var enumerable = (IEnumerable)EnumerateResultsCoreMethod.MakeGenericMethod(resultType).Invoke(null, [result, resultStructuralType, enumerableParameterSlots, ownerConnection])!;
             result.Move();
             return enumerable;
         }
@@ -493,12 +495,12 @@ namespace DuckDbSharp
                 knownTypesList.Add(type);
                 foreach (var field in structureFields)
                 {
-                    AddTypesToPossiblyReuse(field.FieldType, knownTypes, knownTypesList);
+                    AddTypesToPossiblyReuse(field!.FieldType, knownTypes, knownTypesList);
                 }
                 return;
             }
 
-            if (primitiveType.IsEnum)
+            if (primitiveType!.IsEnum)
             {
                 knownTypesList.Add(type);
             }
@@ -519,7 +521,7 @@ namespace DuckDbSharp
             {
                 var settings = new JsonSerializerOptions();
                 settings.Converters.Add(new JsonStringEnumConverter());
-                options.QueryTypeCache = JsonSerializer.Deserialize<QueryTypeCache>(File.ReadAllText(options.QueryTypeCachePath), settings);
+                options.QueryTypeCache = JsonSerializer.Deserialize<QueryTypeCache>(File.ReadAllText(options.QueryTypeCachePath), settings)!;
             }
             else
                 options.QueryTypeCache = new();
@@ -543,7 +545,7 @@ namespace DuckDbSharp
             {
                 if (spec.Type != null)
                 {
-                    AddTypesToPossiblyReuse(ResolveType(spec.Type), typesToPossiblyReuseHashSet, typesToPossiblyReuseList);
+                    AddTypesToPossiblyReuse(ResolveType(spec.Type)!, typesToPossiblyReuseHashSet, typesToPossiblyReuseList);
                 }
             }
 
@@ -693,7 +695,7 @@ namespace DuckDbSharp
                         for (int i = 0; i < spec.Parameters.Length; i++)
                         {
                             if (i != 0) writer.Write(", ");
-                            writer.Write(spec.Parameters[i].Name);
+                            writer.Write(spec.Parameters[i].Name!);
                         }
                         writer.Write(" }");
                     }
@@ -791,7 +793,7 @@ namespace DuckDbSharp
             writer.WriteLine("        public static void RegisterAll()");
             writer.WriteLine("        {");
 
-            foreach (var rootType in serializers.GeneratedMethods.Where(x => x.Delegate is RootSerializer && x.IsRootForType != null).GroupBy(x => x.IsRootForType))
+            foreach (var rootType in serializers.GeneratedMethods.Where(x => x.Delegate is RootSerializer && x.IsRootForType != null).GroupBy(x => x.IsRootForType!))
             {
                 var serializer = rootType.Single();
                 writer.Write("            SerializationHelpers.RegisterSerializer(typeof(");
@@ -800,7 +802,7 @@ namespace DuckDbSharp
                 writer.Write(serializer.Name);
                 writer.WriteLine(");");
             }
-            foreach (var rootType in serializers.GeneratedMethods.Where(x => x.Delegate is RootDeserializer && x.IsRootForType != null).GroupBy(x => x.IsRootForType))
+            foreach (var rootType in serializers.GeneratedMethods.Where(x => x.Delegate is RootDeserializer && x.IsRootForType != null).GroupBy(x => x.IsRootForType!))
             {
                 foreach (var deserializer in rootType)
                 {
@@ -837,7 +839,7 @@ namespace DuckDbSharp
                 }
                 else
                 {
-                    writer.Write(gen.Parameters);
+                    writer.Write(gen.Parameters!);
                 }
                 writer.WriteLine(")");
                 writer.WriteLine("        {");
@@ -912,7 +914,7 @@ namespace DuckDbSharp
             return insertedItems;
         }
 
-        public static object? ExecuteScalar(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
+        internal static object? ExecuteScalar(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
         {
             var box = DuckDbUtils.Execute(conn, sql, parameters, expectSingleColumn: true, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Cast<object>().Single();
             var fields = box.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -961,7 +963,7 @@ namespace DuckDbSharp
             }
         }
 
-        private readonly static MethodInfo EnumerateResultsCoreMethod = typeof(DuckDbUtils).GetMethod(nameof(EnumerateResultsCore), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        private readonly static MethodInfo EnumerateResultsCoreMethod = typeof(DuckDbUtils).GetMethod(nameof(EnumerateResultsCore), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
 
         internal static string? ToStringUtf8(byte* ptr) => Marshal.PtrToStringUTF8((nint)ptr);
@@ -1016,7 +1018,7 @@ namespace DuckDbSharp
             var generator = new Lokad.ILPack.AssemblyGenerator();
             generator.GenerateAssembly(asm.Modules.Single().Assembly, path);
         }
-        internal readonly static string UseSnakeCaseFor = Environment.GetEnvironmentVariable("DUCKDBSHARP_USE_SNAKE_CASE");
+        internal readonly static string? UseSnakeCaseFor = Environment.GetEnvironmentVariable("DUCKDBSHARP_USE_SNAKE_CASE");
         internal readonly static bool UseSnakeCaseForFunctions = UseSnakeCaseFor is "all" or "1" or "functions";
         internal readonly static bool UseSnakeCaseForFields = UseSnakeCaseFor is "all" or "1" or "fields";
 
