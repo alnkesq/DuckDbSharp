@@ -14,7 +14,7 @@ namespace DuckDbSharp.Reflection
         public string? Namespace;
         public string? FullTypeNameForQueries;
         public string? FullTypeNameForAotSerializers;
-        public IReadOnlyList<SerializerSpecification> Specifications;
+        public IReadOnlyList<SerializerSpecification>? Specifications;
         public bool DetectNullability = true;
         public bool GenerateAotSerializers;
         public Type[]? TryReuseTypes;
@@ -22,7 +22,7 @@ namespace DuckDbSharp.Reflection
         public TypedDuckDbConnectionBase? Connection;
         public Assembly[]? AssembliesForQueryFileTypeResolution;
         public string? QueryTypeCachePath;
-        internal QueryTypeCache QueryTypeCache;
+        internal QueryTypeCache? QueryTypeCache;
         public QueryInfoCacheBehavior CacheBehavior = QueryInfoCacheBehavior.PreferCache;
         public bool LogToStderr = true;
 

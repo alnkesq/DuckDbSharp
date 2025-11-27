@@ -159,7 +159,7 @@ namespace DuckDbSharp.Functions
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
         private static void ExecuteScalarFunction(duckdb_function_info_ptr p, _duckdb_data_chunk* chunk, _duckdb_vector* vector)
         {
-            object[]? argsArray = null;
+            object?[]? argsArray = null;
             t_scalarFunctionRecursionLevel++;
             try
             {
@@ -167,19 +167,19 @@ namespace DuckDbSharp.Functions
                 var itemCount = checked((int)Methods.duckdb_data_chunk_get_size(chunk));
                 var colcount = checked((int)Methods.duckdb_data_chunk_get_column_count(chunk));
 
-                var argumentTuples = funcInfo.ScalarArgumentDeserializer((nint)chunk, new DuckDbDeserializationContext());
+                var argumentTuples = funcInfo.ScalarArgumentDeserializer!((nint)chunk, new DuckDbDeserializationContext());
                 var returnClrType = funcInfo.Method.ReturnType;
 
 
                 var returnSerializer = SerializerCreationContext.Global.CreateRootVectorSerializer(returnClrType);
                 var returnVector = Array.CreateInstance(returnClrType, itemCount);
 
-                argsArray = new object[colcount];
+                argsArray = new object?[colcount];
                 for (int rowIdx = 0; rowIdx < itemCount; rowIdx++)
                 {
                     for (int argIdx = 0; argIdx < colcount; argIdx++)
                     {
-                        argsArray[argIdx] = ((ITuple)argumentTuples.GetValue(rowIdx))[argIdx];
+                        argsArray[argIdx] = ((ITuple)argumentTuples.GetValue(rowIdx)!)[argIdx];
                     }
 
                     var result = funcInfo.Method.Invoke(funcInfo.DelegateTarget, argsArray);
@@ -192,7 +192,7 @@ namespace DuckDbSharp.Functions
                 // For now, let's use reusable thread-locals.
                 // HACK: we also key by destination vector pointer, otherwise if we call two string functions for the same row, we overwrite the data for the first invocation.
                 t_scalarFunctionArenaForRecursionLevel ??= new Dictionary<nint, NativeArenaSlim>[64];
-                ref Dictionary<nint, NativeArenaSlim> arenaDict = ref t_scalarFunctionArenaForRecursionLevel[t_scalarFunctionRecursionLevel - 1];
+                ref Dictionary<nint, NativeArenaSlim>? arenaDict = ref t_scalarFunctionArenaForRecursionLevel[t_scalarFunctionRecursionLevel - 1];
                 arenaDict ??= new();
                 if (!arenaDict.TryGetValue((nint)vector, out var arena))
                 {
@@ -321,7 +321,7 @@ namespace DuckDbSharp.Functions
             {
                 var funcinfo = BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_bind_get_extra_info(p));
                 var paramCount = (int)Methods.duckdb_bind_get_parameter_count(p);
-                var args = new object[funcinfo.Parameters.Length];
+                var args = new object?[funcinfo.Parameters.Length];
                 for (var paramId = 0; paramId < paramCount; paramId++)
                 {
                     var param = Methods.duckdb_bind_get_parameter(p, (ulong)paramId);
@@ -416,7 +416,7 @@ namespace DuckDbSharp.Functions
                     object ret;
                     if (bind.HasPrecomputedReturnValue)
                     {
-                        ret = bind.LateTransformer(bind.PrecomputedReturnValue!);
+                        ret = bind.LateTransformer!(bind.PrecomputedReturnValue!);
                     }
                     else
                     {
@@ -426,7 +426,7 @@ namespace DuckDbSharp.Functions
                     if (ret is Array)
                     {
                         if(ret.GetType() == typeof(object[]))
-                            initCtx.Enumerator = ((IEnumerable)(EnumerateObjectArrayAsGenericMethod.MakeGenericMethod(bind.FinalElementType).Invoke(null, new object[] { ret })!)).GetEnumerator();
+                            initCtx.Enumerator = ((IEnumerable)(EnumerateObjectArrayAsGenericMethod.MakeGenericMethod(bind.FinalElementType!).Invoke(null, new object[] { ret })!)).GetEnumerator();
                         else
                             initCtx.Enumerator = ((IEnumerable)(EnumerateArrayGenericMethod.MakeGenericMethod(ret.GetType().GetElementType()!).Invoke(null, new object[] { ret })!)).GetEnumerator();
                     }
@@ -437,7 +437,7 @@ namespace DuckDbSharp.Functions
                 {
                     lock (SerializerCreationContext.Global)
                     {
-                        initCtx.RootSerializer = SerializerCreationContext.Global.CreateRootSerializer(bind.FinalElementType);
+                        initCtx.RootSerializer = SerializerCreationContext.Global.CreateRootSerializer(bind.FinalElementType!);
                     }
                 }
 

@@ -85,7 +85,7 @@ namespace DuckDbSharp.Reflection
         private Type CreateClrEnumTypeCore(DuckDbStructuralType structural, string? nameHint)
         {
 
-            var members = structural.EnumMembers;
+            var members = structural.EnumMembers!;
             var underlyingType =
                 members.Count <= byte.MaxValue ? typeof(byte) :
                 members.Count <= ushort.MaxValue ? typeof(ushort) :
@@ -152,7 +152,7 @@ namespace DuckDbSharp.Reflection
         internal static DuckDbStructuralType? TryGetPossiblyCachedResultStructuralType(TypedDuckDbConnectionBase conn, string sql, QueryParameterInfo[]? parameters, CodeGenerationOptions options)
         {
             var parameterTypeNames = parameters?.Select(x => options.ResolveType(x.Type).FullName!).ToArray() ?? Array.Empty<string>();
-            var cached = options.QueryTypeCache.Queries.SingleOrDefault(x => x.Sql == sql && (x.ParameterTypes ?? Array.Empty<string>()).SequenceEqual(parameterTypeNames));
+            var cached = options.QueryTypeCache!.Queries.SingleOrDefault(x => x.Sql == sql && (x.ParameterTypes ?? Array.Empty<string>()).SequenceEqual(parameterTypeNames));
 
             DuckDbStructuralType structuralType;
 
@@ -180,12 +180,12 @@ namespace DuckDbSharp.Reflection
                     }
 
                     WriteWarning($"Could not get result type for {sql}: {ex}. Using previously cached type.");
-                    structuralType = ToStructuralType(cached.JsonStructuralTypeReference, options.QueryTypeCache);
+                    structuralType = ToStructuralType(cached.JsonStructuralTypeReference!, options.QueryTypeCache);
                 }
             }
             if (cached == null)
             {
-                cached = new();
+                cached = new() { JsonStructuralTypeReference = null!, Sql = null! }; // fields set a few lines from here...
                 options.QueryTypeCache.Queries.Add(cached);
             }
             cached.ParameterTypes = parameterTypeNames is { Length: > 0 } ? parameterTypeNames : null;
@@ -227,7 +227,7 @@ namespace DuckDbSharp.Reflection
         private static string ToJsonStructuralType(DuckDbStructuralType s, QueryTypeCache typeCache)
         {
             var id = s.Hash.ToString();
-            if (!typeCache.TypesById.TryGetValue(id, out var jsonType))
+            if (!typeCache.TypesById!.TryGetValue(id, out var jsonType))
             {
                 jsonType = new JsonStructuralType
                 {

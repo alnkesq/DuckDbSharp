@@ -4,11 +4,11 @@ namespace DuckDbSharp.Functions
 {
     class BindContext
     {
-        public FunctionInfo Function;
-        public object[] Args;
+        public required FunctionInfo Function;
+        public required object?[] Args;
         public object? PrecomputedReturnValue;
         public bool HasPrecomputedReturnValue;
-        public Func<object, object> LateTransformer;
+        public Func<object, object>? LateTransformer;
         public Type? FinalElementType;
     }
 

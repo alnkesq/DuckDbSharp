@@ -57,23 +57,23 @@ namespace DuckDbSharp
             return ExecuteScalar<long>($"delete from {destinationTable} where {keyFieldName} in (select k.Value from table_parameter_1() k)", new object[] { keys });
         }
 
-        public IEnumerable<T> BatchLookup<T, TKey>(string selectAndFromOrTableName, string keyFieldName, IEnumerable<TKey> keys, string? additionalFilter = null, params object[]? parameters)
+        public IEnumerable<T> BatchLookup<T, TKey>(string selectAndFromOrTableName, string keyFieldName, IEnumerable<TKey> keys, string? additionalFilter = null, params object?[] parameters)
         {
             if (!selectAndFromOrTableName.Contains(' ')) selectAndFromOrTableName = "from " + selectAndFromOrTableName;
             return Execute<T>($"{selectAndFromOrTableName} where {(additionalFilter != null ? ("(" + additionalFilter + ") and ") : null)} {keyFieldName} in (select k.Value from table_parameter_1() k)", [keys, ..parameters]);
         }
 
         public abstract long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items);
-        public abstract IEnumerable<T> ExecuteWithOptions<T>(CommandOptions options, string sql, params object[]? parameters);
-        public abstract IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object[]? parameters);
+        public abstract IEnumerable<T> ExecuteWithOptions<T>(CommandOptions options, string sql, params object?[]? parameters);
+        public abstract IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object?[]? parameters);
 
-        public IEnumerable<T> Execute<T>(string sql, params object[]? parameters) => ExecuteWithOptions<T>(default, sql, parameters);
-        public IEnumerable Execute(string sql, params object[]? parameters) => ExecuteWithOptions(default, sql, parameters);
+        public IEnumerable<T> Execute<T>(string sql, params object?[]? parameters) => ExecuteWithOptions<T>(default, sql, parameters);
+        public IEnumerable Execute(string sql, params object?[]? parameters) => ExecuteWithOptions(default, sql, parameters);
 
-        public IEnumerable<T> ExecuteStreamed<T>(string sql, params object[]? parameters) => ExecuteWithOptions<T>(CommandOptions.UseStreaming, sql, parameters);
-        public IEnumerable<T> ExecuteNonStreamed<T>(string sql, params object[]? parameters) => ExecuteWithOptions<T>(CommandOptions.NoStreaming, sql, parameters);
-        public IEnumerable ExecuteStreamed(string sql, params object[]? parameters) => ExecuteWithOptions(CommandOptions.UseStreaming, sql, parameters);
-        public IEnumerable ExecuteNonStreamed(string sql, params object[]? parameters) => ExecuteWithOptions(CommandOptions.NoStreaming, sql, parameters);
+        public IEnumerable<T> ExecuteStreamed<T>(string sql, params object?[]? parameters) => ExecuteWithOptions<T>(CommandOptions.UseStreaming, sql, parameters);
+        public IEnumerable<T> ExecuteNonStreamed<T>(string sql, params object?[]? parameters) => ExecuteWithOptions<T>(CommandOptions.NoStreaming, sql, parameters);
+        public IEnumerable ExecuteStreamed(string sql, params object?[]? parameters) => ExecuteWithOptions(CommandOptions.UseStreaming, sql, parameters);
+        public IEnumerable ExecuteNonStreamed(string sql, params object?[]? parameters) => ExecuteWithOptions(CommandOptions.NoStreaming, sql, parameters);
 
         protected void InitOptions(ref CommandOptions options)
         {
@@ -81,9 +81,9 @@ namespace DuckDbSharp
                 options = DefaultCommandOptions;
         }
 
-        public abstract T ExecuteScalar<T>(string sql, params object[]? parameters);
-        public abstract object ExecuteScalar(string sql, params object[]? parameters);
-        public abstract void ExecuteNonQuery(string sql, params object[]? parameters);
+        public abstract T ExecuteScalar<T>(string sql, params object?[]? parameters);
+        public abstract object? ExecuteScalar(string sql, params object?[]? parameters);
+        public abstract void ExecuteNonQuery(string sql, params object?[]? parameters);
 
         protected unsafe void CheckDisposed()
         {
@@ -226,7 +226,7 @@ namespace DuckDbSharp
             }
             if (primaryKey == null)
             {
-                primaryKey = structureFields.Where(x => x!.ClrField.GetCustomAttribute<KeyAttribute>() != null).Select(x => x!.DuckDbFieldName).ToArray();
+                primaryKey = structureFields.Where(x => x!.ClrField!.GetCustomAttribute<KeyAttribute>() != null).Select(x => x!.DuckDbFieldName).ToArray();
                 if (primaryKey.Length == 0) primaryKey = null;
             }
             if (primaryKey != null)

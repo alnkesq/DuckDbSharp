@@ -5,7 +5,7 @@ namespace DuckDbSharp.Reflection
 {
     internal record class FieldInfo2(string Name, Type FieldType, MemberInfo Member)
     {
-        internal DuckDbStructuralType FieldStructuralType;
+        internal DuckDbStructuralType? FieldStructuralType;
     }
 
 }

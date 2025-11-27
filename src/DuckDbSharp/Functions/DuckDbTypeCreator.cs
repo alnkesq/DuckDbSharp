@@ -69,9 +69,9 @@ namespace DuckDbSharp.Functions
                 if (primitiveType.IsEnum)
                 {
                     var enumInfo = primitiveType.EnumInfo;
-                    fixed (byte** a = BindingUtils.ToPointerArray<ScopedString, byte>(enumInfo!.Members, x => x.Pointer))
+                    fixed (byte** a = BindingUtils.ToPointerArray<ScopedString, byte>(enumInfo!.Members!, x => x.Pointer))
                     {
-                        return Methods.duckdb_create_enum_type(a, (ulong)enumInfo.Members.Length);
+                        return Methods.duckdb_create_enum_type(a, (ulong)enumInfo.Members!.Length);
                     }
                 }
                 else
@@ -83,7 +83,7 @@ namespace DuckDbSharp.Functions
 
             if (arrayFixedLength != null)
             {
-                return Methods.duckdb_create_array_type(CreateLogicalType(sublistElementType, typesBeingCreated), (ulong)arrayFixedLength.Value);
+                return Methods.duckdb_create_array_type(CreateLogicalType(sublistElementType!, typesBeingCreated), (ulong)arrayFixedLength.Value);
             }
 
             if (sublistElementType != null)
@@ -95,7 +95,7 @@ namespace DuckDbSharp.Functions
             {/*
                 try
                 {*/
-                return (Field: x, DuckFieldType: (nint)CreateLogicalType(x.FieldType, typesBeingCreated));
+                return (Field: x!, DuckFieldType: (nint)CreateLogicalType(x!.FieldType, typesBeingCreated));
                 /*}
                 catch (RecursiveTypeException)
                 {
@@ -147,7 +147,7 @@ namespace DuckDbSharp.Functions
                 if (isTuple && structuralType is not null)
                 {
                     var argCount = t.GetGenericTypeDefinition().GetGenericArguments().Length;
-                    if (structuralType.StructureFields.Count > 7)
+                    if (structuralType.StructureFields!.Count > 7)
                         throw new ArgumentException($"Tuples with more than 7 items are not supported. Use a named type instead."); // ValueTuple<..., TRest>
                     if (argCount != structuralType.StructureFields.Count)
                         throw new ArgumentException($"Attempting to select {structuralType.StructureFields.Count} columns or fields onto a tuple type with {argCount} fields.");
@@ -177,9 +177,9 @@ namespace DuckDbSharp.Functions
                         }
                         return name;
                     }); // TODO match proper case
-                    return structuralType.StructureFields.Select((x, i) =>
+                    return structuralType.StructureFields!.Select((x, i) =>
                     {
-                        FieldInfo2 fi;
+                        FieldInfo2? fi;
                         if (isTuple) fi = allFields[i];
                         else if (!byName.TryGetValue(x.Name, out fi)) return null;
 
@@ -221,7 +221,7 @@ namespace DuckDbSharp.Functions
                 processed[shift] = true;
                 var flagAsUnderlyingType = Convert.ChangeType(item, clrUnderlyingType);
                 result.Add(new StructureFieldInfo(
-                    DuckDbUtils.ToDuckCaseField(item.ToString()),
+                    DuckDbUtils.ToDuckCaseField(item.ToString()!),
                     typeof(bool),
 DuckDbStructuralType.BooleanStructuralType,
                     // Flags x => bool
@@ -356,7 +356,7 @@ DuckDbStructuralType.BooleanStructuralType,
                     ThrowIncompatibleTypesException(a, b);
                 if (a.IsEnum)
                 {
-                    var structFields = b.StructureFields;
+                    var structFields = b.StructureFields!;
                     var enumFlags = DuckDbTypeCreator.GetFlagsEnumFields(a);
                     if (structFields.Count != enumFlags.Length) throw new Exception($"Different number of enum flags between DuckDB structure and [Flags] enum: {a}, {b}");
                     if (structFields.Any(x => x.FieldType.Kind != DUCKDB_TYPE.DUCKDB_TYPE_BOOLEAN)) throw new Exception($"DuckDB structure corresponding to a [Flags] enum {a} should only have boolean fields: {b}");
@@ -378,7 +378,7 @@ DuckDbStructuralType.BooleanStructuralType,
             var p = x.Member as PropertyInfo;
 
 
-            return new StructureFieldInfo(DuckDbUtils.ToDuckCaseField(x.Name), x.FieldType, x.FieldStructuralType, (obj, cilctx) =>
+            return new StructureFieldInfo(DuckDbUtils.ToDuckCaseField(x.Name), x.FieldType, x.FieldStructuralType!, (obj, cilctx) =>
             {
 
                 if (f != null)

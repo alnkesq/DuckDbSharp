@@ -12,7 +12,7 @@ namespace DuckDbSharp.Reflection
         public CreateGetExpressionDelegate CreateGetExpression { get; private init; }
         public CreateSetExpressionDelegate CreateSetExpression { get; private init; }
         public GetterKey CacheKey { get; private init; }
-        public MemberInfo ClrField { get; private init; }
+        public MemberInfo? ClrField { get; private init; }
         public StructureFieldInfo(string duckDbFieldName, Type fieldType, DuckDbStructuralType fieldStructuralType, CreateGetExpressionDelegate createGetExpression, CreateSetExpressionDelegate createSetExpression, GetterKey cacheKey, MemberInfo? clrField)
         {
             this.DuckDbFieldName = duckDbFieldName;

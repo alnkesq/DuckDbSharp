@@ -16,8 +16,8 @@ namespace DuckDbSharp.Functions
         internal duckdb_table_function_ptr PointerTableFn;
         internal duckdb_scalar_function_ptr PointerScalarFn;
 
-        internal DuckDbStructuralType ScalarArgumentChunkType;
-        public RootDeserializer ScalarArgumentDeserializer;
+        internal DuckDbStructuralType? ScalarArgumentChunkType;
+        public RootDeserializer? ScalarArgumentDeserializer;
         public object? DelegateTarget { get; internal set; }
 
         public unsafe void Dispose()

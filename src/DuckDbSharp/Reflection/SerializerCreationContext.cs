@@ -223,7 +223,7 @@ namespace DuckDbSharp.Reflection
                 }
                 else if (sublistElementType != null)
                 {
-                    factory = p => CreateListFieldDeserializer(p, getter, sublistElementType, sublistElementStructuralType, arrayFixedLength);
+                    factory = p => CreateListFieldDeserializer(p, getter, sublistElementType, sublistElementStructuralType!, arrayFixedLength);
                 }
                 else
                 {
@@ -292,7 +292,7 @@ namespace DuckDbSharp.Reflection
             var body = new List<Expression>();
             body.Add(Expression.Assign(totalCount, Expression.Constant(0)));
             if (!isFixedArray)
-                body.Add(Expression.Assign(offsetsAndLengths, Expression.Call(null, GetVectorDataMethod.MakeGenericMethod(typeof(OffsetAndCount)), p.VectorPtr, p.ObjectsLength)));
+                body.Add(Expression.Assign(offsetsAndLengths!, Expression.Call(null, GetVectorDataMethod.MakeGenericMethod(typeof(OffsetAndCount)), p.VectorPtr, p.ObjectsLength)));
 
             var variables = new[]
             {
@@ -324,7 +324,7 @@ namespace DuckDbSharp.Reflection
             {
                 var offsetsLoopBody = SerializerCreationContext.MaybeIf(hasInputSublist, Expression.Block(
                         //Expression.Call(null, AssignSpanItemMethod.MakeGenericMethod(typeof(OffsetAndCount)), offsetsAndLengths, rowId, Expression.New(OffsetAndCountCtor, totalCount, sublistLength)),
-                        Expression.AddAssignChecked(totalCount, Expression.Constant(arrayFixedLength.Value))
+                        Expression.AddAssignChecked(totalCount, Expression.Constant(arrayFixedLength!.Value))
                     ),
                     CreateSetNotPresent(validityVector, rowId));
 
@@ -350,7 +350,7 @@ namespace DuckDbSharp.Reflection
             {
 
                 loopBodyInner = Expression.Block(
-                    Expression.Call(CopyFromFixedLengthArrayMethod.MakeGenericMethod(sublistType, sublistElementType), inputSublistExpr, subobjects, innerAbsIdx, Expression.Constant(arrayFixedLength.Value)),
+                    Expression.Call(CopyFromFixedLengthArrayMethod.MakeGenericMethod(sublistType, sublistElementType), inputSublistExpr, subobjects, innerAbsIdx, Expression.Constant(arrayFixedLength!.Value)),
                     Expression.AddAssignChecked(innerAbsIdx, Expression.Constant(arrayFixedLength.Value))
                 ); 
             }
@@ -438,7 +438,7 @@ namespace DuckDbSharp.Reflection
             {
                 body.Add(Expression.Assign(offsetsAndLengths!, Expression.Call(null, GetVectorDataMethod.MakeGenericMethod(typeof(OffsetAndCount)), p.VectorPtr, p.ObjectsLength)));
             }
-            body.Add(Expression.Assign(totalLength, isFixedArray ? Expression.Call(null, GetArraysTotalItemsMethod, p.ObjectsLength, listValidityVector, Expression.Constant((ulong)fixedArrayLength!.Value)) : Expression.Call(null, GetTotalItemsMethod, offsetsAndLengths, listValidityVector)));
+            body.Add(Expression.Assign(totalLength, isFixedArray ? Expression.Call(null, GetArraysTotalItemsMethod, p.ObjectsLength, listValidityVector, Expression.Constant((ulong)fixedArrayLength!.Value)) : Expression.Call(null, GetTotalItemsMethod, offsetsAndLengths!, listValidityVector)));
             body.Add(Expression.Assign(allSubItems, CreateRentArrayExpression(sublistElementType, totalLength, zeroed: true)));
             var needsInitialization = NeedsInitialization(sublistElementType);
             if (needsInitialization)
@@ -610,7 +610,7 @@ namespace DuckDbSharp.Reflection
 
             if (hasValue != null)
             {
-                variables.Add(validityVector);
+                variables.Add(validityVector!);
             }
 
             var deserializationBlock = MaybeIf(hasValue, assign);
@@ -943,7 +943,7 @@ namespace DuckDbSharp.Reflection
             }
             else
             {
-                createObj = Expression.Convert(Expression.Default(Nullable.GetUnderlyingType(elementType)), elementType);
+                createObj = Expression.Convert(Expression.Default(Nullable.GetUnderlyingType(elementType)!), elementType);
             }
             return CreateForLoop(i, rowCount, MaybeIf(isPresent, Expression.Assign(Expression.ArrayAccess(array, i), createObj)));
         }
@@ -1079,7 +1079,7 @@ namespace DuckDbSharp.Reflection
 
             if (Nullable.GetUnderlyingType(objType) is { } nonNullableObjType)
             {
-                var deleg = CreateIlMethod(CreateSpeakableTypeName(destObj.Type, null) + "_SetFieldInsideNullable_" + member.Name, typeof(void), new[] { destArr.Type, typeof(int), val.Type }, ilgen =>
+                var deleg = CreateIlMethod(CreateSpeakableTypeName(destObj.Type, null) + "_SetFieldInsideNullable_" + member.Name, typeof(void), [destArr.Type, typeof(int), val.Type], ilgen =>
                 {
                     ilgen.Emit(OpCodes.Ldarg_0);
                     ilgen.Emit(OpCodes.Ldarg_1);
@@ -1111,7 +1111,7 @@ namespace DuckDbSharp.Reflection
 
             if (f != null)
             {
-                var deleg = CreateIlMethod(CreateSpeakableTypeName(destObj.Type, null) + "_Set_" + member.Name, typeof(void), new[] { destArr.Type, typeof(int), val.Type }, ilgen =>
+                var deleg = CreateIlMethod(CreateSpeakableTypeName(destObj.Type, null) + "_Set_" + member.Name, typeof(void), [destArr.Type, typeof(int), val.Type], ilgen =>
                 {
                     ilgen.Emit(OpCodes.Ldarg_0);
                     ilgen.Emit(OpCodes.Ldarg_1);
@@ -1131,7 +1131,7 @@ namespace DuckDbSharp.Reflection
 
             if (IsGeneratingCSharpCode && p!.SetMethod != null)
             {
-                var deleg = CreateIlMethod(CreateSpeakableTypeName(destObj.Type, null) + "_SetPropertyViaReflection_" + member.Name, typeof(void), new[] { destArr.Type, typeof(int), val.Type }, ilgen =>
+                var deleg = CreateIlMethod(CreateSpeakableTypeName(destObj.Type, null) + "_SetPropertyViaReflection_" + member.Name, typeof(void), [destArr.Type, typeof(int), val.Type], ilgen =>
                 {
                     ilgen.ThrowException(typeof(NotSupportedException));
                 }, () => "throw new System.NotImplementedException();", SetFieldParameterNames);
@@ -1162,7 +1162,7 @@ namespace DuckDbSharp.Reflection
         private readonly static MethodInfo GetReferenceToNullableWrappedValueMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetReferenceToNullableWrappedValue), BindingFlags.Public | BindingFlags.Static)!;
 
         private readonly string[] SetFieldParameterNames = new[] { "arr", "idx", "val" };
-        private Delegate CreateIlMethod(string name, Type returnType, Type[]? parameterTypes, Action<ILGenerator> emitter, Func<string> csharpVersion, string[] csharpParameterNames)
+        private Delegate CreateIlMethod(string name, Type returnType, Type[] parameterTypes, Action<ILGenerator> emitter, Func<string> csharpVersion, string[] csharpParameterNames)
         {
             /*
             if (moduleBuilder == null)

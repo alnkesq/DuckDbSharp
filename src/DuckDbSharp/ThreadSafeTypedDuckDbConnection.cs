@@ -100,7 +100,7 @@ namespace DuckDbSharp
                 enumerator = enumerable.GetEnumerator();
             }
             var threadSafeEnumerable = ProduceEnumerable(enumerator);
-            EnumerableCast ??= typeof(Enumerable).GetMethod("Cast", BindingFlags.Static | BindingFlags.Public);
+            EnumerableCast ??= typeof(Enumerable).GetMethod("Cast", BindingFlags.Static | BindingFlags.Public)!;
             return (IEnumerable)EnumerableCast.MakeGenericMethod([elementType]).Invoke(null, [threadSafeEnumerable])!;
         }
 
@@ -134,7 +134,7 @@ namespace DuckDbSharp
             }
         }
 
-        public override T ExecuteScalar<T>(string sql, params object[]? parameters)
+        public override T ExecuteScalar<T>(string sql, params object?[]? parameters)
         {
             lock (this)
             {
@@ -143,7 +143,7 @@ namespace DuckDbSharp
             }
         }
 
-        public override object? ExecuteScalar(string sql, params object[]? parameters)
+        public override object? ExecuteScalar(string sql, params object?[]? parameters)
         {
             lock (this)
             {
@@ -151,7 +151,7 @@ namespace DuckDbSharp
                 return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
             }
         }
-        public override void ExecuteNonQuery(string sql, params object[]? parameters)
+        public override void ExecuteNonQuery(string sql, params object?[]? parameters)
         {
             lock (this)
             {

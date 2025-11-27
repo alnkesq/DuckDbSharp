@@ -12,7 +12,7 @@ namespace DuckDbSharp.Reflection
 
     internal class JsonStructuralType
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
         public DUCKDB_TYPE Kind { get; set; }
         public List<string>? EnumMembers { get; set; }
         public string? ElementTypeId { get; set; }
@@ -23,9 +23,9 @@ namespace DuckDbSharp.Reflection
 
     internal class QueryInfoCache
     {
-        public string Sql { get; set; }
+        public required string Sql { get; set; }
         public string[]? ParameterTypes { get; set; }
-        public string JsonStructuralTypeReference { get; set; }
+        public required string JsonStructuralTypeReference { get; set; }
     }
 }
 

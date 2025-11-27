@@ -21,7 +21,7 @@ namespace DuckDbSharp
         }
         public static NonSynchronizedTypedDuckDbConnection CreateInMemory() => Create((string?)null);
 
-        public override void ExecuteNonQuery(string sql, params object[]? parameters)
+        public override void ExecuteNonQuery(string sql, params object?[]? parameters)
         {
             OnBeforeExecute(sql);
             DuckDbUtils.ExecuteNonQuery(conn, sql, parameters, EnumerableParameterSlots);
@@ -33,14 +33,14 @@ namespace DuckDbSharp
             return DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
         }
 
-        public override IEnumerable<T> ExecuteWithOptions<T>(CommandOptions options, string sql, params object[]? parameters)
+        public override IEnumerable<T> ExecuteWithOptions<T>(CommandOptions options, string sql, params object?[]? parameters)
         {
             InitOptions(ref options);
             OnBeforeExecute(sql);
             return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this);
         }
 
-        public override IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object[]? parameters)
+        public override IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object?[]? parameters)
         {
             InitOptions(ref options);
             OnBeforeExecute(sql);

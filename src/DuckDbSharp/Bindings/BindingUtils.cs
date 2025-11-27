@@ -61,7 +61,7 @@ namespace DuckDbSharp.Bindings
         internal static T Move<T>(ref T ownedPtr)
         {
             var copy = ownedPtr;
-            ownedPtr = default;
+            ownedPtr = default!;
             return copy;
         }
 

@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
 namespace DuckDbSharp
 {
 
-    internal abstract class TypeSniffedEnumerable : IEnumerable
+    internal abstract class TypeSniffedEnumerable : IEnumerable, IDisposable
     {
-        internal object first;
-        internal IEnumerator rest;
-        internal IEnumerable original;
-        internal Type elementType;
-        public static IEnumerable Create(IEnumerable original, out Type elementType)
+        internal required object first;
+        internal IEnumerator? rest;
+        internal required IEnumerable original;
+        internal required Type elementType;
+
+        public static IEnumerable Create(IEnumerable original, [NotNull] out Type? elementType)
         {
             if (original is TypeSniffedEnumerable tse)
             {
@@ -68,6 +70,11 @@ namespace DuckDbSharp
         public static Type? GetTypeDefinition(Type? type)
         {
             return type != null && type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+        }
+
+        public void Dispose()
+        {
+            (rest as IDisposable)?.Dispose();
         }
     }
 
