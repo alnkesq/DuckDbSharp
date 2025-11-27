@@ -48,8 +48,8 @@ namespace DuckDbSharp.Reflection
             }
             if (isNullishMethod != null)
             {
-                if (IsNullishMethod.ReturnType != typeof(bool)) throw new ArgumentException("If specified, nullishness method should return bool.");
-                if (IsNullishMethod.GetParameters()[0].ParameterType != ClrType) throw new ArgumentException($"If specified, nullishness method should take a single parameter of type {clrType}.");
+                if (isNullishMethod.ReturnType != typeof(bool)) throw new ArgumentException("If specified, nullishness method should return bool.");
+                if (isNullishMethod.GetParameters()[0].ParameterType != ClrType) throw new ArgumentException($"If specified, nullishness method should take a single parameter of type {clrType}.");
             }
             NeedsArena = serializeParams.Length == 2;
 
@@ -59,8 +59,8 @@ namespace DuckDbSharp.Reflection
             : this(
                   clrType,
                   duckDbType,
-                  typeof(SerializationHelpers).GetMethod(serializeMethodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic),
-                  typeof(SerializationHelpers).GetMethod(deserializeMethodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic),
+                  typeof(SerializationHelpers).GetMethod(serializeMethodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!,
+                  typeof(SerializationHelpers).GetMethod(deserializeMethodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!,
                   isNullishMethodName != null ? typeof(SerializationHelpers).GetMethod(isNullishMethodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic) : null
                   )
         {
@@ -116,7 +116,7 @@ namespace DuckDbSharp.Reflection
             foreach (var clrValue in clrValues)
             {
                 var value = Convert.ToUInt64(clrValue);
-                members[(int)value] = clrValue.ToString();
+                members[(int)value] = clrValue.ToString()!;
             }
             for (int i = 0; i < members.Length; i++)
             {
@@ -125,7 +125,7 @@ namespace DuckDbSharp.Reflection
 
 
             var membersUtf8 = members.Select(x => (ScopedString)x).ToArray();
-            return new EnumSerializationInfo((ScopedString)DuckDbUtils.ToDuckCaseField(clrType.Name), membersUtf8, serializer, deserializer, maxClr);
+            return new EnumSerializationInfo((ScopedString)DuckDbUtils.ToDuckCaseField(clrType.Name), membersUtf8, serializer, deserializer, maxClr!);
         }
         internal const string AnonymousEnumMemberPrefix = "Anonymous_";
 

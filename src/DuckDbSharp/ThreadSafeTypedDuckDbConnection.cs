@@ -143,7 +143,7 @@ namespace DuckDbSharp
             }
         }
 
-        public override object ExecuteScalar(string sql, params object[]? parameters)
+        public override object? ExecuteScalar(string sql, params object[]? parameters)
         {
             lock (this)
             {

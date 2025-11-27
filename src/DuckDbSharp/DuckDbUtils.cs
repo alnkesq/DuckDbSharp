@@ -283,8 +283,8 @@ namespace DuckDbSharp
             return TypeSniffedEnumerable.TryGetEnumerableElementType(type) != null;
         }
 
-        internal static IEnumerable Execute(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
-        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object[] parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
+        internal static IEnumerable Execute(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
+        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
 
         internal static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
@@ -312,22 +312,22 @@ namespace DuckDbSharp
 
         internal static DuckDbStructuralType GetSingleWrappedColumnType(DuckDbStructuralType structuralType)
         {
-            if (structuralType.StructureFields.Count > 1) throw new ArgumentException($"{structuralType.StructureFields.Count} columns were selected, but only one output type was specified.");
+            if (structuralType.StructureFields!.Count > 1) throw new ArgumentException($"{structuralType.StructureFields.Count} columns were selected, but only one output type was specified.");
             structuralType = structuralType.StructureFields.Single().FieldType;
             return structuralType;
         }
 
-        internal static void ExecuteNonQuery(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots)
+        internal static void ExecuteNonQuery(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
         {
             using var _ = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming);
         }
 
-        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
             return Execute(conn, sql, parameters, expectSingleColumn: false, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
         }
 
-        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object[]? parameters, bool expectSingleColumn, List<EnumerableParameterSlot>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object?[]? parameters, bool expectSingleColumn, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
             using var result = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions);
 
@@ -527,6 +527,7 @@ namespace DuckDbSharp
                 options.QueryTypeCache = new();
             options.QueryTypeCache.TypesById = options.QueryTypeCache.Types.ToDictionary(x => x.Id);
 
+            [return: NotNullIfNotNull(nameof(type))]
             Type? ResolveType(PossiblyUnresolvedType? type) => options.ResolveType(type);
 
             if (!options.DestinationPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)) throw new ArgumentException($"{nameof(options.DestinationPath)} must end in '.cs'.");
@@ -677,7 +678,7 @@ namespace DuckDbSharp
                         foreach (var p in spec.Parameters)
                         {
                             writer.Write(", ");
-                            writer.WriteTypeReference(ResolveType(p.Type)!, false);
+                            writer.WriteTypeReference(ResolveType(p.Type), false);
                             writer.Write(" ");
                             writer.Write(p.Name!);
                         }
@@ -852,7 +853,7 @@ namespace DuckDbSharp
                 {
                     if (gen.Body is not BlockExpression { Expressions: { Count: 0 } })
                     {
-                        writer.Write(gen.Body, x => delegateToMethod[x].Name, "            ");
+                        writer.Write(gen.Body!, x => delegateToMethod[x].Name, "            ");
                     }
                 }
 
@@ -914,14 +915,14 @@ namespace DuckDbSharp
             return insertedItems;
         }
 
-        internal static object? ExecuteScalar(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
+        internal static object? ExecuteScalar(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
         {
             var box = DuckDbUtils.Execute(conn, sql, parameters, expectSingleColumn: true, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Cast<object>().Single();
             var fields = box.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
             if (fields.Length != 1) throw new Exception($"A scalar query returned {fields.Length} columns.");
             return fields[0].GetValue(box);
         }
-        internal static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
+        internal static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
         {
             return Execute<T>(conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Single();
         }
@@ -1073,6 +1074,11 @@ namespace DuckDbSharp
             using var conn = ThreadSafeTypedDuckDbConnection.CreateInMemory();
             conn.ExecuteNonQuery($"COPY (select * from table_parameter_1() {(orderBy != null ? "ORDER BY " + orderBy : null)}) TO '{destinationFile}' (FORMAT PARQUET, PARQUET_VERSION V2, COMPRESSION ZSTD, USE_TMP_FILE 1)", rows);
             
+        }
+
+        internal static IEnumerable<T> WhereNonNull<T>(this IEnumerable<T?> source) where T : class
+        {
+            return source.Where(x => x != null)!;
         }
     }
 }

@@ -303,12 +303,12 @@ namespace DuckDbSharp
         [DebuggerStepThrough]
         public static bool IsDefaultStructValue<T>(T value) where T : struct => value.Equals(default(T));
 
-        public static void RegisterSerializer(Type type, RootSerializer? serializer)
+        public static void RegisterSerializer(Type type, RootSerializer serializer)
         {
             SerializerCreationContext.RootSerializerCache.TryAdd(type, serializer);
         }
 
-        public static void RegisterDeserializer(Type type, RootDeserializer deserializer, string? deserializerTypeHash)
+        public static void RegisterDeserializer(Type type, RootDeserializer deserializer, string deserializerTypeHash)
         {
             var hash = StructuralTypeHash.Parse(deserializerTypeHash);
             SerializerCreationContext.RootDeserializerCache.TryAdd((type, hash), deserializer);
@@ -318,7 +318,7 @@ namespace DuckDbSharp
 
         public static DuckString SerializeEnumAsString<T>(T value, NativeArenaSlim arena)
         {
-            return SerializeString(value.ToString(), arena);
+            return SerializeString(value!.ToString()!, arena);
         }
 
         [SkipLocalsInit]

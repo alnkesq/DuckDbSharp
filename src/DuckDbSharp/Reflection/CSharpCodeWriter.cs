@@ -27,7 +27,7 @@ namespace DuckDbSharp.Reflection
 
         public void Write(Type type)
         {
-            WriteNamespace(type.Namespace);
+            WriteNamespace(type.Namespace!);
             if (DuckDbUtils.IsEnum(type))
             {
                 WriteEnum(type);
@@ -78,13 +78,13 @@ namespace DuckDbSharp.Reflection
         {
             WriteLine("    [DuckDbGeneratedType]");
             Write($"    public enum {type.Name} : ");
-            WriteTypeReference(type.GetField("value__", BindingFlags.Instance | BindingFlags.Public).FieldType);
+            WriteTypeReference(type.GetField("value__", BindingFlags.Instance | BindingFlags.Public)!.FieldType);
             WriteLine();
             WriteLine("    {");
             foreach (var member in Enum.GetValues(type))
             {
                 Write("        ");
-                Write(member.ToString());
+                Write(member.ToString()!);
                 Write(" = ");
                 Write(Convert.ToUInt64(member).ToString());
                 WriteLine(",");
@@ -116,12 +116,12 @@ namespace DuckDbSharp.Reflection
             }
             if (type.IsArray)
             {
-                WriteTypeReference(type.GetElementType(), false);
+                WriteTypeReference(type.GetElementType()!, false);
                 Write("[]");
                 if (nullableReference) Write("?");
                 return;
             }
-            Write(type.FullName.Replace("+", "."));
+            Write(type.FullName!.Replace("+", "."));
             if (!type.IsValueType && nullableReference)
                 Write("?");
         }
@@ -209,7 +209,7 @@ namespace DuckDbSharp.Reflection
                 any = true;
                 WriteTypeReference(item.Type, false);
                 Write(" ");
-                Write(item.Name);
+                Write(item.Name!);
             }
         }
 

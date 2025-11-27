@@ -6,7 +6,7 @@ namespace DuckDbSharp.Bindings
     {
         public static implicit operator _duckdb_connection*(OwnedDuckDbConnection ptr) => ptr.Pointer;
         public _duckdb_connection* Pointer;
-        private Action _onDispose;
+        private Action? _onDispose;
         public OwnedDuckDbConnection(_duckdb_connection* ptr, Action? onDispose = null)
         {
             this.Pointer = ptr;

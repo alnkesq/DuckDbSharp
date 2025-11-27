@@ -6,11 +6,11 @@ using System.Reflection;
 
 namespace DuckDbSharp.Functions
 {
-    public unsafe class FunctionInfo : IDisposable
+    public class FunctionInfo : IDisposable
     {
-        public string Name { get; internal set; }
-        public MethodInfo Method { get; internal set; }
-        public ParameterInfo[] Parameters { get; internal set; }
+        public required string Name;
+        public required MethodInfo Method;
+        public required ParameterInfo[] Parameters;
         public Type? FinalElementType { get; internal set; }
         internal Func<object, object>? Transformer;
         internal duckdb_table_function_ptr PointerTableFn;

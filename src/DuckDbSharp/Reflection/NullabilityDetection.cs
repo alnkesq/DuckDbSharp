@@ -68,7 +68,7 @@ namespace DuckDbSharp.Reflection
 
         public static Dictionary<TypeKey, List<string>> FindAlwaysNonNullFields(TypedDuckDbConnectionBase conn, TypeGenerationContext ctx, Dictionary<NullnessCacheKey, bool> neverNullCache, CodeGenerationOptions options)
         {
-            var types = ctx.Paths
+            var types = ctx.Paths!
                 .GroupBy(x => x.TypeKey)
                 .Select(x =>
                 {

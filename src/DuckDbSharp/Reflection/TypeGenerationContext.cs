@@ -72,12 +72,12 @@ namespace DuckDbSharp.Reflection
             return primitive.ClrType;
         }
 
-        private Type CreateClrListTypeCore(DuckDbStructuralType lt, string? nameHint, TypePath path)
+        private Type CreateClrListTypeCore(DuckDbStructuralType lt, string? nameHint, TypePath? path)
         {
             return CreateClrType(lt.ElementType!, nameHint, new TypePath { ListElement = true, Parent = path }).MakeArrayType();
 
         }
-        private Type CreateClrFixedArrayTypeCore(DuckDbStructuralType lt, string? nameHint, TypePath path)
+        private Type CreateClrFixedArrayTypeCore(DuckDbStructuralType lt, string? nameHint, TypePath? path)
         {            
             throw new NotImplementedException();
         }
@@ -149,9 +149,9 @@ namespace DuckDbSharp.Reflection
             return (type, structuralType);
         }
 
-        internal static DuckDbStructuralType TryGetPossiblyCachedResultStructuralType(TypedDuckDbConnectionBase conn, string sql, QueryParameterInfo[]? parameters, CodeGenerationOptions options)
+        internal static DuckDbStructuralType? TryGetPossiblyCachedResultStructuralType(TypedDuckDbConnectionBase conn, string sql, QueryParameterInfo[]? parameters, CodeGenerationOptions options)
         {
-            var parameterTypeNames = parameters?.Select(x => options.ResolveType(x.Type).FullName).ToArray() ?? Array.Empty<string>();
+            var parameterTypeNames = parameters?.Select(x => options.ResolveType(x.Type).FullName!).ToArray() ?? Array.Empty<string>();
             var cached = options.QueryTypeCache.Queries.SingleOrDefault(x => x.Sql == sql && (x.ParameterTypes ?? Array.Empty<string>()).SequenceEqual(parameterTypeNames));
 
             DuckDbStructuralType structuralType;
@@ -217,7 +217,7 @@ namespace DuckDbSharp.Reflection
                 };
                 if (s.Kind == DUCKDB_TYPE.DUCKDB_TYPE_STRUCT) return new DuckDbStructuralType(hash, s.Kind)
                 {
-                    StructureFields = s.StructureFields.Select(x => new StructuralTypeStructureField(x.Name, ToStructuralType(x.FieldTypeId, queryTypeCache))).ToList()
+                    StructureFields = s.StructureFields!.Select(x => new StructuralTypeStructureField(x.Name, ToStructuralType(x.FieldTypeId, queryTypeCache))).ToList()
                 };
                 return new DuckDbStructuralType(hash, s.Kind);
             });

@@ -115,7 +115,7 @@ namespace DuckDbSharp.Reflection
                     StructureFields = columns.Select(x =>
                     {
                         if (expectSingleColumn && size == 1) return new StructuralTypeStructureField("Value", x.Type);
-                        return new StructuralTypeStructureField(x.Name.ToStringUtf8(), x.Type);
+                        return new StructuralTypeStructureField(x.Name.ToStringUtf8()!, x.Type);
                     }).ToList()
                 };
             });
@@ -163,7 +163,7 @@ namespace DuckDbSharp.Reflection
                 {
                     return new DuckDbStructuralType(hash, DUCKDB_TYPE.DUCKDB_TYPE_STRUCT)
                     {
-                        StructureFields = members.Select(x => new StructuralTypeStructureField(x.Name.ToStringUtf8(), x.Type)).ToList()
+                        StructureFields = members.Select(x => new StructuralTypeStructureField(x.Name.ToStringUtf8()!, x.Type)).ToList()
                     };
                 });
                 return result;
@@ -202,7 +202,7 @@ namespace DuckDbSharp.Reflection
                     var enumMembers = new List<string>();
                     for (int i = 0; i < members.Count; i++)
                     {
-                        enumMembers.Add(members[i].ToStringUtf8());
+                        enumMembers.Add(members[i].ToStringUtf8()!);
                     }
                     return new DuckDbStructuralType(hash, DUCKDB_TYPE.DUCKDB_TYPE_ENUM)
                     {
@@ -227,7 +227,7 @@ namespace DuckDbSharp.Reflection
 
         public string ToSql()
         {
-            if (FixedSizeArrayLength != null) return $"{ElementType.ToSql()}[{FixedSizeArrayLength}]";
+            if (FixedSizeArrayLength != null) return $"{ElementType!.ToSql()}[{FixedSizeArrayLength}]";
             if (ElementType is not null) return $"{ElementType.ToSql()}[]";
             if (StructureFields is not null) return $"STRUCT({string.Join(", ", StructureFields.Select(x => x.Name + " " + x.FieldType.ToSql()))})";
             if (EnumMembers is not null) return $"ENUM({string.Join(", ", EnumMembers.Select(x => $"'{x}'"))})";
@@ -240,12 +240,12 @@ namespace DuckDbSharp.Reflection
             return new TypeKey(this.Hash);
         }
 
-        public static bool operator ==(DuckDbStructuralType a, DuckDbStructuralType b)
+        public static bool operator ==(DuckDbStructuralType? a, DuckDbStructuralType? b)
         {
             if (a is null || b is null) return a is null == b is null;
             return a.Hash == b.Hash;
         }
-        public static bool operator !=(DuckDbStructuralType a, DuckDbStructuralType b)
+        public static bool operator !=(DuckDbStructuralType? a, DuckDbStructuralType? b)
         {
             return !(a == b);
         }

@@ -94,7 +94,7 @@ namespace DuckDbSharp.Reflection
 
         internal string GetSql() => Sql ?? $"select * from {TableOrView}";
 
-        public override string ToString()
+        public override string? ToString()
         {
             return SqlName ?? Type.ToString();
         }

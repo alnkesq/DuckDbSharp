@@ -2,6 +2,7 @@ using DuckDbSharp.Functions;
 using DuckDbSharp.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -37,20 +38,22 @@ namespace DuckDbSharp.Reflection
             if (assembliesForTypeNameLookup == null || assembliesForTypeNameLookup.Length == 0) throw new ArgumentException($"Unable to find type {name}, because no assemblies were passed to {nameof(CodeGenerationOptions)}.{nameof(CodeGenerationOptions.AssembliesForQueryFileTypeResolution)}.");
             var isFullName = name.Contains('.');
             var candidates = isFullName
-                ? assembliesForTypeNameLookup.Select(x => x.GetType(name, throwOnError: false)).Where(x => x != null).ToArray()
+                ? assembliesForTypeNameLookup.Select(x => x.GetType(name, throwOnError: false)).WhereNonNull().ToArray()
                 : assembliesForTypeNameLookup.SelectMany(x => FunctionUtils.GetTypesBestEffort(x).Where(x => x.Name == name)).ToArray();
             candidates = candidates.Where(x => x.GetCustomAttribute<DuckDbGeneratedTypeAttribute>() == null).ToArray();
             if (candidates.Length == 0) throw new ArgumentException($"Could not find a type named '{name}' in any of the provided assemblies.");
-            if (candidates.Length == 1) return candidates[0];
+            if (candidates.Length == 1) return candidates[0]!;
             throw new InvalidOperationException($"Multiple types named '{name}' were found in the provided assemblies." + (!isFullName ? " Try specifying a namespace-qualified name instead." : null));
 
         }
 
-        internal Type ResolveType(PossiblyUnresolvedType? type)
+
+        [return: NotNullIfNotNull(nameof(type))]
+        internal Type? ResolveType(PossiblyUnresolvedType? type)
         {
             if (type == null) return null;
             if (type.Value.Type is { } t) return t;
-            return GetTypeByName(type.Value.UnresolvedType);
+            return GetTypeByName(type.Value.UnresolvedType!);
         }
 
         private static Type? ParsePrimitiveType(string name, bool throwOnError)

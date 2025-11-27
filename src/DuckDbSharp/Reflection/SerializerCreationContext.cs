@@ -191,11 +191,11 @@ namespace DuckDbSharp.Reflection
                 {
                     if (getter != null)
                     {
-                        factory = p => CreateStructureSelector(p, getter, structureFields);
+                        factory = p => CreateStructureSelector(p, getter, structureFields!);
                     }
                     else
                     {
-                        factory = p => CreateStructureSerializer(p, structureFields);
+                        factory = p => CreateStructureSerializer(p, structureFields!);
                     }
                 }
                 return CreateSerializer(inputArrayElementType, "SerializeField_", factory, getter);
@@ -335,7 +335,7 @@ namespace DuckDbSharp.Reflection
                 var offsetsLoopBody = SerializerCreationContext.MaybeIf(hasInputSublist, Expression.Block(
                         Expression.Assign(sublist, inputSublistExpr),
                         Expression.Assign(sublistLength, GetListCountExpression(sublist)),
-                        Expression.Call(null, AssignSpanItemMethod.MakeGenericMethod(typeof(OffsetAndCount)), offsetsAndLengths, rowId, Expression.New(OffsetAndCountCtor, totalCount, sublistLength)),
+                        Expression.Call(null, AssignSpanItemMethod.MakeGenericMethod(typeof(OffsetAndCount)), offsetsAndLengths!, rowId, Expression.New(OffsetAndCountCtor, totalCount, sublistLength)),
                         Expression.AddAssignChecked(totalCount, sublistLength)
                     ),
                     CreateSetNotPresent(validityVector, rowId));
@@ -368,7 +368,7 @@ namespace DuckDbSharp.Reflection
             
 
             body.Add(SerializerCreationContext.CreateForLoop(rowId, p.ObjectsLength, Expression.Block(
-                Expression.IfThen(hasInputSublist, loopBodyInner)
+                Expression.IfThen(hasInputSublist!, loopBodyInner)
            )));
             var sublistItemSerializer = CreateFieldSerializer(sublistElementType, null);
             body.Add(CreateCall(sublistItemSerializer, Expression.Call(null, GetSublistChildVectorAndReserveMethod, p.VectorPtr, totalCount), subobjects, totalCount, Expression.Constant((nint)0), p.Arena));
@@ -448,7 +448,7 @@ namespace DuckDbSharp.Reflection
             body.Add(CreateCall(sublistItemDeserializer, sublistVector, allSubItems, totalLength, p.DeserializationContext));
 
             var copyFrom = Expression.ArrayIndex(allSubItems, absIdx);
-            var sublistSizeExpr = isFixedArray ? null : Expression.Call(null, GetSublistSizeMethod, offsetsAndLengths, rowId);
+            var sublistSizeExpr = isFixedArray ? null : Expression.Call(null, GetSublistSizeMethod, offsetsAndLengths!, rowId);
             Expression? newSublist;
             Expression? addToSublist;
             var sublistSize = Expression.Variable(typeof(int), "sublistSize");
@@ -475,7 +475,7 @@ namespace DuckDbSharp.Reflection
             if (isFixedArray)
             {
                 loopBodyInner = Expression.Block(
-                    CreateAssignment(getter, p.Objects, rowId, Expression.Call(CopyToFixedLengthArrayMethod.MakeGenericMethod(sublistType, sublistElementType), allSubItems, absIdx, Expression.Constant(fixedArrayLength.Value))),
+                    CreateAssignment(getter, p.Objects, rowId, Expression.Call(CopyToFixedLengthArrayMethod.MakeGenericMethod(sublistType, sublistElementType), allSubItems, absIdx, Expression.Constant(fixedArrayLength!.Value))),
                     Expression.Assign(absIdx, Expression.Add(absIdx, Expression.Constant(fixedArrayLength.Value)))
                     );
             }
@@ -485,10 +485,10 @@ namespace DuckDbSharp.Reflection
                     Expression.Block(
                             Expression.Assign(sublistSize, sublistSizeExpr!),
                             Expression.Assign(sublist, newSublist!),
-                            Expression.Assign(absIdx, Expression.Call(null, GetSublistOffsetMethod, offsetsAndLengths, rowId)),
+                            Expression.Assign(absIdx, Expression.Call(null, GetSublistOffsetMethod, offsetsAndLengths!, rowId)),
                             CreateForLoop(j, sublistSize,
                             Expression.Block(
-                                addToSublist,
+                                addToSublist!,
                                 Expression.PostIncrementAssign(absIdx))
                             ),
                             assignment
@@ -513,7 +513,7 @@ namespace DuckDbSharp.Reflection
 
 
 
-        private Expression CreateStructureSerializer(SerializerParameters p, StructureFieldInfo[] fields)
+        private Expression CreateStructureSerializer(SerializerParameters p, StructureFieldInfo?[] fields)
         {
             var body = new List<Expression>();
             var variables = new List<ParameterExpression>();
@@ -691,7 +691,7 @@ namespace DuckDbSharp.Reflection
         }
 
 
-        private Expression CreateStructureSelector(SerializerParameters p, StructureFieldInfo? getter, StructureFieldInfo[]? structureFields)
+        private Expression CreateStructureSelector(SerializerParameters p, StructureFieldInfo? getter, StructureFieldInfo?[] structureFields)
         {
             var substructType = getter != null ? getter.FieldType : p.InputArrayElementType;
 
@@ -721,7 +721,7 @@ namespace DuckDbSharp.Reflection
                     Expression.Assign(Expression.ArrayAccess(subobjects, rowId), MaybeConvertToNullable(inputSubstructExpr, substructType)),
                     CreateSetNotPresent(validityVector, rowId))
            )));
-            var substructSerializer = CreateSerializer(substructType, "SerializeStruct_", p => CreateStructureSerializer(p, structureFields!), null);
+            var substructSerializer = CreateSerializer(substructType, "SerializeStruct_", p => CreateStructureSerializer(p, structureFields), null);
             body.Add(CreateCall(substructSerializer, p.VectorPtr, subobjects, rowId, validityVector, p.Arena));
             body.Add(CreateReleaseArrayExpression(subobjects));
             return Expression.Block(variables, body);
@@ -832,7 +832,7 @@ namespace DuckDbSharp.Reflection
                 if (primitiveConverter.IsEnum)
                 {
                     var clrUnderlyingType = Enum.GetUnderlyingType(primitiveConverter.ClrType);
-                    var underlyingMaximum = Convert.ChangeType(primitiveConverter.EnumInfo.MaximumAllowedValue, clrUnderlyingType);
+                    var underlyingMaximum = Convert.ChangeType(primitiveConverter.EnumInfo!.MaximumAllowedValue, clrUnderlyingType);
                     serializedValue = Expression.Condition(Expression.LessThanOrEqual(Expression.Convert(nonNullValue, clrUnderlyingType), Expression.Constant(underlyingMaximum, clrUnderlyingType)), serializedValue, Expression.Call(null, ThrowEnumOutOfRangeMethod.MakeGenericMethod(nonNullValue.Type, primitiveConverter.SerializationType), nonNullValue));
                 }
             }
@@ -917,7 +917,7 @@ namespace DuckDbSharp.Reflection
                 }
             }
             body.Add(result);
-            var bodyBlock = Expression.Block(new[] { rowCount, result, needsInitialization ? i : null }.Where(x => x != null).ToArray(), body);
+            var bodyBlock = Expression.Block(new[] { rowCount, result, needsInitialization ? i : null }.WhereNonNull().ToArray(), body);
             return CreateMethod("DeserializeColumns_" + CreateSpeakableTypeName(elementType, elementStructuralType), typeof(RootDeserializer), elementType, elementStructuralType, bodyBlock, chunkParam, deserializationContext);
         }
 
@@ -1129,7 +1129,7 @@ namespace DuckDbSharp.Reflection
             }
 
 
-            if (IsGeneratingCSharpCode && p.SetMethod != null)
+            if (IsGeneratingCSharpCode && p!.SetMethod != null)
             {
                 var deleg = CreateIlMethod(CreateSpeakableTypeName(destObj.Type, null) + "_SetPropertyViaReflection_" + member.Name, typeof(void), new[] { destArr.Type, typeof(int), val.Type }, ilgen =>
                 {

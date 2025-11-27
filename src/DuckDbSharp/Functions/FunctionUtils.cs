@@ -46,11 +46,11 @@ namespace DuckDbSharp.Functions
                     // IEnumerable<long>
                     var boxType = typeof(Box<>).MakeGenericType(elementType);
                     finalElementType = boxType;
-                    var boxMany = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.BoxMany)).MakeGenericMethod(elementType);
+                    var boxMany = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.BoxMany))!.MakeGenericMethod(elementType);
                     transformer = ret =>
                     {
                         var baseItems = ret;
-                        return boxMany.Invoke(null, new object[] { baseItems });
+                        return boxMany.Invoke(null, [baseItems])!;
                     };
                 }
             }
@@ -72,7 +72,7 @@ namespace DuckDbSharp.Functions
                 else // Scalar function returning a single primitive type.
                 {
                     finalElementType = typeof(Box<>).MakeGenericType(methodReturnType);
-                    var valueField = finalElementType.GetField(nameof(Box<object>.Value), BindingFlags.Public | BindingFlags.Instance);
+                    var valueField = finalElementType.GetField(nameof(Box<object>.Value), BindingFlags.Public | BindingFlags.Instance)!;
                     transformer = ret =>
                     {
                         var singleton = ret;
@@ -110,7 +110,7 @@ namespace DuckDbSharp.Functions
             var parameters = method.GetParameters();
             if (parameters.Length == 0) throw new NotSupportedException("Scalar functions with zero arguments are not supported.");
 
-            Func<object[], object> baseInvoke = args => method.Invoke(delegateTarget, args);
+            Func<object[], object?> baseInvoke = args => method.Invoke(delegateTarget, args);
             var funcInfo = new FunctionInfo
             {
                 Name = name,
@@ -245,7 +245,7 @@ namespace DuckDbSharp.Functions
             using var tableFunctionName = (ScopedString)name;
             var parameters = method.GetParameters();
 
-            Func<object[], object> baseInvoke = args => method.Invoke(delegateTarget, args);
+            Func<object[], object> baseInvoke = args => method.Invoke(delegateTarget, args)!;
             var funcInfo = new FunctionInfo
             {
                 Name = name,
@@ -416,11 +416,11 @@ namespace DuckDbSharp.Functions
                     object ret;
                     if (bind.HasPrecomputedReturnValue)
                     {
-                        ret = bind.LateTransformer(bind.PrecomputedReturnValue);
+                        ret = bind.LateTransformer(bind.PrecomputedReturnValue!);
                     }
                     else
                     {
-                        ret = funcInfo.Transformer(funcInfo.Method.Invoke(funcInfo.DelegateTarget, bind.Args));
+                        ret = funcInfo.Transformer!(funcInfo.Method.Invoke(funcInfo.DelegateTarget, bind.Args)!)!;
                     }
 
                     if (ret is Array)
@@ -428,7 +428,7 @@ namespace DuckDbSharp.Functions
                         if(ret.GetType() == typeof(object[]))
                             initCtx.Enumerator = ((IEnumerable)(EnumerateObjectArrayAsGenericMethod.MakeGenericMethod(bind.FinalElementType).Invoke(null, new object[] { ret })!)).GetEnumerator();
                         else
-                            initCtx.Enumerator = ((IEnumerable)(EnumerateArrayGenericMethod.MakeGenericMethod(ret.GetType().GetElementType()).Invoke(null, new object[] { ret })!)).GetEnumerator();
+                            initCtx.Enumerator = ((IEnumerable)(EnumerateArrayGenericMethod.MakeGenericMethod(ret.GetType().GetElementType()!).Invoke(null, new object[] { ret })!)).GetEnumerator();
                     }
                     else initCtx.Enumerator = ((IEnumerable)ret).GetEnumerator();
                 }
@@ -458,8 +458,8 @@ namespace DuckDbSharp.Functions
 
         }
 
-        private readonly static MethodInfo EnumerateArrayGenericMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.EnumerateArrayGeneric), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo EnumerateObjectArrayAsGenericMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.EnumerateObjectArrayAsGeneric), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        private readonly static MethodInfo EnumerateArrayGenericMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.EnumerateArrayGeneric), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private readonly static MethodInfo EnumerateObjectArrayAsGenericMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.EnumerateObjectArrayAsGeneric), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
         internal static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Type type)
         {
@@ -487,7 +487,7 @@ namespace DuckDbSharp.Functions
             }
             catch (ReflectionTypeLoadException ex)
             {
-                types = ex.Types;
+                types = ex.Types.WhereNonNull().ToArray();
                 Console.Error.WriteLine("Warning: some types could not be loaded: " + ex);
             }
 

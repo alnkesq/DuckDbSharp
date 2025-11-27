@@ -33,7 +33,7 @@ namespace DuckDbSharp.Reflection
 
         public int Id;
 
-        public string Prefix => RootSql != null ? null : ".v";
+        public string? Prefix => RootSql != null ? null : ".v";
         public QueryParameterInfo[]? RootParameters;
         public SerializerSpecification? RootSpec;
         public string FullSql

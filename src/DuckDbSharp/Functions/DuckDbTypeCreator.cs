@@ -69,7 +69,7 @@ namespace DuckDbSharp.Functions
                 if (primitiveType.IsEnum)
                 {
                     var enumInfo = primitiveType.EnumInfo;
-                    fixed (byte** a = BindingUtils.ToPointerArray<ScopedString, byte>(enumInfo.Members, x => x.Pointer))
+                    fixed (byte** a = BindingUtils.ToPointerArray<ScopedString, byte>(enumInfo!.Members, x => x.Pointer))
                     {
                         return Methods.duckdb_create_enum_type(a, (ulong)enumInfo.Members.Length);
                     }
@@ -91,7 +91,7 @@ namespace DuckDbSharp.Functions
                 return Methods.duckdb_create_list_type(CreateLogicalType(sublistElementType, typesBeingCreated));
             }
 
-            var fields = structureFields.Select(x =>
+            var fields = structureFields!.Select(x =>
             {/*
                 try
                 {*/
@@ -104,7 +104,7 @@ namespace DuckDbSharp.Functions
                 }*/
             }).Where(x => x.DuckFieldType != 0).ToArray();
 
-            var names = fields.Select(x => (ScopedString)x.Field.DuckDbFieldName).ToArray();
+            var names = fields.Select(x => (ScopedString)x.Field!.DuckDbFieldName).ToArray();
             var types = fields.Select(x => x.DuckFieldType).ToArray();
 
             var typesArray = BindingUtils.ToPointerArray<(StructureFieldInfo Field, nint DuckDbType), _duckdb_logical_type>(fields, x => CreateLogicalType(x.Field.FieldType, typesBeingCreated));
@@ -126,7 +126,7 @@ namespace DuckDbSharp.Functions
             }
 
         }
-        private readonly static ConcurrentDictionary<(Type ClrType, DuckDbStructuralType? StructuralType), List<FieldInfo2>> FieldsCache = new();
+        private readonly static ConcurrentDictionary<(Type ClrType, DuckDbStructuralType? StructuralType), List<FieldInfo2?>> FieldsCache = new();
 
         internal static List<FieldInfo2> GetFields(Type t)
         {
@@ -190,7 +190,7 @@ namespace DuckDbSharp.Functions
                 }
                 else
                 {
-                    return allFields.OrderBy(x => x.Member.MetadataToken).ToList();
+                    return allFields.OrderBy(x => x.Member.MetadataToken).ToList()!;
                 }
             });
         }
@@ -315,8 +315,8 @@ DuckDbStructuralType.BooleanStructuralType,
 
         }
 
-        internal readonly static MethodInfo SerializeEnumAsStringMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.SerializeEnumAsString), BindingFlags.Public | BindingFlags.Static);
-        internal readonly static MethodInfo DeserializeEnumFromStringMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.DeserializeEnumFromString), BindingFlags.Public | BindingFlags.Static);
+        internal readonly static MethodInfo SerializeEnumAsStringMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.SerializeEnumAsString), BindingFlags.Public | BindingFlags.Static)!;
+        internal readonly static MethodInfo DeserializeEnumFromStringMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.DeserializeEnumFromString), BindingFlags.Public | BindingFlags.Static)!;
 
         private static void ThrowIncompatibleTypesException(Type a, DuckDbStructuralType b)
         {
@@ -338,7 +338,7 @@ DuckDbStructuralType.BooleanStructuralType,
             {
                 if (b.Kind != DUCKDB_TYPE.DUCKDB_TYPE_LIST)
                     ThrowIncompatibleTypesException(a, b);
-                CheckTypeCompatibility(aElementType, b.ElementType);
+                CheckTypeCompatibility(aElementType, b.ElementType!);
                 return;
             }
             if (aElementType != null && arrayFixedLength != null)
@@ -347,7 +347,7 @@ DuckDbStructuralType.BooleanStructuralType,
                     ThrowIncompatibleTypesException(a, b);
                 if (b.FixedSizeArrayLength != arrayFixedLength)
                     ThrowIncompatibleTypesException(a, b);
-                CheckTypeCompatibility(aElementType, b.ElementType);
+                CheckTypeCompatibility(aElementType, b.ElementType!);
                 return;
             }
             if (aStructureFields != null)
