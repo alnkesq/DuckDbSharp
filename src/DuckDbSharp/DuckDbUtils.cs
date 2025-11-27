@@ -211,7 +211,7 @@ namespace DuckDbSharp
                     {
                         foreach (var item in enumerableParameterSlots)
                         {
-                            item.ValueByQueryToken.Remove(token);
+                            item!.ValueByQueryToken.Remove(token);
                         }
                     }
                     FunctionUtils.FreeScalarFunctionArenasForCurrentThreadAndRecursionLevel();

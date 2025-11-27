@@ -79,7 +79,7 @@ namespace DuckDbSharp.Reflection
                     var fields = clrType.GetFields().ToList();
                     var neverNullFields = fields.Where(field =>
                     {
-                        return paths.All(x => IsAlwaysNonNull(conn, field, x, neverNullCache, options));
+                        return paths.All(x => IsAlwaysNonNull(conn, field, x!, neverNullCache, options));
 
                     }).Select(x => DuckDbUtils.GetDuckName(x)).ToList();
                     return (typeKey, neverNullFields);

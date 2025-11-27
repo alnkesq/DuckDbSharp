@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using DuckDbSharp.Bindings;
 using DuckDbSharp.Reflection;
+using DuckDbSharp.Tests;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +17,7 @@ namespace DuckDbSharp
     {
 
         [UnmanagedCallersOnly(EntryPoint = "duckdbsharp_init", CallConvs = new[] { typeof(CallConvCdecl) })]
-        public static void duckdbsharp_init(_duckdb_database db) => DuckDbExtensionUtils.BridgeInit(db, typeof(Program).Assembly);
+        public static void duckdbsharp_init(_duckdb_database db) => DuckDbExtensionUtils.BridgeInit(db, typeof(QueryTests).Assembly);
 
 
         [UnmanagedCallersOnly(EntryPoint = "duckdbsharp_version", CallConvs = new[] { typeof(CallConvCdecl) })]

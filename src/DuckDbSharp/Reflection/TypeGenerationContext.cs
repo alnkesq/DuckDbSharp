@@ -30,7 +30,7 @@ namespace DuckDbSharp.Reflection
             else ClrTypeCache = new();
         }
 
-        internal List<(Type Type, TypeKey TypeKey, TypePath Path)>? Paths;
+        internal List<(Type Type, TypeKey TypeKey, TypePath? Path)>? Paths;
         internal Dictionary<TypeKey, List<string>>? NeverNullFields { get; init; }
 
         public string GetNewTypeName(string hint, IEnumerable<string>? forbiddenNames, string? disambiguationSuffix)
