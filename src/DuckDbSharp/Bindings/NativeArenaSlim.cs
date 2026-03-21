@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace DuckDbSharp.Bindings
 {
@@ -68,6 +69,7 @@ namespace DuckDbSharp.Bindings
             var chunkSize = checked((int)chunkSizeLong);
             lastChunkSize = chunkSize;
             nextAllocation = (byte*)NativeMemory.Alloc((nuint)chunkSize);
+            Interlocked.Add(ref NativeMemoryAllocBytes, (nuint)chunkSize);
             //if ((nuint)nextAllocation % 8 != 0) throw new Exception();
             Debug.Assert((nuint)nextAllocation % 8 == 0);
             nextAllocationThreshold = nextAllocation + chunkSize;
@@ -77,6 +79,8 @@ namespace DuckDbSharp.Bindings
             return nextAllocation;
         }
 
+        public static ulong NativeMemoryAllocBytes;
+        public static ulong NativeMemoryFreedBytes;
         public long TotalAllocatedSize => chunks.Sum(x => (long)x.Length);
 
 
@@ -100,6 +104,7 @@ namespace DuckDbSharp.Bindings
             foreach (var item in chunks)
             {
                 NativeMemory.Free((void*)item.Start);
+                Interlocked.Add(ref NativeMemoryFreedBytes, (nuint)item.Length);
             }
             chunks = null!;
             nextAllocation = null;
