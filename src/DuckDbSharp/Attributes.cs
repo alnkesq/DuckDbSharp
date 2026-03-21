@@ -6,6 +6,7 @@ namespace DuckDbSharp
     [AttributeUsage(AttributeTargets.Method)]
     public class DuckDbFunctionAttribute : Attribute
     {
+        public bool IsBatched { get; set; }
         internal bool? IsScalar;
         public DuckDbFunctionAttribute()
         { 

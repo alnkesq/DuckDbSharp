@@ -10,16 +10,18 @@ namespace DuckDbSharp.Functions
     {
         public required string Name;
         public required MethodInfo Method;
-        public required ParameterInfo[] Parameters;
+        public required Type[] Parameters;
         public Type? FinalElementType { get; internal set; }
         internal Func<object, object>? Transformer;
         internal duckdb_table_function_ptr PointerTableFn;
         internal duckdb_scalar_function_ptr PointerScalarFn;
 
+
         internal DuckDbStructuralType? ScalarArgumentChunkType;
         public RootDeserializer? ScalarArgumentDeserializer;
         public object? DelegateTarget { get; internal set; }
-
+        internal bool IsBatched;
+        internal Type? ScalarReturnType;
         public unsafe void Dispose()
         {
             if (PointerTableFn.ptr != null)

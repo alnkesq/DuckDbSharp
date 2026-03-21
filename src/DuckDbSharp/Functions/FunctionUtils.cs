@@ -97,17 +97,18 @@ namespace DuckDbSharp.Functions
         }
         internal static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, string name, Delegate deleg)
         {
-            return RegisterScalarFunctionCore(conn, deleg.Method, name, deleg.Target);
+            return RegisterScalarFunctionCore(conn, deleg.Method, name, deleg.Target, false);
         }
         internal static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, MethodInfo method)
         {
-            return RegisterScalarFunctionCore(conn, method, GetRegistrationNameForMethod(method), null);
+            return RegisterScalarFunctionCore(conn, method, GetRegistrationNameForMethod(method), null, batched: method.GetCustomAttribute<DuckDbFunctionAttribute>()?.IsBatched == true);
         }
         internal static string GetRegistrationNameForMethod(MethodInfo m) => DuckDbUtils.ToDuckCaseFunction(m.Name);
-        private unsafe static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget)
+        private unsafe static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget, bool batched)
         {
             using var scalarFunctionName = (ScopedString)name;
-            var parameters = method.GetParameters();
+            var parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
+            if (batched) parameters = parameters.Take(parameters.Length - 1).Select(x => x.GetElementType()!).ToArray();
             if (parameters.Length == 0) throw new NotSupportedException("Scalar functions with zero arguments are not supported.");
 
             Func<object[], object?> baseInvoke = args => method.Invoke(delegateTarget, args);
@@ -117,9 +118,10 @@ namespace DuckDbSharp.Functions
                 Method = method,
                 DelegateTarget = delegateTarget,
                 Parameters = parameters,
+                IsBatched = batched
             };
 
-            var clrReturnType = method.ReturnType;
+            var clrReturnType = batched ? method.GetParameters()[^1].ParameterType.GetElementType()! : method.ReturnType;
 
             if (clrReturnType == typeof(object) || clrReturnType == typeof(void)) throw new ArgumentException("Scalar function must return a non-void, non-System.Object type.");
             
@@ -136,12 +138,12 @@ namespace DuckDbSharp.Functions
             for (int i = 0; i < parameters.Length; i++)
             {
                 var param = parameters[i];
-                var lt = DuckDbTypeCreator.CreateLogicalType(param.ParameterType, null);
+                var lt = DuckDbTypeCreator.CreateLogicalType(param, null);
                 Methods.duckdb_scalar_function_add_parameter(func, lt);
                 //var structuralType = DuckDbStructuralType.CreateStructuralType(lt);
                 //colTypes[i] = DuckDbTypeCreator.CreateGetter(new FieldInfo2("Arg" + i, ))
             }
-            var argChunkClrType = typeof(ValueTuple).Assembly.GetType("System.ValueTuple`" + parameters.Length)?.MakeGenericType(parameters.Select(x => x.ParameterType).ToArray());
+            var argChunkClrType = typeof(ValueTuple).Assembly.GetType("System.ValueTuple`" + parameters.Length)?.MakeGenericType(parameters);
             if (argChunkClrType == null) throw new Exception("Could not find a System.ValueTuple with the required number of type parameters.");
             funcInfo.ScalarArgumentChunkType = DuckDbStructuralType.CreateStructuralType(argChunkClrType);
             funcInfo.ScalarArgumentDeserializer = SerializerCreationContext.Global.CreateRootDeserializer(argChunkClrType, funcInfo.ScalarArgumentChunkType);
@@ -152,6 +154,7 @@ namespace DuckDbSharp.Functions
             
             BindingUtils.CheckState(Methods.duckdb_register_scalar_function(conn, func));
             funcInfo.PointerScalarFn = func;
+            funcInfo.ScalarReturnType = clrReturnType;
             return funcInfo;
         }
 
@@ -168,25 +171,47 @@ namespace DuckDbSharp.Functions
                 var colcount = checked((int)Methods.duckdb_data_chunk_get_column_count(chunk));
 
                 var argumentTuples = funcInfo.ScalarArgumentDeserializer!((nint)chunk, new DuckDbDeserializationContext());
-                var returnClrType = funcInfo.Method.ReturnType;
+                var returnClrType = funcInfo.ScalarReturnType!;
 
 
-                var returnSerializer = SerializerCreationContext.Global.CreateRootVectorSerializer(returnClrType);
-                var returnVector = Array.CreateInstance(returnClrType, itemCount);
+                RootVectorSerializer returnSerializer = SerializerCreationContext.Global.CreateRootVectorSerializer(returnClrType);
+                Array returnVector = Array.CreateInstance(returnClrType, itemCount);
 
-                argsArray = new object?[colcount];
-                for (int rowIdx = 0; rowIdx < itemCount; rowIdx++)
-                {
+                if (funcInfo.IsBatched)
+                { 
+                    argsArray ??= new object[colcount + 1];
                     for (int argIdx = 0; argIdx < colcount; argIdx++)
                     {
-                        argsArray[argIdx] = ((ITuple)argumentTuples.GetValue(rowIdx)!)[argIdx];
+                        argsArray[argIdx] = Array.CreateInstance(funcInfo.Parameters[argIdx], itemCount);
                     }
 
-                    var result = funcInfo.Method.Invoke(funcInfo.DelegateTarget, argsArray);
-                    returnVector.SetValue(result, rowIdx);
+                    for (int rowIdx = 0; rowIdx < itemCount; rowIdx++)
+                    {
+                        for (int argIdx = 0; argIdx < colcount; argIdx++)
+                        {
+                            ((Array)argsArray[argIdx]!).SetValue(((ITuple)argumentTuples.GetValue(rowIdx)!)[argIdx], rowIdx);
+                        }
+                    }
+
+                    argsArray[colcount] = returnVector;
+                    funcInfo.Method.Invoke(funcInfo.DelegateTarget, argsArray);
+
+ 
                 }
+                else
+                {
+                    argsArray ??= new object?[colcount];
+                    for (int rowIdx = 0; rowIdx < itemCount; rowIdx++)
+                    {
+                        for (int argIdx = 0; argIdx < colcount; argIdx++)
+                        {
+                            argsArray[argIdx] = ((ITuple)argumentTuples.GetValue(rowIdx)!)[argIdx];
+                        }
 
-
+                        var result = funcInfo.Method.Invoke(funcInfo.DelegateTarget, argsArray);
+                        returnVector.SetValue(result, rowIdx);
+                    }
+                }
                 // 
                 // HACK: Scalar functions don't have a duckdb_init_info, so how do we dispose the arena after DuckDB finishes reading our data?
                 // For now, let's use reusable thread-locals.
@@ -243,7 +268,7 @@ namespace DuckDbSharp.Functions
         private static FunctionInfo RegisterTableFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget)
         {
             using var tableFunctionName = (ScopedString)name;
-            var parameters = method.GetParameters();
+            var parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
 
             Func<object[], object> baseInvoke = args => method.Invoke(delegateTarget, args)!;
             var funcInfo = new FunctionInfo
@@ -269,7 +294,7 @@ namespace DuckDbSharp.Functions
             Methods.duckdb_table_function_set_name(func, tableFunctionName);
             foreach (var param in parameters)
             {
-                var lt = DuckDbTypeCreator.CreateLogicalType(param.ParameterType, null);
+                var lt = DuckDbTypeCreator.CreateLogicalType(param, null);
                 Methods.duckdb_table_function_add_parameter(func, lt);
             }
             Methods.duckdb_table_function_set_init(func, &TableFunctionInit);
@@ -327,7 +352,7 @@ namespace DuckDbSharp.Functions
                     var param = Methods.duckdb_bind_get_parameter(p, (ulong)paramId);
                     var clrParam = funcinfo.Parameters[paramId];
                     object? val;
-                    var paramType = clrParam.ParameterType;
+                    var paramType = clrParam;
                     if (paramType == typeof(string))
                     {
                         val = BindingUtils.ToString(Methods.duckdb_get_varchar(param));

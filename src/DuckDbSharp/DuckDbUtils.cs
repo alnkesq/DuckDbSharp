@@ -135,7 +135,7 @@ namespace DuckDbSharp
                 using var prepared = CreatePreparedStatement(conn, sql);
                 var simpleParamCount = Methods.duckdb_nparams(prepared);
 
-                if (simpleParamCount != (ulong)simpleParameters.Count) throw new DuckDbException($"Expected {simpleParamCount} parameters, but {simpleParameters} were provided.");
+                if (simpleParamCount != (ulong)simpleParameters.Count) throw new DuckDbException($"Expected {simpleParamCount} parameters, but {simpleParameters.Count} were provided.");
 
                 for (ulong i = 1; i <= simpleParamCount; i++)
                 {
