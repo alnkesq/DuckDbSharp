@@ -57,13 +57,13 @@ namespace DuckDbSharp
         {
             OnBeforeExecute(sql);
             return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
-		}
-		public override OwnedDuckDbResult ExecuteUnsafeWithOptions(CommandOptions options, string sql, params object?[]? parameters)
-		{
+        }
+        public override OwnedDuckDbResult ExecuteUnsafeWithOptions(CommandOptions options, string sql, params object?[]? parameters)
+        {
             InitOptions(ref options);
             OnBeforeExecute(sql);
-			return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options);
-		}
+            return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options);
+        }
 
         public virtual NonSynchronizedTypedDuckDbConnection Clone => Create(Database);
     }

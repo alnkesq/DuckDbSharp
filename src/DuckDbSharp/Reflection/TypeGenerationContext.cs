@@ -78,7 +78,7 @@ namespace DuckDbSharp.Reflection
 
         }
         private Type CreateClrFixedArrayTypeCore(DuckDbStructuralType lt, string? nameHint, TypePath? path)
-        {            
+        {
             throw new NotImplementedException();
         }
 
@@ -162,7 +162,7 @@ namespace DuckDbSharp.Reflection
             }
             else
             {
-                if(options.LogToStderr)
+                if (options.LogToStderr)
                     Console.Error.WriteLine($"Determining result type for {DuckDbUtils.ToSingleLineSql(sql)}");
 
                 try

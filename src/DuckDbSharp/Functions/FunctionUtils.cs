@@ -124,9 +124,9 @@ namespace DuckDbSharp.Functions
             var clrReturnType = batched ? method.GetParameters()[^1].ParameterType.GetElementType()! : method.ReturnType;
 
             if (clrReturnType == typeof(object) || clrReturnType == typeof(void)) throw new ArgumentException("Scalar function must return a non-void, non-System.Object type.");
-            
+
             var nonNullClrReturnType = Nullable.GetUnderlyingType(clrReturnType) ?? clrReturnType;
-            
+
 
             var func = Methods.duckdb_create_scalar_function();
             Methods.duckdb_scalar_function_set_name(func, scalarFunctionName);
@@ -134,7 +134,7 @@ namespace DuckDbSharp.Functions
 
 
 
-            
+
             for (int i = 0; i < parameters.Length; i++)
             {
                 var param = parameters[i];
@@ -151,7 +151,7 @@ namespace DuckDbSharp.Functions
             //funcInfo.ScalarArgumentDeserializer = DuckDbStructuralType.CreateStructuralType()
             Methods.duckdb_scalar_function_set_extra_info(func, CreateGcHandle(funcInfo), &BindingUtils.FreeGcHandle);
             Methods.duckdb_scalar_function_set_function(func, &ExecuteScalarFunction);
-            
+
             BindingUtils.CheckState(Methods.duckdb_register_scalar_function(conn, func));
             funcInfo.PointerScalarFn = func;
             funcInfo.ScalarReturnType = clrReturnType;
@@ -178,7 +178,7 @@ namespace DuckDbSharp.Functions
                 Array returnVector = Array.CreateInstance(returnClrType, itemCount);
 
                 if (funcInfo.IsBatched)
-                { 
+                {
                     argsArray ??= new object[colcount + 1];
                     for (int argIdx = 0; argIdx < colcount; argIdx++)
                     {
@@ -196,7 +196,7 @@ namespace DuckDbSharp.Functions
                     argsArray[colcount] = returnVector;
                     funcInfo.Method.Invoke(funcInfo.DelegateTarget, argsArray);
 
- 
+
                 }
                 else
                 {
@@ -226,7 +226,7 @@ namespace DuckDbSharp.Functions
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     arenaDict.Add((nint)vector, arena);
                 }
-                
+
                 arena.Reset();
                 returnSerializer(returnVector, (nint)vector, arena);
 
@@ -450,7 +450,7 @@ namespace DuckDbSharp.Functions
 
                     if (ret is Array)
                     {
-                        if(ret.GetType() == typeof(object[]))
+                        if (ret.GetType() == typeof(object[]))
                             initCtx.Enumerator = ((IEnumerable)(EnumerateObjectArrayAsGenericMethod.MakeGenericMethod(bind.FinalElementType!).Invoke(null, new object[] { ret })!)).GetEnumerator();
                         else
                             initCtx.Enumerator = ((IEnumerable)(EnumerateArrayGenericMethod.MakeGenericMethod(ret.GetType().GetElementType()!).Invoke(null, new object[] { ret })!)).GetEnumerator();
@@ -534,7 +534,7 @@ namespace DuckDbSharp.Functions
                 if (attr != null)
                 {
                     var isScalar = attr.IsScalar ?? TypeSniffedEnumerable.TryGetEnumerableElementType(method.ReturnType) == null;
-                    
+
                     output.Add(isScalar ? RegisterScalarFunction(conn, method) : RegisterTableFunction(conn, method));
                 }
             }

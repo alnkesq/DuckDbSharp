@@ -444,8 +444,8 @@ namespace DuckDbSharp
 
         private unsafe static T[]? FetchAndDeserializeChunk<T>(RootDeserializer deserializer, nint result, ulong chunkIndex, bool isStreamed, DuckDbDeserializationContext deserializationContext)
         {
-            using var chunk = 
-                isStreamed 
+            using var chunk =
+                isStreamed
                     ? (OwnedDuckDbDataChunk)Methods.duckdb_fetch_chunk(*(duckdb_result*)result)
                     : (OwnedDuckDbDataChunk)Methods.duckdb_result_get_chunk(*(duckdb_result*)result, chunkIndex);
             if (chunk.Pointer == null)
@@ -910,7 +910,7 @@ namespace DuckDbSharp
             }
 
             BindingUtils.CheckAppenderError(Methods.duckdb_appender_close(appender), appender);
-            
+
 
             return insertedItems;
         }
@@ -1073,7 +1073,7 @@ namespace DuckDbSharp
 
             using var conn = ThreadSafeTypedDuckDbConnection.CreateInMemory();
             conn.ExecuteNonQuery($"COPY (select * from table_parameter_1() {(orderBy != null ? "ORDER BY " + orderBy : null)}) TO '{destinationFile}' (FORMAT PARQUET, PARQUET_VERSION V2, COMPRESSION ZSTD, USE_TMP_FILE 1)", rows);
-            
+
         }
 
         internal static IEnumerable<T> WhereNonNull<T>(this IEnumerable<T?> source) where T : class

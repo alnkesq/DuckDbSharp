@@ -352,7 +352,7 @@ namespace DuckDbSharp.Reflection
                 loopBodyInner = Expression.Block(
                     Expression.Call(CopyFromFixedLengthArrayMethod.MakeGenericMethod(sublistType, sublistElementType), inputSublistExpr, subobjects, innerAbsIdx, Expression.Constant(arrayFixedLength!.Value)),
                     Expression.AddAssignChecked(innerAbsIdx, Expression.Constant(arrayFixedLength.Value))
-                ); 
+                );
             }
             else
             {
@@ -365,7 +365,7 @@ namespace DuckDbSharp.Reflection
                 );
             }
 
-            
+
 
             body.Add(SerializerCreationContext.CreateForLoop(rowId, p.ObjectsLength, Expression.Block(
                 Expression.IfThen(hasInputSublist!, loopBodyInner)
@@ -1016,7 +1016,7 @@ namespace DuckDbSharp.Reflection
                 Expression.Assign(array, Expression.Convert(untypedArrayParam, elementType.MakeArrayType())),
                 CreateCall(serializer, vectorParam, array, Expression.ArrayLength(array), Expression.Constant((nint)0), arenaParam)
             };
-            
+
             var bodyBlock = Expression.Block(new[] { array }, body);
             return CreateMethod("SerializeVector_" + CreateSpeakableTypeName(elementType, null), typeof(RootVectorSerializer), elementType, null, bodyBlock, untypedArrayParam, vectorParam, arenaParam);
 

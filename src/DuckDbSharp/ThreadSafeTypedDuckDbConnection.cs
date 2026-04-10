@@ -87,7 +87,7 @@ namespace DuckDbSharp
         }
 
 
-		public override IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object?[]? parameters)
+        public override IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object?[]? parameters)
         {
             InitOptions(ref options);
             IEnumerator enumerator;
@@ -105,7 +105,7 @@ namespace DuckDbSharp
         }
 
         private static MethodInfo? EnumerableCast;
-        
+
         private IEnumerable ProduceEnumerable(IEnumerator enumerator)
         {
 

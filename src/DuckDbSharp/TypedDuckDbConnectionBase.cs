@@ -27,11 +27,11 @@ namespace DuckDbSharp
             this.conn = conn;
             this.database = database;
         }
-		public TypeGenerationContext TypeGenerationContext { get; set; } = TypeGenerationContext.Global;
+        public TypeGenerationContext TypeGenerationContext { get; set; } = TypeGenerationContext.Global;
 
         public CommandOptions DefaultCommandOptions { get; set; } = CommandOptions.NoStreaming; // Streaming uses less RAM, but can be slower
 
-		public DuckDbDatabase Database => database;
+        public DuckDbDatabase Database => database;
         public virtual void Dispose()
         {
             conn.Dispose();
@@ -60,7 +60,7 @@ namespace DuckDbSharp
         public IEnumerable<T> BatchLookup<T, TKey>(string selectAndFromOrTableName, string keyFieldName, IEnumerable<TKey> keys, string? additionalFilter = null, params object?[] parameters)
         {
             if (!selectAndFromOrTableName.Contains(' ')) selectAndFromOrTableName = "from " + selectAndFromOrTableName;
-            return Execute<T>($"{selectAndFromOrTableName} where {(additionalFilter != null ? ("(" + additionalFilter + ") and ") : null)} {keyFieldName} in (select k.Value from table_parameter_1() k)", [keys, ..parameters]);
+            return Execute<T>($"{selectAndFromOrTableName} where {(additionalFilter != null ? ("(" + additionalFilter + ") and ") : null)} {keyFieldName} in (select k.Value from table_parameter_1() k)", [keys, .. parameters]);
         }
 
         public abstract long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items);

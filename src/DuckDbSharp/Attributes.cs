@@ -9,7 +9,7 @@ namespace DuckDbSharp
         public bool IsBatched { get; set; }
         internal bool? IsScalar;
         public DuckDbFunctionAttribute()
-        { 
+        {
         }
         public DuckDbFunctionAttribute(bool isScalar)
         {
