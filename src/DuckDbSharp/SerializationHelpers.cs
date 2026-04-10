@@ -123,11 +123,7 @@ namespace DuckDbSharp
         }
 
 
-#if NET8_0_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public unsafe static TTo BitCast<TFrom, TTo>(TFrom value) where TFrom: unmanaged where TTo: unmanaged => Unsafe.BitCast<TFrom, TTo>(value);
-#else
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public unsafe static TTo BitCast<TFrom, TTo>(TFrom value) where TFrom : unmanaged where TTo : unmanaged => *(TTo*)&value;
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static uint SerializeEnum_32To32<T>(T e) where T : unmanaged => BitCast<T, uint>(e);
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ushort SerializeEnum_32To16<T>(T e) where T : unmanaged => (ushort)BitCast<T, uint>(e);
