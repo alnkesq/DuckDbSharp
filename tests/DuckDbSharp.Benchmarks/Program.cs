@@ -50,7 +50,7 @@ namespace DuckDbSharp.Benchmarks
         }
 
 
- 
+
     }
 
     public class DuckDbSharpQueryingBenchmark : IDisposable

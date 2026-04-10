@@ -45,7 +45,7 @@ namespace DuckDbSharp.Tests
             Assert.Equal("[{'col':{'a':1,'b':[2,3]}}]", Serialize(db.Execute("select {a: 1, b: [2, 3]} as col")));
         }
         [Fact]
-        public void CreateEnum() 
+        public void CreateEnum()
         {
             db.CreateEnum(typeof(SomeEnum));
             Assert.Equal(SomeEnum.A, db.ExecuteScalar<SomeEnum>("select 'A'::SomeEnum"));
@@ -128,7 +128,7 @@ namespace DuckDbSharp.Tests
         }
 
         [Fact]
-        public void QueryVariousTypes() 
+        public void QueryVariousTypes()
         {
             Assert.Equal("[{'a':1,'b':[2,3],'c':'c','d':[{'f1':'v1','f2':2,'f3':null},{'f1':'v11','f2':22,'f3':'v3'}],'e':'2009-01-01T00:00:00Z'}]", Serialize(db.Execute("select 1 as a, [2, 3] as b, 'c' as c, [{f1: 'v1', f2: 2, f3: null}, {f1: 'v11', f2: 22, f3: 'v3'}] as d, '2009-01-01'::timestamp as e")));
         }
@@ -225,7 +225,7 @@ namespace DuckDbSharp.Tests
     }
 
     enum SomeEnum
-    { 
+    {
         A,
         B,
     }

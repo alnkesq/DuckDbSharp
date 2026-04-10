@@ -41,12 +41,12 @@ namespace DuckDbSharp.Tests
         [Fact]
         public static void UuidComparisons()
         {
-            var longs = new ulong[] 
-            { 
-                ulong.MinValue, 
+            var longs = new ulong[]
+            {
+                ulong.MinValue,
                 ulong.MaxValue,
-                unchecked((ulong)long.MinValue), 
-                long.MaxValue, 
+                unchecked((ulong)long.MinValue),
+                long.MaxValue,
                 1UL,
                 0xFFUL,
                 0x1UL << 8,
