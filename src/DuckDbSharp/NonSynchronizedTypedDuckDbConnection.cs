@@ -1,5 +1,4 @@
 using DuckDbSharp.Bindings;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 

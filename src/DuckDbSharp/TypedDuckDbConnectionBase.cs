@@ -1,7 +1,6 @@
 using DuckDbSharp.Bindings;
 using DuckDbSharp.Functions;
 using DuckDbSharp.Reflection;
-using DuckDbSharp.Types;
 using System;
 using System.Collections;
 using System.Collections.Generic;
