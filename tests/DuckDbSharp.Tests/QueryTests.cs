@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using DuckDbSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;

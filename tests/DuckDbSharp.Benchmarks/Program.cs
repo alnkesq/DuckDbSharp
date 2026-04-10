@@ -1,14 +1,12 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using ProtoMemberAttribute = ProtoBuf.ProtoMemberAttribute;
-using DuckDbSharp;
-using System.Data;
-using System.IO;
-using System.Data.Common;
 using Dapper;
-using System.Collections.Generic;
+using DuckDbSharp;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using ProtoMemberAttribute = ProtoBuf.ProtoMemberAttribute;
 
 namespace DuckDbSharp.Benchmarks
 {
