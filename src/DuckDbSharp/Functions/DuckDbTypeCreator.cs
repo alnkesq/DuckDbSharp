@@ -38,14 +38,14 @@ namespace DuckDbSharp.Functions
 
             var d = LogicalTypesCache.TryGetValue(t, out var v) ? v : LogicalTypesCache.GetOrAdd(t, _ =>
             {
-                typesBeingCreated ??= new();
+                typesBeingCreated ??= [];
                 typesBeingCreated.Add(t);
                 nint r;
                 try
                 {
                     r = (nint)CreateLogicalTypeCore(t, typesBeingCreated);
                 }
-                catch (Exception ex) when (!(ex is RecursiveTypeException))
+                catch (Exception ex) when (ex is not RecursiveTypeException)
                 {
                     throw new Exception($"Error while creating DuckDB type for {t}: {ex.Message}", ex);
                 }

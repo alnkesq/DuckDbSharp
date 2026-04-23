@@ -4,7 +4,7 @@ namespace DuckDbSharp.Reflection
 {
     public record struct QueryParameterInfo(string? Name, PossiblyUnresolvedType Type)
     {
-        public object GetExampleValue(CodeGenerationOptions options)
+        public readonly object GetExampleValue(CodeGenerationOptions options)
         {
             var t = options?.ResolveType(Type) ?? Type.Type!;
             if (t.IsValueType) return Activator.CreateInstance(t)!;

@@ -361,7 +361,7 @@ namespace DuckDbSharp
         public static void ReleaseArray<T>(T[] array) => ArrayPool<T>.Shared.Return(array, RuntimeHelpers.IsReferenceOrContainsReferences<T>());
 
         [DebuggerStepThrough]
-        public static T[] CreateArray<T>(int length) => length == 0 ? Array.Empty<T>() : new T[length];
+        public static T[] CreateArray<T>(int length) => length == 0 ? [] : new T[length];
 
 
         public static TBuffer CopyToFixedLengthArray<TBuffer, TItem>(TItem[] source, int offset, int length) where TBuffer : new()

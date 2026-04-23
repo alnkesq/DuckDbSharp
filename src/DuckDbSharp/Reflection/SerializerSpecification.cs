@@ -27,7 +27,7 @@ namespace DuckDbSharp.Reflection
             var closeParens = name.IndexOf(')');
             var sql = File.ReadAllText(path);
             if (openParens != -1 != (closeParens != -1)) throw new ArgumentException();
-            QueryParameterInfo[] parameters = Array.Empty<QueryParameterInfo>();
+            QueryParameterInfo[] parameters = [];
             if (openParens != -1)
             {
                 var paramString = name.Substring(openParens + 1, closeParens - openParens - 1).Trim();

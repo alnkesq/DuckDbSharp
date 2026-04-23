@@ -127,7 +127,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !SerializationHelpers.IsDefaultStructValue(objects[rowId].WithNullishDefault))
                 {
                     subobjects[rowId] = objects[rowId].WithNullishDefault;
@@ -202,7 +203,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if (SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null))
+                if (SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null))
                 {
                     subobjects[rowId] = objects[rowId].SomeStruct;
                 }
@@ -276,7 +278,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     objects[rowId].SomeOptionalStruct.HasValue)
                 {
                     subobjects[rowId] = (DuckDbSharp.FuzzingTypes.SomeStruct?)objects[rowId].SomeOptionalStruct.Value;
@@ -435,7 +438,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].EvenInner == null))
                 {
                     subobjects[rowId] = objects[rowId].EvenInner;
@@ -479,7 +483,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfIntInner(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             int[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -492,7 +496,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfIntInner == null))
                 {
                     sublist = objects[rowId].ListOfIntInner;
@@ -517,7 +522,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfIntInner == null))
                 {
                     sublist = objects[rowId].ListOfIntInner;
@@ -569,7 +575,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfOptIntInner(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             int?[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -582,7 +588,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptIntInner == null))
                 {
                     sublist = objects[rowId].ListOfOptIntInner;
@@ -607,7 +614,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptIntInner == null))
                 {
                     sublist = objects[rowId].ListOfOptIntInner;
@@ -632,7 +640,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfObjs(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             DuckDbSharp.FuzzingTypes.EvenInner[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -645,7 +653,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfObjs == null))
                 {
                     sublist = objects[rowId].ListOfObjs;
@@ -670,7 +679,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfObjs == null))
                 {
                     sublist = objects[rowId].ListOfObjs;
@@ -743,7 +753,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfNonNullStructs(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             DuckDbSharp.FuzzingTypes.EvenInnerStruct[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -756,7 +766,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfNonNullStructs == null))
                 {
                     sublist = objects[rowId].ListOfNonNullStructs;
@@ -781,7 +792,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfNonNullStructs == null))
                 {
                     sublist = objects[rowId].ListOfNonNullStructs;
@@ -854,7 +866,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_InnerObj_ListOfOptionalStructs(nint vectorPtr, DuckDbSharp.FuzzingTypes.InnerObj[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -867,7 +879,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptionalStructs == null))
                 {
                     sublist = objects[rowId].ListOfOptionalStructs;
@@ -892,7 +905,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptionalStructs == null))
                 {
                     sublist = objects[rowId].ListOfOptionalStructs;
@@ -956,7 +970,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].InnerObj == null))
                 {
                     subobjects[rowId] = objects[rowId].InnerObj;
@@ -1001,7 +1016,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfInt(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             int[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1014,7 +1029,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfInt == null))
                 {
                     sublist = objects[rowId].ListOfInt;
@@ -1039,7 +1055,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfInt == null))
                 {
                     sublist = objects[rowId].ListOfInt;
@@ -1064,7 +1081,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfOptInt(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             int?[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1077,7 +1094,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptInt == null))
                 {
                     sublist = objects[rowId].ListOfOptInt;
@@ -1102,7 +1120,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptInt == null))
                 {
                     sublist = objects[rowId].ListOfOptInt;
@@ -1155,7 +1174,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfObjs(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             DuckDbSharp.FuzzingTypes.EvenInner[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1168,7 +1187,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfObjs == null))
                 {
                     sublist = objects[rowId].ListOfObjs;
@@ -1193,7 +1213,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfObjs == null))
                 {
                     sublist = objects[rowId].ListOfObjs;
@@ -1218,7 +1239,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfNonNullStructs(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             DuckDbSharp.FuzzingTypes.EvenInnerStruct[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1231,7 +1252,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfNonNullStructs == null))
                 {
                     sublist = objects[rowId].ListOfNonNullStructs;
@@ -1256,7 +1278,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfNonNullStructs == null))
                 {
                     sublist = objects[rowId].ListOfNonNullStructs;
@@ -1281,7 +1304,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListOfOptionalStructs(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             DuckDbSharp.FuzzingTypes.EvenInnerStruct?[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1294,7 +1317,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptionalStructs == null))
                 {
                     sublist = objects[rowId].ListOfOptionalStructs;
@@ -1319,7 +1343,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListOfOptionalStructs == null))
                 {
                     sublist = objects[rowId].ListOfOptionalStructs;
@@ -1344,7 +1369,7 @@ namespace DuckDbFuzzingGeneratedTypes
 
         private static void SerializeField_DuckDbSharp_FuzzingTypes_MyClass_ListWithNullishDefault(nint vectorPtr, DuckDbSharp.FuzzingTypes.MyClass[] objects, int objectsLength, nint parentValidity, DuckDbSharp.Bindings.NativeArenaSlim arena)
         {
-            int innerRelIdx, sublistLength;
+            int sublistLength, innerRelIdx;
             DuckDbSharp.FuzzingTypes.WithNullishDefault[] sublist;
             var totalCount = 0;
             var offsetsAndLengths = SerializationHelpers.GetVectorData<DuckDbSharp.Types.OffsetAndCount>(vectorPtr, objectsLength);
@@ -1357,7 +1382,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListWithNullishDefault == null))
                 {
                     sublist = objects[rowId].ListWithNullishDefault;
@@ -1382,7 +1408,8 @@ namespace DuckDbFuzzingGeneratedTypes
                     break;
                 }
             
-                if ((SerializationHelpers.IsPresent(parentValidity, rowId) && !(objects[rowId] == null)) &&
+                if ((SerializationHelpers.IsPresent(parentValidity, rowId) &&
+                    !(objects[rowId] == null)) &&
                     !(objects[rowId].ListWithNullishDefault == null))
                 {
                     sublist = objects[rowId].ListWithNullishDefault;
@@ -2667,3 +2694,4 @@ namespace DuckDbFuzzingGeneratedTypes
 
     }
 }
+

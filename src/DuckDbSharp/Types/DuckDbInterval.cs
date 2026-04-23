@@ -14,7 +14,7 @@ namespace DuckDbSharp.Types
             return new DuckDbInterval(0, (int)(totalMicros / MicrosPerDay), totalMicros % MicrosPerDay);
         }
 
-        public TimeSpan ToTimeSpan()
+        public readonly TimeSpan ToTimeSpan()
         {
             if (Months != 0) throw new NotSupportedException($"DuckDB INTERVAL cannot be converted to System.TimeSpan due to non-zero number of months, which have a non-fixed duration: {this}. Consider using the native {nameof(DuckDbInterval)} type.");
             var totalMicros =
@@ -23,7 +23,7 @@ namespace DuckDbSharp.Types
             return new TimeSpan(totalMicros * TimeSpan.TicksPerMicrosecond);
         }
 
-        public TimeSpan ToTimeSpanWithPossiblePrecisionLoss()
+        public readonly TimeSpan ToTimeSpanWithPossiblePrecisionLoss()
         {
             var totalMicros =
                 Micros +

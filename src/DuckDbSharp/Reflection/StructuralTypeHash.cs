@@ -58,9 +58,9 @@ namespace DuckDbSharp.Reflection
             return new StructuralTypeHash(s[0], s[1]);
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return Convert.ToHexString(MemoryMarshal.Cast<UInt128, byte>(new[] { High, Low })).ToLowerInvariant();
+            return Convert.ToHexString(MemoryMarshal.Cast<UInt128, byte>([High, Low])).ToLowerInvariant();
         }
     }
 }

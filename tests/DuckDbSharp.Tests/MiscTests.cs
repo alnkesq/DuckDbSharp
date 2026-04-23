@@ -15,7 +15,7 @@ namespace DuckDbSharp.Tests
         public static void ReadParquet()
         {
             // Generated using select a.* from (select unnest([{a:1, b: 'b'}, {a:2, b:'bb'}]) as a)
-            Assert.Equal(new[] { new SomeParquetRow(1, "b"), new SomeParquetRow(2, "bb") }, DuckDbUtils.QueryParquet<SomeParquetRow>("../../../data/1.parquet", "select * from data order by a"));
+            Assert.Equal([new SomeParquetRow(1, "b"), new SomeParquetRow(2, "bb")], DuckDbUtils.QueryParquet<SomeParquetRow>("../../../data/1.parquet", "select * from data order by a"));
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace DuckDbSharp.Tests
             {
                 foreach (var b in longs)
                 {
-                    var bytes = MemoryMarshal.AsBytes<ulong>(new[] { a, b });
+                    var bytes = MemoryMarshal.AsBytes<ulong>([a, b]);
                     var guid = new Guid(bytes, true);
                     guids.Add(guid);
                 }

@@ -8,9 +8,9 @@ namespace DuckDbSharp
 {
     public class DuckDbDatabase
     {
-        private readonly static Dictionary<string, DuckDbDatabase> dbs = new();
-        internal List<EnumerableParameterSlot?> EnumerableParameterSlots = new();
-        internal HashSet<Type> didRegisterFunctionsInTypes = new();
+        private readonly static Dictionary<string, DuckDbDatabase> dbs = [];
+        internal List<EnumerableParameterSlot?> EnumerableParameterSlots = [];
+        internal HashSet<Type> didRegisterFunctionsInTypes = [];
         internal List<IDisposable>? ToDispose;
         private OwnedDuckDbDatabase database;
         private int usageCount;
@@ -21,8 +21,8 @@ namespace DuckDbSharp
             this.database = database;
         }
 
-        internal Dictionary<string, object> RegisteredTableFunctions = new();
-        internal Dictionary<string, object> RegisteredScalarFunctions = new();
+        internal Dictionary<string, object> RegisteredTableFunctions = [];
+        internal Dictionary<string, object> RegisteredScalarFunctions = [];
         internal string? Path;
 
         internal unsafe static OwnedDuckDbConnection AcquireConnection(string? path, out DuckDbDatabase ownerDb, int timeoutMs = 30000)

@@ -70,7 +70,7 @@ namespace DuckDbSharp.Functions
                 else // Scalar function returning a single primitive type.
                 {
                     finalElementType = typeof(Box<>).MakeGenericType(methodReturnType);
-                    var valueField = finalElementType.GetField(nameof(Box<object>.Value), BindingFlags.Public | BindingFlags.Instance)!;
+                    var valueField = finalElementType.GetField(nameof(Box<>.Value), BindingFlags.Public | BindingFlags.Instance)!;
                     transformer = ret =>
                     {
                         var singleton = ret;
@@ -109,7 +109,7 @@ namespace DuckDbSharp.Functions
             if (batched) parameters = parameters.Take(parameters.Length - 1).Select(x => x.GetElementType()!).ToArray();
             if (parameters.Length == 0) throw new NotSupportedException("Scalar functions with zero arguments are not supported.");
 
-            Func<object[], object?> baseInvoke = args => method.Invoke(delegateTarget, args);
+            object? baseInvoke(object[] args) => method.Invoke(delegateTarget, args);
             var funcInfo = new FunctionInfo
             {
                 Name = name,
@@ -216,7 +216,7 @@ namespace DuckDbSharp.Functions
                 // HACK: we also key by destination vector pointer, otherwise if we call two string functions for the same row, we overwrite the data for the first invocation.
                 t_scalarFunctionArenaForRecursionLevel ??= new Dictionary<nint, NativeArenaSlim>[64];
                 ref Dictionary<nint, NativeArenaSlim>? arenaDict = ref t_scalarFunctionArenaForRecursionLevel[t_scalarFunctionRecursionLevel - 1];
-                arenaDict ??= new();
+                arenaDict ??= [];
                 if (!arenaDict.TryGetValue((nint)vector, out var arena))
                 {
 #pragma warning disable CA2000 // Dispose objects before losing scope
@@ -268,7 +268,7 @@ namespace DuckDbSharp.Functions
             using var tableFunctionName = (ScopedString)name;
             var parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
 
-            Func<object[], object> baseInvoke = args => method.Invoke(delegateTarget, args)!;
+            object baseInvoke(object[] args) => method.Invoke(delegateTarget, args)!;
             var funcInfo = new FunctionInfo
             {
                 Name = name,
@@ -449,9 +449,9 @@ namespace DuckDbSharp.Functions
                     if (ret is Array)
                     {
                         if (ret.GetType() == typeof(object[]))
-                            initCtx.Enumerator = ((IEnumerable)(EnumerateObjectArrayAsGenericMethod.MakeGenericMethod(bind.FinalElementType!).Invoke(null, new object[] { ret })!)).GetEnumerator();
+                            initCtx.Enumerator = ((IEnumerable)(EnumerateObjectArrayAsGenericMethod.MakeGenericMethod(bind.FinalElementType!).Invoke(null, [ret])!)).GetEnumerator();
                         else
-                            initCtx.Enumerator = ((IEnumerable)(EnumerateArrayGenericMethod.MakeGenericMethod(ret.GetType().GetElementType()!).Invoke(null, new object[] { ret })!)).GetEnumerator();
+                            initCtx.Enumerator = ((IEnumerable)(EnumerateArrayGenericMethod.MakeGenericMethod(ret.GetType().GetElementType()!).Invoke(null, [ret])!)).GetEnumerator();
                     }
                     else initCtx.Enumerator = ((IEnumerable)ret).GetEnumerator();
                 }

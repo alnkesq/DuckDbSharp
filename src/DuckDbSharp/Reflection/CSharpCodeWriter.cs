@@ -131,8 +131,8 @@ namespace DuckDbSharp.Reflection
             writer.Write(v);
         }
 
-        internal readonly static (Type Type, string CSharp)[] PrimitiveTypes = new[]
-        {
+        internal readonly static (Type Type, string CSharp)[] PrimitiveTypes =
+        [
             (typeof(void), "void"),
             (typeof(string), "string"),
             (typeof(bool), "bool"),
@@ -148,7 +148,7 @@ namespace DuckDbSharp.Reflection
             (typeof(double), "double"),
             (typeof(nint), "nint"),
             (typeof(nuint), "nuint"),
-        };
+        ];
 
         public void WriteLine(string str)
         {

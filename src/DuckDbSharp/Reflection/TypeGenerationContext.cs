@@ -15,10 +15,10 @@ namespace DuckDbSharp.Reflection
     {
         public readonly ModuleBuilder ModuleBuilder;
         public readonly AssemblyBuilder AssemblyBuilder;
-        private readonly HashSet<string> UsedNames = new();
+        private readonly HashSet<string> UsedNames = [];
         internal ConcurrentDictionary<TypeKey, Type>? ClrTypeCache;
         public string Namespace = "GeneratedDuckDbTypes";
-        private bool AllowInvalidCSharpIdentifiers;
+        private readonly bool AllowInvalidCSharpIdentifiers;
         public TypeGenerationContext(bool forNullnessCheck = false, bool allowInvalidCSharpIdentifiers = false)
         {
             var asmnameStr = "DuckDbDynamic_";
@@ -26,7 +26,7 @@ namespace DuckDbSharp.Reflection
             AssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(asmname, AssemblyBuilderAccess.Run);
             ModuleBuilder = AssemblyBuilder.DefineDynamicModule(asmnameStr);
             this.AllowInvalidCSharpIdentifiers = allowInvalidCSharpIdentifiers;
-            if (forNullnessCheck) Paths = new();
+            if (forNullnessCheck) Paths = [];
             else ClrTypeCache = new();
         }
 
@@ -125,10 +125,10 @@ namespace DuckDbSharp.Reflection
                 var fieldBuilder = classBuilder.DefineField(name, type, FieldAttributes.Public);
                 if (!type.IsValueType)
                 {
-                    if (couldBeNull) fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(MaybeNullAttribute).GetConstructor([])!, Array.Empty<object>()));
-                    else fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(NotNullAttribute).GetConstructor([])!, Array.Empty<object>()));
+                    if (couldBeNull) fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(MaybeNullAttribute).GetConstructor([])!, []));
+                    else fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(NotNullAttribute).GetConstructor([])!, []));
                 }
-                fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(DuckDbIncludeAttribute).GetConstructor([typeof(string)])!, new object[] { name }));
+                fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(DuckDbIncludeAttribute).GetConstructor([typeof(string)])!, [name]));
             }
             var t = classBuilder.CreateType();
             Paths?.Add((t, typeKey, path));
@@ -151,8 +151,8 @@ namespace DuckDbSharp.Reflection
 
         internal static DuckDbStructuralType? TryGetPossiblyCachedResultStructuralType(TypedDuckDbConnectionBase conn, string sql, QueryParameterInfo[]? parameters, CodeGenerationOptions options)
         {
-            var parameterTypeNames = parameters?.Select(x => options.ResolveType(x.Type).FullName!).ToArray() ?? Array.Empty<string>();
-            var cached = options.QueryTypeCache!.Queries.SingleOrDefault(x => x.Sql == sql && (x.ParameterTypes ?? Array.Empty<string>()).SequenceEqual(parameterTypeNames));
+            var parameterTypeNames = parameters?.Select(x => options.ResolveType(x.Type).FullName!).ToArray() ?? [];
+            var cached = options.QueryTypeCache!.Queries.SingleOrDefault(x => x.Sql == sql && (x.ParameterTypes ?? []).SequenceEqual(parameterTypeNames));
 
             DuckDbStructuralType structuralType;
 

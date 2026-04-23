@@ -7,7 +7,7 @@ namespace DuckDbSharp.Bindings
         public static implicit operator duckdb_result*(OwnedDuckDbResult ptr) => ptr.Pointer;
         //public static explicit operator OwnedDuckDbResult(duckdb_result* ptr) => new OwnedDuckDbResult(ptr);
         public duckdb_result* Pointer;
-        public nint PointerAsIntPtr => (nint)Pointer;
+        public readonly nint PointerAsIntPtr => (nint)Pointer;
         public event Action? Disposed;
         public OwnedDuckDbResult(duckdb_result* ptr)
         {

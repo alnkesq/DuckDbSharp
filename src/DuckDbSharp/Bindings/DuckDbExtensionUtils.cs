@@ -53,7 +53,7 @@ namespace DuckDbSharp.Bindings
         [Obsolete("Empty params argument. If this is intentional, consider passing Array.Empty<Assembly>().")]
         public static void BridgeInit(_duckdb_database db)
         {
-            BridgeInit(db, Array.Empty<Assembly>());
+            BridgeInit(db, []);
         }
         public static void BridgeInit(_duckdb_database db, params Assembly[] registerFunctionsInAssemblies)
         {
@@ -66,7 +66,7 @@ namespace DuckDbSharp.Bindings
                     FunctionUtils.RegisterFunctions(conn, item);
                 }
 
-                var dlls = GetMandatoryEnvironmentVariable("DUCKDBSHARP_USER_ASSEMBLY_PATH").Split(new[] { ';', ',' }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
+                var dlls = GetMandatoryEnvironmentVariable("DUCKDBSHARP_USER_ASSEMBLY_PATH").Split([';', ','], StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
                 /*
                 var folders = dlls.Select(x => Path.GetDirectoryName(Path.GetFullPath(x))).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
                 AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>

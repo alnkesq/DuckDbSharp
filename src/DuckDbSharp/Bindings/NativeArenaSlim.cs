@@ -20,7 +20,7 @@ namespace DuckDbSharp.Bindings
 
         }
 
-        private List<(nuint Start, int Length)> chunks = new();
+        private List<(nuint Start, int Length)> chunks = [];
         private byte* nextAllocation;
         private byte* nextAllocationThreshold;
 

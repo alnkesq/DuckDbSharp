@@ -35,7 +35,7 @@ namespace DuckDbSharp.Tests
         [Fact]
         public void ExecuteQuerySingleColumn()
         {
-            Assert.Equal(new int[] { 1, 2, 3, 4 }, db.Execute<int>("select unnest([1, 2, 3, ?])", 4));
+            Assert.Equal([1, 2, 3, 4], db.Execute<int>("select unnest([1, 2, 3, ?])", 4));
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace DuckDbSharp.Tests
         {
             db.CreateTable<SomeRow>("t");
             db.Insert("t", new SomeRow { Col1 = 1, Col2 = 2 });
-            db.InsertRange("t", new[] { new SomeRow { Col1 = 3, Col2 = 4 } });
+            db.InsertRange("t", [new SomeRow { Col1 = 3, Col2 = 4 }]);
             Assert.Equal("[{'Col1':1,'Col2':2},{'Col1':3,'Col2':4}]", Serialize(db.Execute<SomeRow>("select * from t order by Col1")));
         }
 
@@ -101,7 +101,7 @@ namespace DuckDbSharp.Tests
         public void RegisterTableFunctionListOfScalars()
         {
             db.RegisterTableFunction("myfunc", (int a, string b) => new[] { a, int.Parse(b) });
-            Assert.Equal(new[] { 7, 8 }, db.Execute<int>("select v.Value from myfunc(?, ?) v order by v", 7, "8"));
+            Assert.Equal([7, 8], db.Execute<int>("select v.Value from myfunc(?, ?) v order by v", 7, "8"));
         }
 
         [Fact]
@@ -135,13 +135,13 @@ namespace DuckDbSharp.Tests
         [Fact]
         public void ListParameterAsTable()
         {
-            Assert.Equal(new[] { 1, 2, 3 }, db.Execute<int>("select t.Value from table_parameter_1() t", new object[] { new int[] { 1, 2, 3 } }));
+            Assert.Equal([1, 2, 3], db.Execute<int>("select t.Value from table_parameter_1() t", [new int[] { 1, 2, 3 }]));
         }
 
         [Fact]
         public void ListParameterAsArray()
         {
-            Assert.Equal(new[] { 1, 2, 3 }, db.ExecuteScalar<int[]>("select array_transform(array_parameter_1(), x -> x.Value)", new object[] { new int[] { 1, 2, 3 } }));
+            Assert.Equal([1, 2, 3], db.ExecuteScalar<int[]>("select array_transform(array_parameter_1(), x -> x.Value)", [new int[] { 1, 2, 3 }]));
         }
 
 
@@ -154,7 +154,7 @@ namespace DuckDbSharp.Tests
             var json2 = Serialize(db.Execute("select * from ReturnsSingleMyResult()"), true);
             //File.WriteAllText("../../../data/2.json", json2);
             Assert.Equal(File.ReadAllText("../../../data/2.json"), json2);
-            Assert.Equal(new[] { 0, 1, 2, 3, 4 }, db.Execute<int>("select Value from ReturnsInts()"));
+            Assert.Equal([0, 1, 2, 3, 4], db.Execute<int>("select Value from ReturnsInts()"));
             Assert.Equal("[{'SomeVal':5}]", Serialize(db.Execute("select * from ReturnsAnonymousObjects()")));
             Assert.Equal("[{'Str':'6'}]", Serialize(db.Execute("select ReturnsScalarString(6) as Str")));
             var json3 = Serialize(db.Execute<MyResult>("select * from ReturnsComplexObjects(3, 'a')"), true);
@@ -169,7 +169,7 @@ namespace DuckDbSharp.Tests
         [DuckDbFunction(isScalar: false)] static int ReturnsInt() => 5;
         [DuckDbFunction(isScalar: false)] static MyResult ReturnsSingleMyResult() => new MyResult();
         [DuckDbFunction] static IEnumerable<int> ReturnsInts() => Enumerable.Range(0, 5);
-        [DuckDbFunction] public static IEnumerable<object> ReturnsAnonymousObjects() => new[] { new { SomeVal = 5 } };
+        [DuckDbFunction] public static IEnumerable<object> ReturnsAnonymousObjects() => [new { SomeVal = 5 }];
         [DuckDbFunction] static string ReturnsScalarString(int a) => a.ToString();
 
         [DuckDbFunction]
@@ -209,7 +209,7 @@ namespace DuckDbSharp.Tests
 
         private static string Serialize(object obj, bool expanded = false)
         {
-            if (obj is IEnumerable ienu && !TypeSniffedEnumerable.IsFalseEnumerable(ienu.GetType()) && !(obj is Array))
+            if (obj is IEnumerable ienu && !TypeSniffedEnumerable.IsFalseEnumerable(ienu.GetType()) && obj is not Array)
             {
                 obj = ienu.Cast<object>().ToArray();
             }
@@ -245,17 +245,17 @@ namespace DuckDbSharp.Tests
         public StringSplitOptions SplitFlags;
         public DateTime SomeDate;
         public DateTime? SomeOptionalDate;
-        public List<int>? FListInt = new List<int>() { 4, 5, 6 };
-        public List<List<int>>? FListListInt = new List<List<int>>()
-            {
-                new List<int>() { 33, 44 },
-                new List<int>() { 56 }
-            };
-        public List<Substruct> FListSub = new List<Substruct>()
-            {
+        public List<int>? FListInt = [4, 5, 6];
+        public List<List<int>>? FListListInt =
+            [
+                [33, 44],
+                [56]
+            ];
+        public List<Substruct> FListSub =
+            [
                 new Substruct { Sub1 = 67, Sub2 = 68 },
                 new Substruct { Sub1 = 6, Sub2 = 99 },
-            };
+            ];
         public Substruct? FSub = new Substruct { Sub1 = 6, Sub2 = 44 };
     }
 

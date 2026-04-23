@@ -12,14 +12,17 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
+#pragma warning disable IDE0028 // Collection initialization can be simplified (avoid splitting List<Expression>.Add() on conditionals)
+#pragma warning disable CA1859 // Change return type of method from Expression to BlockExpression for improved performance
+
 namespace DuckDbSharp.Reflection
 {
     internal class SerializerCreationContext
     {
 
 
-        public static List<DuckDbPrimitiveTypeConverter> PrimitiveConverters = new()
-        {
+        public static List<DuckDbPrimitiveTypeConverter> PrimitiveConverters =
+        [
             new(typeof(bool), DUCKDB_TYPE.DUCKDB_TYPE_BOOLEAN),
 
             new(typeof(sbyte), DUCKDB_TYPE.DUCKDB_TYPE_TINYINT),
@@ -56,7 +59,7 @@ namespace DuckDbSharp.Reflection
             new(typeof(byte[]), DUCKDB_TYPE.DUCKDB_TYPE_BLOB, nameof(SerializationHelpers.SerializeByteArray), nameof(SerializationHelpers.DeserializeByteArray)),
             new(typeof(Memory<byte>), DUCKDB_TYPE.DUCKDB_TYPE_BLOB, nameof(SerializationHelpers.SerializeMemory), nameof(SerializationHelpers.DeserializeMemory)),
             new(typeof(ReadOnlyMemory<byte>), DUCKDB_TYPE.DUCKDB_TYPE_BLOB, nameof(SerializationHelpers.SerializeReadOnlyMemory), nameof(SerializationHelpers.DeserializeReadOnlyMemory)),
-        };
+        ];
 
         private readonly static MethodInfo GetStructureChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetStructureChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetSublistChildVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetSublistChildVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
@@ -67,7 +70,7 @@ namespace DuckDbSharp.Reflection
         private static readonly MethodInfo GetVectorDataMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorData), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!;
         private static readonly MethodInfo AssignSpanItemMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.AssignSpanItem), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!;
         private static readonly MethodInfo ReadSpanItemMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.ReadSpanItem), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!;
-        private static readonly ConstructorInfo OffsetAndCountCtor = typeof(OffsetAndCount).GetConstructor(new[] { typeof(int), typeof(int) })!;
+        private static readonly ConstructorInfo OffsetAndCountCtor = typeof(OffsetAndCount).GetConstructor([typeof(int), typeof(int)])!;
         private readonly static MethodInfo GetChunkSizeMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetChunkSize), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo NewSkipCtorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.NewSkipCtor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetTotalItemsMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetTotalItems), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
@@ -141,7 +144,7 @@ namespace DuckDbSharp.Reflection
             {
                 hasValue = Expression.Not(Expression.ReferenceEqual(maybeNullable, Expression.Constant(null, maybeNullable.Type)));
             }
-            else if (Nullable.GetUnderlyingType(maybeNullable.Type) is { } nonNullableInputType)
+            else if (Nullable.GetUnderlyingType(maybeNullable.Type) != null)
             {
 
                 hasValue = Expression.Property(maybeNullable, "HasValue");
@@ -466,7 +469,7 @@ namespace DuckDbSharp.Reflection
             }
             else
             {
-                newSublist = Expression.New(sublist.Type.GetConstructor(new[] { typeof(int) })!, sublistSize);
+                newSublist = Expression.New(sublist.Type.GetConstructor([typeof(int)])!, sublistSize);
                 addToSublist = Expression.Call(sublist, "Add", null, copyFrom);
             }
 
@@ -827,7 +830,7 @@ namespace DuckDbSharp.Reflection
             Expression serializedValue = nonNullValue;
             if (primitiveConverter.SerializeMethod != null)
             {
-                serializedValue = Expression.Call(null, primitiveConverter.SerializeMethod, primitiveConverter.NeedsArena ? new[] { nonNullValue, paramArena } : new[] { nonNullValue });
+                serializedValue = Expression.Call(null, primitiveConverter.SerializeMethod, primitiveConverter.NeedsArena ? [nonNullValue, paramArena] : [nonNullValue]);
                 if (primitiveConverter.IsEnum)
                 {
                     var clrUnderlyingType = Enum.GetUnderlyingType(primitiveConverter.ClrType);
@@ -949,7 +952,7 @@ namespace DuckDbSharp.Reflection
 
         private static bool HasEmptyCtor(Type elementType, out ConstructorInfo ctor)
         {
-            ctor = elementType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, Array.Empty<Type>())!;
+            ctor = elementType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, [])!;
             if (ctor == null) return false;
             return true;
             /*
@@ -997,7 +1000,7 @@ namespace DuckDbSharp.Reflection
             }
             body.Add(CreateReleaseArrayExpression(buffer));
             body.Add(itemCount);
-            var bodyBlock = Expression.Block(new[] { itemCount, buffer, typedEnumerator }, body);
+            var bodyBlock = Expression.Block([itemCount, buffer, typedEnumerator], body);
 
             return CreateMethod("SerializeColumns_" + CreateSpeakableTypeName(elementType, null), typeof(RootSerializer), elementType, null, bodyBlock, enumeratorParam, chunkParam, arenaParam);
 
@@ -1016,7 +1019,7 @@ namespace DuckDbSharp.Reflection
                 CreateCall(serializer, vectorParam, array, Expression.ArrayLength(array), Expression.Constant((nint)0), arenaParam)
             };
 
-            var bodyBlock = Expression.Block(new[] { array }, body);
+            var bodyBlock = Expression.Block([array], body);
             return CreateMethod("SerializeVector_" + CreateSpeakableTypeName(elementType, null), typeof(RootVectorSerializer), elementType, null, bodyBlock, untypedArrayParam, vectorParam, arenaParam);
 
         }
@@ -1160,7 +1163,7 @@ namespace DuckDbSharp.Reflection
 
         private readonly static MethodInfo GetReferenceToNullableWrappedValueMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetReferenceToNullableWrappedValue), BindingFlags.Public | BindingFlags.Static)!;
 
-        private readonly string[] SetFieldParameterNames = new[] { "arr", "idx", "val" };
+        private readonly string[] SetFieldParameterNames = ["arr", "idx", "val"];
         private Delegate CreateIlMethod(string name, Type returnType, Type[] parameterTypes, Action<ILGenerator> emitter, Func<string> csharpVersion, string[] csharpParameterNames)
         {
             /*
@@ -1243,7 +1246,7 @@ namespace DuckDbSharp.Reflection
         //private AssemblyBuilder? assemblyBuilder;
         //private ModuleBuilder? moduleBuilder;
 
-        private static MethodInfo GetDataChunkVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetDataChunkVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
+        private static readonly MethodInfo GetDataChunkVectorMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetDataChunkVector), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo GetVectorValidityMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorValidity), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
         private readonly static MethodInfo GetVectorValidityAndSetAllMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.GetVectorValidityAndSetAll), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;

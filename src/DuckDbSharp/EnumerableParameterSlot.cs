@@ -7,7 +7,7 @@ namespace DuckDbSharp
     {
         internal int ParameterId;
         internal required FunctionInfo Function;
-        internal Dictionary<EnumerableParametersInvocationToken, object> ValueByQueryToken = new();
+        internal Dictionary<EnumerableParametersInvocationToken, object> ValueByQueryToken = [];
     }
 }
 

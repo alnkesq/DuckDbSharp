@@ -125,10 +125,8 @@ namespace DuckDbSharp.Benchmarks
         public void Setup()
         {
             ms = new MemoryStream();
-            using (var tw = new StreamWriter(ms, leaveOpen: true))
-            {
-                JsonSerializer.Serialize(tw, Program.ReadDataset());
-            }
+            using var tw = new StreamWriter(ms, leaveOpen: true);
+            JsonSerializer.Serialize(tw, Program.ReadDataset());
         }
 
         [Benchmark]

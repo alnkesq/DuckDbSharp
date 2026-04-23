@@ -34,6 +34,7 @@ namespace DuckDbSharp
         public virtual void Dispose()
         {
             conn.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public void Insert<T>(string destinationTableOrView, T item)
@@ -43,7 +44,7 @@ namespace DuckDbSharp
 
         public void Insert<T>(string? destinationSchema, string destinationTableOrView, T item)
         {
-            InsertRange(destinationSchema, destinationTableOrView, new[] { item });
+            InsertRange(destinationSchema, destinationTableOrView, [item]);
         }
         public long InsertRange<T>(string destinationTableOrView, IEnumerable<T> items)
         {
@@ -53,7 +54,7 @@ namespace DuckDbSharp
         public long DeleteRange<TKey>(string destinationTable, string keyFieldName, IEnumerable<TKey> keys)
         {
             if (keys.TryGetNonEnumeratedCount(out var count) && count == 0) return 0;
-            return ExecuteScalar<long>($"delete from {destinationTable} where {keyFieldName} in (select k.Value from table_parameter_1() k)", new object[] { keys });
+            return ExecuteScalar<long>($"delete from {destinationTable} where {keyFieldName} in (select k.Value from table_parameter_1() k)", [keys]);
         }
 
         public IEnumerable<T> BatchLookup<T, TKey>(string selectAndFromOrTableName, string keyFieldName, IEnumerable<TKey> keys, string? additionalFilter = null, params object?[] parameters)
@@ -193,7 +194,7 @@ namespace DuckDbSharp
 
         private void EnqueueFunctionDisposal(FunctionInfo obj)
         {
-            database.ToDispose ??= new();
+            database.ToDispose ??= [];
             database.ToDispose.Add(obj);
         }
 

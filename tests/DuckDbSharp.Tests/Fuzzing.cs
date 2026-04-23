@@ -230,11 +230,11 @@ namespace DuckDbSharp
             {
                 Connection = Connection,
                 GenerateAotSerializers = true,
-                Specifications = new SerializerSpecification[]
-                {
+                Specifications =
+                [
                     new(typeof(T)),
                     new("select * from myfunc()", "MyClassQuery", typeof(T))
-                },
+                ],
                 DestinationPath = @"..\..\..\FuzzingGenerated.cs",
                 Namespace = aotSerializersNamespace,
             });

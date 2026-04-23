@@ -26,7 +26,7 @@ namespace DuckDbSharp.Bindings
             }
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return Encoding.UTF8.GetString(Span);
         }

@@ -5,8 +5,8 @@ namespace DuckDbSharp.Reflection
 {
     internal class QueryTypeCache
     {
-        public List<QueryInfoCache> Queries { get; set; } = new();
-        public List<JsonStructuralType> Types { get; set; } = new();
+        public List<QueryInfoCache> Queries { get; set; } = [];
+        public List<JsonStructuralType> Types { get; set; } = [];
         public Dictionary<string, JsonStructuralType>? TypesById;
     }
 
