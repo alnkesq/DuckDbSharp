@@ -87,8 +87,7 @@ namespace DuckDbSharp
 
         protected unsafe void CheckDisposed()
         {
-            if (conn.Pointer == null)
-                throw new ObjectDisposedException(nameof(NonSynchronizedTypedDuckDbConnection));
+            ObjectDisposedException.ThrowIf(conn.Pointer == null, this);
         }
 
         public unsafe IReadOnlyList<FunctionInfo> RegisterFunctions(Assembly methodsInAssembly)
@@ -226,7 +225,7 @@ namespace DuckDbSharp
             }
             if (primaryKey == null)
             {
-                primaryKey = structureFields.Where(x => x!.ClrField!.GetCustomAttribute<KeyAttribute>() != null).Select(x => x!.DuckDbFieldName).ToArray();
+                primaryKey = structureFields.Where(x => Attribute.IsDefined(x!.ClrField!, typeof(KeyAttribute))).Select(x => x!.DuckDbFieldName).ToArray();
                 if (primaryKey.Length == 0) primaryKey = null;
             }
             if (primaryKey != null)

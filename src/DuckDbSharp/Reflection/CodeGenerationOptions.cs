@@ -40,7 +40,7 @@ namespace DuckDbSharp.Reflection
             var candidates = isFullName
                 ? assembliesForTypeNameLookup.Select(x => x.GetType(name, throwOnError: false)).WhereNonNull().ToArray()
                 : assembliesForTypeNameLookup.SelectMany(x => FunctionUtils.GetTypesBestEffort(x).Where(x => x.Name == name)).ToArray();
-            candidates = candidates.Where(x => x.GetCustomAttribute<DuckDbGeneratedTypeAttribute>() == null).ToArray();
+            candidates = candidates.Where(x => !Attribute.IsDefined(x, typeof(DuckDbGeneratedTypeAttribute))).ToArray();
             if (candidates.Length == 0) throw new ArgumentException($"Could not find a type named '{name}' in any of the provided assemblies.");
             if (candidates.Length == 1) return candidates[0]!;
             throw new InvalidOperationException($"Multiple types named '{name}' were found in the provided assemblies." + (!isFullName ? " Try specifying a namespace-qualified name instead." : null));

@@ -52,7 +52,7 @@ namespace DuckDbSharp.Reflection
         private Type CreateOrReuseType(string? nameHint, DuckDbStructuralType type, Func<Type> factory)
         {
             if (ClrTypeCache == null) return factory(); // nullness check phase: we don't want to reuse types.
-            return ClrTypeCache.GetOrAdd(type.GetTypeKey(nameHint), _ => factory());
+            return ClrTypeCache.GetOrAdd(type.GetTypeKey(nameHint), (_, factory) => factory(), factory);
         }
 
 

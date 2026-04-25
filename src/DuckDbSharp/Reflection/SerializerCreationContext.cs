@@ -17,6 +17,8 @@ using System.Runtime.CompilerServices;
 
 namespace DuckDbSharp.Reflection
 {
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "MA0106:Avoid closure by using an overload with the 'factoryArgument' parameter", Justification = "Not a hot path, would complicate code")]
     internal class SerializerCreationContext
     {
 
@@ -133,7 +135,7 @@ namespace DuckDbSharp.Reflection
         internal static bool IsDefaultIsNullishValueType(Type innerType)
         {
             return innerType.IsValueType &&
-                (innerType.GetCustomAttribute<DuckDbDefaultValueIsNullishAttribute>() != null ||
+                (Attribute.IsDefined(innerType, typeof(DuckDbDefaultValueIsNullishAttribute)) ||
                 false);
         }
 
@@ -664,7 +666,7 @@ namespace DuckDbSharp.Reflection
             }
             var nonNull = Nullable.GetUnderlyingType(type);
             if (nonNull != null) return "Nullable_" + CreateSpeakableTypeName(nonNull, structuralType);
-            return type.FullName!.Replace(".", "_").Replace('+', '_') + structuralType?.Hash;
+            return type.FullName!.Replace('.', '_').Replace('+', '_') + structuralType?.Hash;
         }
 
         private GeneratedMethodInfo CreateDeserializer(Type outputArrayElementType, string prefix, DuckDbStructuralType outputArrayElementStructuralType, Func<DeserializerParameters, Expression> impl, StructureFieldInfo? field)
@@ -855,7 +857,7 @@ namespace DuckDbSharp.Reflection
             {
                 if (!RuntimeFeature.IsDynamicCodeSupported)
                     throw new NotSupportedException($"Could not find a pre-compiled serializer for CLR type '{elementType}'.");
-                r = RootSerializerCache.GetOrAdd(elementType, elementType => (RootSerializer)CreateRootSerializerCore(elementType).Delegate);
+                r = RootSerializerCache.GetOrAdd(elementType, (elementType, arg) => (RootSerializer)CreateRootSerializerCore(elementType).Delegate, this);
             }
             return r;
         }
@@ -927,7 +929,7 @@ namespace DuckDbSharp.Reflection
         {
             var nonNull = Nullable.GetUnderlyingType(elementType) ?? elementType;
             if (TypeSniffedEnumerable.TryGetEnumerableElementType(elementType) != null) return true;
-            if (elementType.IsEnum && elementType.GetCustomAttribute<FlagsAttribute>() == null) return true;
+            if (elementType.IsEnum && !Attribute.IsDefined(elementType, typeof(FlagsAttribute))) return true;
             var primitiveType = TryGetPrimitiveConverter(nonNull);
             if (primitiveType != null)
             {

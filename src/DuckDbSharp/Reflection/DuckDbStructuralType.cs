@@ -220,7 +220,7 @@ namespace DuckDbSharp.Reflection
         {
             if (!DuckDbStructuralTypes.TryGetValue(hash, out var r))
             {
-                return DuckDbStructuralTypes.GetOrAdd(hash, _ => factory());
+                return DuckDbStructuralTypes.GetOrAdd(hash, (_, factory) => factory(), factory);
             }
             return r;
         }

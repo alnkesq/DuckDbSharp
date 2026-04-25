@@ -63,7 +63,7 @@ namespace DuckDbSharp.Reflection
                     WriteLine($@"        [DuckDbInclude(""{duckName}"")]");
 
                 Write("        public ");
-                var isNeverNull = member.GetCustomAttribute<NotNullAttribute>() != null;
+                var isNeverNull = Attribute.IsDefined(member, typeof(NotNullAttribute));
                 //if (isNeverNull && member.FieldType.IsClass)
                 //    Write("required ");
                 WriteTypeReference(member.FieldType, !isNeverNull);
@@ -121,7 +121,7 @@ namespace DuckDbSharp.Reflection
                 if (nullableReference) Write("?");
                 return;
             }
-            Write(type.FullName!.Replace("+", "."));
+            Write(type.FullName!.Replace('+', '.'));
             if (!type.IsValueType && nullableReference)
                 Write("?");
         }

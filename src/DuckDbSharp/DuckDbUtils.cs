@@ -44,7 +44,7 @@ namespace DuckDbSharp
             while (true)
             {
                 var converters = SerializerCreationContext.PrimitiveConverters;
-                if (converters.Any(x => x.ClrType == converter.ClrType))
+                if (converters.Exists(x => x.ClrType == converter.ClrType))
                     throw new InvalidOperationException($"A primitive serializer is already registered for type {converter.ClrType}");
                 var converters2 = converters.ToList();
 
@@ -284,27 +284,27 @@ namespace DuckDbSharp
         }
 
         internal static IEnumerable Execute(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
-        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
+        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, commandOptions, ownerConnection);
 
-        internal static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
-            PrepareExecute<T>(conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, typeGenerationContext, commandOptions);
-            var enumerable = EnumerateResultsCore<T>(result, structuralType, enumerableParameterSlots, ownerConnection);
+            PrepareExecute<T>(conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, commandOptions);
+            var enumerable = EnumerateResultsCore<T>(result, structuralType, ownerConnection);
             result.Move();
             return enumerable;
         }
 
-        internal static IEnumerable<T[]> ExecuteBatched<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal static IEnumerable<T[]> ExecuteBatched<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
-            PrepareExecute<T>((_duckdb_connection*)conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, typeGenerationContext, commandOptions);
+            PrepareExecute<T>((_duckdb_connection*)conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, commandOptions);
 
             SetUpDoubleStreamingCheck(ref result, ownerConnection);
-            var enumerable = EnumerateResultsBatchedCore<T>(result, structuralType, new StrongBox<bool>(), enumerableParameterSlots);
+            var enumerable = EnumerateResultsBatchedCore<T>(result, structuralType, new StrongBox<bool>());
             result.Move();
             return enumerable;
         }
 
-        internal static void PrepareExecute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, out OwnedDuckDbResult result, out DuckDbStructuralType structuralType, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions)
+        internal static void PrepareExecute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, out OwnedDuckDbResult result, out DuckDbStructuralType structuralType, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions)
         {
             result = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions);
             structuralType = DuckDbStructuralType.CreateStructuralTypeForResult(result, typeof(T));
@@ -340,7 +340,7 @@ namespace DuckDbSharp
                 }
             }
 
-            var enumerable = (IEnumerable)EnumerateResultsCoreMethod.MakeGenericMethod(resultType).Invoke(null, [result, resultStructuralType, enumerableParameterSlots, ownerConnection])!;
+            var enumerable = (IEnumerable)EnumerateResultsCoreMethod.MakeGenericMethod(resultType).Invoke(null, [result, resultStructuralType, ownerConnection])!;
             result.Move();
             return enumerable;
         }
@@ -356,10 +356,10 @@ namespace DuckDbSharp
             return structural.Kind;
         }
 
-        private unsafe static IEnumerable<T> EnumerateResultsCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypedDuckDbConnectionBase? ownerConnection)
+        private unsafe static IEnumerable<T> EnumerateResultsCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, TypedDuckDbConnectionBase? ownerConnection)
         {
             SetUpDoubleStreamingCheck(ref result, ownerConnection);
-            return EnumerateResultsCore2<T>(result, duckType, new StrongBox<bool>(), enumerableParameterSlots);
+            return EnumerateResultsCore2<T>(result, duckType, new StrongBox<bool>());
         }
 
         private static void SetUpDoubleStreamingCheck(ref OwnedDuckDbResult result, TypedDuckDbConnectionBase? ownerConnection)
@@ -375,7 +375,7 @@ namespace DuckDbSharp
             }
         }
 
-        private static IEnumerable<T> EnumerateResultsCore2<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, StrongBox<bool> used, List<EnumerableParameterSlot?>? enumerableParameterSlots)
+        private static IEnumerable<T> EnumerateResultsCore2<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, StrongBox<bool> used)
         {
             if (used.Value) throw new Exception("Results cannot be enumerated more than once.");
             used.Value = true;
@@ -406,7 +406,7 @@ namespace DuckDbSharp
             return Methods.duckdb_result_is_streaming(*result.Pointer) != 0;
         }
 
-        private static IEnumerable<T[]> EnumerateResultsBatchedCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, StrongBox<bool> used, List<EnumerableParameterSlot?>? enumerableParameterSlots)
+        private static IEnumerable<T[]> EnumerateResultsBatchedCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, StrongBox<bool> used)
         {
             if (used.Value) throw new Exception("Results cannot be enumerated more than once.");
             used.Value = true;
@@ -721,13 +721,13 @@ namespace DuckDbSharp
         {
             if (!type.IsEnum) return false;
             if (type == typeof(HttpStatusCode)) return false;
-            if (type.GetCustomAttribute<DuckDbSerializeAsAttribute>() != null) return false;
+            if (Attribute.IsDefined(type, typeof(DuckDbSerializeAsAttribute))) return false;
             return true;
         }
 
         internal static void CreateEnumType(_duckdb_connection* conn, Type type)
         {
-            if (type.GetCustomAttribute<FlagsAttribute>() != null) throw new Exception("Enums marked with FlagsAttribute cannot be used in CREATE TYPE AS ENUM statements.");
+            if (Attribute.IsDefined(type, typeof(FlagsAttribute))) throw new Exception("Enums marked with FlagsAttribute cannot be used in CREATE TYPE AS ENUM statements.");
             using var info = DuckDbPrimitiveTypeConverter.CreateEnumInfo(type);
             try
             {
@@ -922,9 +922,9 @@ namespace DuckDbSharp
             if (fields.Length != 1) throw new Exception($"A scalar query returned {fields.Length} columns.");
             return fields[0].GetValue(box);
         }
-        internal static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
+        internal static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
         {
-            return Execute<T>(conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Single();
+            return Execute<T>(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming, null).Single();
         }
 
         public static void LoadDuckDbDll()
@@ -1060,9 +1060,7 @@ namespace DuckDbSharp
         [SkipLocalsInit]
         internal static void Write(this Stream s, StructuralTypeHash hash)
         {
-            Span<UInt128> span = stackalloc UInt128[2];
-            span[0] = hash.High;
-            span[1] = hash.Low;
+            Span<UInt128> span = [hash.High, hash.Low];
             s.Write(MemoryMarshal.AsBytes(span));
         }
 

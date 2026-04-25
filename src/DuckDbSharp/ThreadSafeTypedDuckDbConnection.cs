@@ -23,6 +23,7 @@ namespace DuckDbSharp
         }
         public static ThreadSafeTypedDuckDbConnection CreateInMemory() => Create((string?)null);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize", Justification = "Base call takes care of that.")]
         public override void Dispose()
         {
             lock (this)
@@ -48,7 +49,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this).GetEnumerator();
+                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, options, this).GetEnumerator();
             }
             try
             {
@@ -138,7 +139,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
+                return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots);
             }
         }
 

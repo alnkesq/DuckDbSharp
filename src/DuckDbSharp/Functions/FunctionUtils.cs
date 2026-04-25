@@ -102,14 +102,13 @@ namespace DuckDbSharp.Functions
             return RegisterScalarFunctionCore(conn, method, GetRegistrationNameForMethod(method), null, batched: method.GetCustomAttribute<DuckDbFunctionAttribute>()?.IsBatched == true);
         }
         internal static string GetRegistrationNameForMethod(MethodInfo m) => DuckDbUtils.ToDuckCaseFunction(m.Name);
-        private unsafe static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget, bool batched)
+        private static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget, bool batched)
         {
             using var scalarFunctionName = (ScopedString)name;
             var parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
             if (batched) parameters = parameters.Take(parameters.Length - 1).Select(x => x.GetElementType()!).ToArray();
             if (parameters.Length == 0) throw new NotSupportedException("Scalar functions with zero arguments are not supported.");
 
-            object? baseInvoke(object[] args) => method.Invoke(delegateTarget, args);
             var funcInfo = new FunctionInfo
             {
                 Name = name,
@@ -268,7 +267,6 @@ namespace DuckDbSharp.Functions
             using var tableFunctionName = (ScopedString)name;
             var parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
 
-            object baseInvoke(object[] args) => method.Invoke(delegateTarget, args)!;
             var funcInfo = new FunctionInfo
             {
                 Name = name,

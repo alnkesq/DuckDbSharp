@@ -36,7 +36,7 @@ namespace DuckDbSharp
         {
             InitOptions(ref options);
             OnBeforeExecute(sql);
-            return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this);
+            return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots, options, this);
         }
 
         public override IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object?[]? parameters)
@@ -49,7 +49,7 @@ namespace DuckDbSharp
         public override T ExecuteScalar<T>(string sql, params object?[]? parameters)
         {
             OnBeforeExecute(sql);
-            return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
+            return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots);
         }
 
         public override object? ExecuteScalar(string sql, params object?[]? parameters)

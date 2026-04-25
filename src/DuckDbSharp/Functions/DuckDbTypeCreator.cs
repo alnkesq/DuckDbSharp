@@ -36,22 +36,22 @@ namespace DuckDbSharp.Functions
                 }
             }
 
-            var d = LogicalTypesCache.TryGetValue(t, out var v) ? v : LogicalTypesCache.GetOrAdd(t, _ =>
+            var d = LogicalTypesCache.TryGetValue(t, out var v) ? v : LogicalTypesCache.GetOrAdd(t, (_, typesBeingCreated) =>
             {
                 typesBeingCreated ??= [];
-                typesBeingCreated.Add(t);
+                typesBeingCreated.Add(_);
                 nint r;
                 try
                 {
-                    r = (nint)CreateLogicalTypeCore(t, typesBeingCreated);
+                    r = (nint)CreateLogicalTypeCore(_, typesBeingCreated);
                 }
                 catch (Exception ex) when (ex is not RecursiveTypeException)
                 {
-                    throw new Exception($"Error while creating DuckDB type for {t}: {ex.Message}", ex);
+                    throw new Exception($"Error while creating DuckDB type for {_}: {ex.Message}", ex);
                 }
                 typesBeingCreated.RemoveAt(typesBeingCreated.Count - 1);
                 return r;
-            });
+            }, typesBeingCreated);
             return (_duckdb_logical_type*)d;
         }
 
@@ -133,10 +133,11 @@ namespace DuckDbSharp.Functions
             return GetFields(t, null)!;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "MA0106:Avoid closure by using an overload with the 'factoryArgument' parameter", Justification = "False positive, the lambda is static.")]
         internal static List<FieldInfo2?> GetFields(Type t, DuckDbStructuralType? structuralType)
         {
             if (t.IsEnum) throw new ArgumentException();
-            return FieldsCache.GetOrAdd((t, structuralType), pair =>
+            return FieldsCache.GetOrAdd((t, structuralType), static (pair) =>
             {
                 if (SerializerCreationContext.IsWrappedSingleColumn(pair.ClrType)) throw new ArgumentException();
                 var t = pair.ClrType;
@@ -197,8 +198,8 @@ namespace DuckDbSharp.Functions
 
         private static bool ShouldIncludeField(MemberInfo fieldOrProperty, bool isProtoContract, bool isPublic)
         {
-            if (fieldOrProperty.GetCustomAttribute<DuckDbIncludeAttribute>() != null) return true;
-            if (fieldOrProperty.GetCustomAttribute<DuckDbIgnoreAttribute>() != null) return false;
+            if (Attribute.IsDefined(fieldOrProperty, typeof(DuckDbIncludeAttribute))) return true;
+            if (Attribute.IsDefined(fieldOrProperty, typeof(DuckDbIgnoreAttribute))) return false;
             if (isProtoContract)
             {
                 return fieldOrProperty.GetCustomAttributes().Any(x => x.GetType().FullName == "ProtoBuf.ProtoMemberAttribute");
@@ -258,7 +259,7 @@ DuckDbStructuralType.BooleanStructuralType,
 
             if (DuckDbUtils.IsEnum(nonNullableType))
             {
-                if (nonNullableType.GetCustomAttribute<FlagsAttribute>() != null)
+                if (Attribute.IsDefined(nonNullableType, typeof(FlagsAttribute)))
                 {
                     if (structuralType is { Kind: DUCKDB_TYPE.DUCKDB_TYPE_VARCHAR }) throw new NotImplementedException();
                     structureFields = GetFlagsEnumFields(nonNullableType);
@@ -359,7 +360,7 @@ DuckDbStructuralType.BooleanStructuralType,
                     var structFields = b.StructureFields!;
                     var enumFlags = DuckDbTypeCreator.GetFlagsEnumFields(a);
                     if (structFields.Count != enumFlags.Length) throw new Exception($"Different number of enum flags between DuckDB structure and [Flags] enum: {a}, {b}");
-                    if (structFields.Any(x => x.FieldType.Kind != DUCKDB_TYPE.DUCKDB_TYPE_BOOLEAN)) throw new Exception($"DuckDB structure corresponding to a [Flags] enum {a} should only have boolean fields: {b}");
+                    if (structFields.Exists(x => x.FieldType.Kind != DUCKDB_TYPE.DUCKDB_TYPE_BOOLEAN)) throw new Exception($"DuckDB structure corresponding to a [Flags] enum {a} should only have boolean fields: {b}");
                     var hasStructNames = structFields.Select(x => x.Name).ToHashSet();
                     var missing = enumFlags.FirstOrDefault(x => !hasStructNames.Contains(x.DuckDbFieldName));
                     if (missing != null) throw new Exception($"Missing boolean field {missing.DuckDbFieldName} for [Flags] enum {a} in DuckDB structure {b}");
