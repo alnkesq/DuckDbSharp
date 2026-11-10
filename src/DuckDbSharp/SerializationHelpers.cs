@@ -40,7 +40,13 @@ namespace DuckDbSharp
         public static DuckDbTimestampMicros SerializeTimestampMicros(DateTime d) => DuckDbTimestampMicros.FromDateTime(d);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DuckDbTimestampTz SerializeTimestampTz(DateTime d) => DuckDbTimestampTz.FromDateTime(d);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static DateTime DeserializeTimestampMicros(DuckDbTimestampMicros t) => t.AsDateTime;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DateTime DeserializeTimestampTz(DuckDbTimestampTz t) => t.AsDateTime;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SerializeDateOnly(DateOnly d) => d.DayNumber - UnixDateEpoch.DayNumber;

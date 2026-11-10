@@ -331,7 +331,7 @@ DuckDbStructuralType.BooleanStructuralType,
             GetDuckDbType(a, null, out var aPrimitive, out var aElementType, out _, out var aStructureFields, out var arrayFixedLength);
             if (aPrimitive != null)
             {
-                if (aPrimitive.Kind != b.Kind)
+                if (CanonicalizePrimitiveType(aPrimitive.Kind) != CanonicalizePrimitiveType(b.Kind))
                     ThrowIncompatibleTypesException(a, b);
                 return;
             }
@@ -370,6 +370,14 @@ DuckDbStructuralType.BooleanStructuralType,
                 return;
             }
             throw new UnreachableException();
+        }
+
+        private static DUCKDB_TYPE CanonicalizePrimitiveType(DUCKDB_TYPE kind)
+        {
+            // Bitwise-compatible, but treated differently by DuckDB
+            if (kind == DUCKDB_TYPE.DUCKDB_TYPE_TIMESTAMP_TZ) return DUCKDB_TYPE.DUCKDB_TYPE_TIMESTAMP;
+
+            return kind;
         }
 
         internal static StructureFieldInfo CreateGetter(FieldInfo2 x)

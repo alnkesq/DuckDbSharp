@@ -47,6 +47,8 @@ namespace DuckDbSharp.Reflection
             new(typeof(float), DUCKDB_TYPE.DUCKDB_TYPE_FLOAT),
 
             new(typeof(DateTime), DUCKDB_TYPE.DUCKDB_TYPE_TIMESTAMP, nameof(SerializationHelpers.SerializeTimestampMicros), nameof(SerializationHelpers.DeserializeTimestampMicros), nameof(SerializationHelpers.IsDateTimeNullish)),
+            new(typeof(DateTime), DUCKDB_TYPE.DUCKDB_TYPE_TIMESTAMP_TZ, nameof(SerializationHelpers.SerializeTimestampTz), nameof(SerializationHelpers.DeserializeTimestampTz), nameof(SerializationHelpers.IsDateTimeNullish)),
+
             new(typeof(DateOnly), DUCKDB_TYPE.DUCKDB_TYPE_DATE, nameof(SerializationHelpers.SerializeDateOnly), nameof(SerializationHelpers.DeserializeDateOnly), nameof(SerializationHelpers.IsDateOnlyNullish)),
             new(typeof(DuckDbTimestampSeconds), DUCKDB_TYPE.DUCKDB_TYPE_TIMESTAMP_S),
             new(typeof(DuckDbTimestampMillis), DUCKDB_TYPE.DUCKDB_TYPE_TIMESTAMP_MS),
