@@ -1078,6 +1078,8 @@ namespace DuckDbSharp
         {
             return source.Where(x => x != null)!;
         }
+
+        public static string GetSqlTypeName(Type type) => DuckDbStructuralType.CreateStructuralType(type).ToSql();
     }
 }
 
