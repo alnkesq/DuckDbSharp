@@ -46,6 +46,8 @@ namespace DuckDbSharp.Bindings
         DUCKDB_TYPE_STRING_LITERAL = 37,
         DUCKDB_TYPE_INTEGER_LITERAL = 38,
         DUCKDB_TYPE_TIME_NS = 39,
+        DUCKDB_TYPE_GEOMETRY = 40,
+        DUCKDB_TYPE_VARIANT = 41,
     }
 
     public enum duckdb_state
