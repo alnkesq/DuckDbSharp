@@ -1,12 +1,16 @@
 using DuckDbSharp.Bindings;
 using DuckDbSharp.Reflection;
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DuckDbSharp.Functions
 {
@@ -95,14 +99,15 @@ namespace DuckDbSharp.Functions
         }
         internal static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, string name, Delegate deleg)
         {
-            return RegisterScalarFunctionCore(conn, deleg.Method, name, deleg.Target, false);
+            return RegisterScalarFunctionCore(conn, deleg.Method, name, deleg.Target, false, false);
         }
         internal static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, MethodInfo method)
         {
-            return RegisterScalarFunctionCore(conn, method, GetRegistrationNameForMethod(method), null, batched: method.GetCustomAttribute<DuckDbFunctionAttribute>()?.IsBatched == true);
+            var attr = method.GetCustomAttribute<DuckDbFunctionAttribute>();
+            return RegisterScalarFunctionCore(conn, method, GetRegistrationNameForMethod(method), null, batched: attr?.IsBatched == true, parallel: attr?.UseParallelism ?? true);
         }
         internal static string GetRegistrationNameForMethod(MethodInfo m) => DuckDbUtils.ToDuckCaseFunction(m.Name);
-        private static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget, bool batched)
+        private static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget, bool batched, bool parallel)
         {
             using var scalarFunctionName = (ScopedString)name;
             var parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
@@ -115,7 +120,8 @@ namespace DuckDbSharp.Functions
                 Method = method,
                 DelegateTarget = delegateTarget,
                 Parameters = parameters,
-                IsBatched = batched
+                IsBatched = batched,
+                UseParallelism = parallel,
             };
 
             var clrReturnType = batched ? method.GetParameters()[^1].ParameterType.GetElementType()! : method.ReturnType;
@@ -155,58 +161,112 @@ namespace DuckDbSharp.Functions
             return funcInfo;
         }
 
+        private class ArgumentsAndException
+        {
+            public required ITuple Arguments;
+            public required Exception Exception;
+        }
+
+        private readonly static SemaphoreSlim ParallelismSemaphore = new SemaphoreSlim(2);
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
         private static void ExecuteScalarFunction(duckdb_function_info_ptr p, _duckdb_data_chunk* chunk, _duckdb_vector* vector)
         {
-            object?[]? argsArray = null;
+            ArgumentsAndException? faultyArguments = null;
+            FunctionInfo? funcInfo = null;
             t_scalarFunctionRecursionLevel++;
             try
             {
-                var funcInfo = BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_scalar_function_get_extra_info(p));
+                funcInfo = BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_scalar_function_get_extra_info(p));
                 var itemCount = checked((int)Methods.duckdb_data_chunk_get_size(chunk));
                 var colcount = checked((int)Methods.duckdb_data_chunk_get_column_count(chunk));
 
                 var argumentTuples = funcInfo.ScalarArgumentDeserializer!((nint)chunk, new DuckDbDeserializationContext());
                 var returnClrType = funcInfo.ScalarReturnType!;
 
-
+                funcInfo.MethodInvoker ??= MethodInvoker.Create(funcInfo.Method);
+                var methodInvoker = funcInfo.MethodInvoker;
                 RootVectorSerializer returnSerializer = SerializerCreationContext.Global.CreateRootVectorSerializer(returnClrType);
                 Array returnVector = Array.CreateInstance(returnClrType, itemCount);
 
                 if (funcInfo.IsBatched)
                 {
-                    argsArray ??= new object[colcount + 1];
+                    var batchedArgsArray = new object[colcount + 1];
                     for (int argIdx = 0; argIdx < colcount; argIdx++)
                     {
-                        argsArray[argIdx] = Array.CreateInstance(funcInfo.Parameters[argIdx], itemCount);
+                        batchedArgsArray[argIdx] = Array.CreateInstance(funcInfo.Parameters[argIdx], itemCount);
                     }
 
                     for (int rowIdx = 0; rowIdx < itemCount; rowIdx++)
                     {
                         for (int argIdx = 0; argIdx < colcount; argIdx++)
                         {
-                            ((Array)argsArray[argIdx]!).SetValue(((ITuple)argumentTuples.GetValue(rowIdx)!)[argIdx], rowIdx);
+                            ((Array)batchedArgsArray[argIdx]!).SetValue(((ITuple)argumentTuples.GetValue(rowIdx)!)[argIdx], rowIdx);
                         }
                     }
 
-                    argsArray[colcount] = returnVector;
-                    funcInfo.Method.Invoke(funcInfo.DelegateTarget, argsArray);
+                    batchedArgsArray[colcount] = returnVector;
+                    funcInfo.MethodInvoker.Invoke(funcInfo.DelegateTarget, batchedArgsArray!);
 
 
                 }
                 else
                 {
-                    argsArray ??= new object?[colcount];
-                    for (int rowIdx = 0; rowIdx < itemCount; rowIdx++)
-                    {
-                        for (int argIdx = 0; argIdx < colcount; argIdx++)
-                        {
-                            argsArray[argIdx] = ((ITuple)argumentTuples.GetValue(rowIdx)!)[argIdx];
-                        }
+                    var useParallelism = false;
 
-                        var result = funcInfo.Method.Invoke(funcInfo.DelegateTarget, argsArray);
-                        returnVector.SetValue(result, rowIdx);
+                    var parallelismForCurrentBatch = Math.Max(1, Environment.ProcessorCount / 2);
+                    if (funcInfo.UseParallelism && parallelismForCurrentBatch > 1 && !Debugger.IsAttached)
+                    {
+                        // DuckDB engine can call ExecuteScalarFunction on multiple threads concurrently, so let's avoid excessive MxN parallelism in such case.
+                        if (ParallelismSemaphore.Wait(0))
+                        {
+                            useParallelism = true;
+                        }
+                    }
+
+
+                    if (useParallelism)
+                    {
+                        try
+                        {
+                            Parallel.For(0, itemCount, new ParallelOptions { MaxDegreeOfParallelism = parallelismForCurrentBatch }, rowIdx =>
+                            {
+                                var arguments = (ITuple)argumentTuples.GetValue(rowIdx)!;
+                                try
+                                {
+                                    var result = InvokeScalarFunctionOnce(methodInvoker, funcInfo.DelegateTarget, arguments);
+                                    returnVector.SetValue(result, rowIdx);
+                                }
+                                catch (Exception ex)
+                                {
+                                    faultyArguments = new ArgumentsAndException { Arguments = arguments, Exception = ex };
+                                    throw;
+                                }
+                            });
+                        }
+                        finally
+                        {
+                            ParallelismSemaphore.Release();
+                        }
+                    }
+                    else
+                    {
+                        for (int rowIdx = 0; rowIdx < itemCount; rowIdx++)
+                        {
+                            var arguments = (ITuple)argumentTuples.GetValue(rowIdx)!;
+
+                            try
+                            {
+                                var result = InvokeScalarFunctionOnce(methodInvoker, funcInfo.DelegateTarget, arguments);
+                                returnVector.SetValue(result, rowIdx);
+                            }
+                            catch (Exception ex)
+                            {
+                                faultyArguments = new ArgumentsAndException { Arguments = arguments, Exception = ex };
+                                throw;
+                            }
+                            
+                        }
                     }
                 }
                 // 
@@ -230,13 +290,9 @@ namespace DuckDbSharp.Functions
             }
             catch (Exception ex)
             {
-                using var error = (ScopedString)(ex.ToString() + (argsArray != null ? " - Provided arguments: " + string.Join(", ", argsArray.Select(x =>
-                {
-                    if (x == null) return "NULL";
-                    var str = x.ToString() ?? string.Empty;
-                    if (str.Length > 20) return string.Concat(str.AsSpan(0, 20), "...");
-                    return str;
-                })) : null));
+                var errorText =
+                    faultyArguments != null ? faultyArguments.Exception.ToString() + " when calling " + funcInfo?.Name + " with arguments " + TupleToStringForDebugging(faultyArguments.Arguments) : ex.ToString();
+                using var error = (ScopedString)errorText;
                 Methods.duckdb_scalar_function_set_error(p, error);
             }
             finally
@@ -244,6 +300,58 @@ namespace DuckDbSharp.Functions
                 t_scalarFunctionRecursionLevel--;
             }
 
+        }
+
+        private static string TupleToStringForDebugging(ITuple tuple)
+        {
+            var length = tuple.Length;
+            var objs = new object?[length];
+            for (int i = 0; i < length; i++)
+            {
+                objs[i] = tuple[i];
+            }
+            return string.Join(", ", objs.Select(x =>
+            {
+                try
+                {
+                    if (x == null) return "NULL";
+                    var str = x.ToString() ?? string.Empty;
+                    if (str.Length > 20) return string.Concat(str.AsSpan(0, 20), "...");
+                    return str;
+                }
+                catch
+                {
+                    return "(Object with failing ToString)";
+                }
+            }));
+        }
+
+        private static object? InvokeScalarFunctionOnce(MethodInvoker methodInvoker, object? delegateTarget, ITuple arguments)
+        {
+            var colcount = arguments.Length;
+            return colcount switch
+            {
+                0 => methodInvoker.Invoke(delegateTarget),
+                1 => methodInvoker.Invoke(delegateTarget, arguments[0]),
+                2 => methodInvoker.Invoke(delegateTarget, arguments[0], arguments[1]),
+                3 => methodInvoker.Invoke(delegateTarget, arguments[0], arguments[1], arguments[2]),
+                4 => methodInvoker.Invoke(delegateTarget, arguments[0], arguments[1], arguments[2], arguments[3]),
+                _ => InvokeScalarFunctionOnceManyArgs(methodInvoker, delegateTarget, arguments),
+            };
+        }
+
+        private static object? InvokeScalarFunctionOnceManyArgs(MethodInvoker methodInvoker, object? delegateTarget, ITuple arguments)
+        {
+            var colcount = arguments.Length;
+            InlineArray16<object?> buffer = default;
+            Span<object?> span = buffer;
+            if (colcount > span.Length) span = new object?[colcount];
+            else span = span.Slice(0, colcount);
+            for (int i = 0; i < colcount; i++)
+            {
+                span[i] = arguments[i];
+            }
+            return methodInvoker.Invoke(delegateTarget, span);
         }
 
         internal static void FreeScalarFunctionArenasForCurrentThreadAndRecursionLevel()

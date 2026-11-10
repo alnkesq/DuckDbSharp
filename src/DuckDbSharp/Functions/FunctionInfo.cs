@@ -5,11 +5,12 @@ using System.Reflection;
 
 namespace DuckDbSharp.Functions
 {
-    public class FunctionInfo : IDisposable
+    public sealed class FunctionInfo : IDisposable
     {
         public required string Name;
         public required MethodInfo Method;
         public required Type[] Parameters;
+        public MethodInvoker? MethodInvoker;
         public Type? FinalElementType { get; internal set; }
         internal Func<object, object>? Transformer;
         internal duckdb_table_function_ptr PointerTableFn;
@@ -20,6 +21,7 @@ namespace DuckDbSharp.Functions
         public RootDeserializer? ScalarArgumentDeserializer;
         public object? DelegateTarget { get; internal set; }
         internal bool IsBatched;
+        internal bool UseParallelism;
         internal Type? ScalarReturnType;
         public unsafe void Dispose()
         {

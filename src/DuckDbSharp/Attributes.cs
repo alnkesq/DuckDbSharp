@@ -7,6 +7,7 @@ namespace DuckDbSharp
     public class DuckDbFunctionAttribute : Attribute
     {
         public bool IsBatched { get; set; }
+        public bool UseParallelism { get; set; } = true;
         internal bool? IsScalar;
         public DuckDbFunctionAttribute()
         {
