@@ -2,12 +2,12 @@ using System;
 
 namespace DuckDbSharp.Bindings
 {
-    public unsafe struct OwnedDuckDbDataChunk : IDisposable
+    public struct OwnedDuckDbDataChunk : IDisposable
     {
-        public static explicit operator OwnedDuckDbDataChunk(_duckdb_data_chunk* ptr) => new OwnedDuckDbDataChunk(ptr);
+        public static unsafe explicit operator OwnedDuckDbDataChunk(_duckdb_data_chunk* ptr) => unsafe(new OwnedDuckDbDataChunk(ptr));
         public static implicit operator _duckdb_data_chunk*(OwnedDuckDbDataChunk ptr) => ptr.Pointer;
         public _duckdb_data_chunk* Pointer;
-        public OwnedDuckDbDataChunk(_duckdb_data_chunk* ptr)
+        public unsafe OwnedDuckDbDataChunk(_duckdb_data_chunk* ptr)
         {
             Pointer = ptr;
         }
@@ -17,7 +17,7 @@ namespace DuckDbSharp.Bindings
             if (Pointer == null) return;
             fixed (_duckdb_data_chunk** ptr = &Pointer)
             {
-                Methods.duckdb_destroy_data_chunk(ptr);
+                unsafe { Methods.duckdb_destroy_data_chunk(ptr); }
             }
             Pointer = null;
         }

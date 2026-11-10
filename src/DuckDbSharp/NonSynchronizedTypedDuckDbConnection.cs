@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace DuckDbSharp
 {
-    public unsafe class NonSynchronizedTypedDuckDbConnection : TypedDuckDbConnectionBase
+    public class NonSynchronizedTypedDuckDbConnection : TypedDuckDbConnectionBase
     {
         protected NonSynchronizedTypedDuckDbConnection(OwnedDuckDbConnection conn, DuckDbDatabase db)
             : base(conn, db)
@@ -23,7 +23,7 @@ namespace DuckDbSharp
         public override void ExecuteNonQuery(string sql, params object?[]? parameters)
         {
             OnBeforeExecute(sql);
-            DuckDbUtils.ExecuteNonQuery(conn, sql, parameters, EnumerableParameterSlots);
+            unsafe { DuckDbUtils.ExecuteNonQuery(conn, sql, parameters, EnumerableParameterSlots); }
         }
 
         public override long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
@@ -36,7 +36,7 @@ namespace DuckDbSharp
         {
             InitOptions(ref options);
             OnBeforeExecute(sql);
-            return DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots, options, this);
+            return unsafe(DuckDbUtils.Execute<T>(conn, sql, parameters, EnumerableParameterSlots, options, this));
         }
 
         public override IEnumerable ExecuteWithOptions(CommandOptions options, string sql, params object?[]? parameters)
@@ -49,19 +49,19 @@ namespace DuckDbSharp
         public override T ExecuteScalar<T>(string sql, params object?[]? parameters)
         {
             OnBeforeExecute(sql);
-            return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots);
+            return unsafe(DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots));
         }
 
         public override object? ExecuteScalar(string sql, params object?[]? parameters)
         {
             OnBeforeExecute(sql);
-            return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
+            return unsafe(DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext));
         }
         public override OwnedDuckDbResult ExecuteUnsafeWithOptions(CommandOptions options, string sql, params object?[]? parameters)
         {
             InitOptions(ref options);
             OnBeforeExecute(sql);
-            return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options);
+            return unsafe(DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options));
         }
 
         public virtual NonSynchronizedTypedDuckDbConnection Clone => Create(Database);

@@ -84,15 +84,18 @@ namespace DuckDbSharp
             const int CACHE_SIZE = 4096;
             ClrStringCache[] cache;
             cache = deserializationContext.CacheEntries ??= new ClrStringCache[CACHE_SIZE];
-            var entryIndex = (uint)HashCode.Combine(d.Hi, d.Lo) % CACHE_SIZE;
-            ref ClrStringCache cachedEntry = ref cache[(int)entryIndex];
-            if (cachedEntry.DuckString.Hi == d.Hi && cachedEntry.DuckString.Lo == d.Lo)
+            unsafe
             {
+                var entryIndex = (uint)HashCode.Combine(d.Hi, d.Lo) % CACHE_SIZE;
+                ref ClrStringCache cachedEntry = ref cache[(int)entryIndex];
+                if (cachedEntry.DuckString.Hi == d.Hi && cachedEntry.DuckString.Lo == d.Lo)
+                {
+                    return cachedEntry.ClrString;
+                }
+                cachedEntry.ClrString = d.ToString();
+                cachedEntry.DuckString = d;
                 return cachedEntry.ClrString;
             }
-            cachedEntry.ClrString = d.ToString();
-            cachedEntry.DuckString = d;
-            return cachedEntry.ClrString;
         }
         public static byte[] DeserializeByteArray(DuckString d)
         {
@@ -101,12 +104,12 @@ namespace DuckDbSharp
 
         public static Memory<byte> DeserializeMemory(DuckString d) => DeserializeByteArray(d);
         public static ReadOnlyMemory<byte> DeserializeReadOnlyMemory(DuckString d) => DeserializeByteArray(d);
-        public unsafe static DuckString SerializeByteArray(byte[] str, NativeArenaSlim arena) => DuckString.Create(str, arena);
-        public unsafe static DuckString SerializeMemory(Memory<byte> str, NativeArenaSlim arena) => DuckString.Create(str.Span, arena);
-        public unsafe static DuckString SerializeReadOnlyMemory(ReadOnlyMemory<byte> str, NativeArenaSlim arena) => DuckString.Create(str.Span, arena);
+        public static DuckString SerializeByteArray(byte[] str, NativeArenaSlim arena) => DuckString.Create(str, arena);
+        public static DuckString SerializeMemory(Memory<byte> str, NativeArenaSlim arena) => DuckString.Create(str.Span, arena);
+        public static DuckString SerializeReadOnlyMemory(ReadOnlyMemory<byte> str, NativeArenaSlim arena) => DuckString.Create(str.Span, arena);
 
 
-        public unsafe static DuckString SerializeString(string str, NativeArenaSlim arena)
+        public static DuckString SerializeString(string str, NativeArenaSlim arena)
         {
             var buffer = arena.GetRemaingSpaceInCurrentChunk();
             Span<byte> encoded;
@@ -129,7 +132,7 @@ namespace DuckDbSharp
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public unsafe static TTo BitCast<TFrom, TTo>(TFrom value) where TFrom : unmanaged where TTo : unmanaged => Unsafe.BitCast<TFrom, TTo>(value);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TTo BitCast<TFrom, TTo>(TFrom value) where TFrom : unmanaged where TTo : unmanaged => unsafe(Unsafe.BitCast<TFrom, TTo>(value));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static uint SerializeEnum_32To32<T>(T e) where T : unmanaged => BitCast<T, uint>(e);
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ushort SerializeEnum_32To16<T>(T e) where T : unmanaged => (ushort)BitCast<T, uint>(e);
@@ -169,16 +172,19 @@ namespace DuckDbSharp
         }
 
         [DebuggerStepThrough]
-        public unsafe static nint GetDataChunkVector(nint chunk, ulong colIdx) => (nint)Methods.duckdb_data_chunk_get_vector((_duckdb_data_chunk*)chunk, colIdx);
+        public unsafe static nint GetDataChunkVector(nint chunk, ulong colIdx) => (nint)unsafe(Methods.duckdb_data_chunk_get_vector((_duckdb_data_chunk*)chunk, colIdx));
         [DebuggerStepThrough]
-        public unsafe static nint GetVectorValidity(nint vector) => (nint)Methods.duckdb_vector_get_validity((_duckdb_vector*)vector);
+        public unsafe static nint GetVectorValidity(nint vector) => (nint)unsafe(Methods.duckdb_vector_get_validity((_duckdb_vector*)vector));
 
 
         [DebuggerStepThrough]
         public unsafe static nint GetVectorValidityAndSetAll(nint vector)
         {
-            Methods.duckdb_vector_ensure_validity_writable((_duckdb_vector*)vector); // this implicitly also sets everything to 1.
-            return (nint)Methods.duckdb_vector_get_validity((_duckdb_vector*)vector);
+            unsafe
+            {
+                Methods.duckdb_vector_ensure_validity_writable((_duckdb_vector*)vector); // this implicitly also sets everything to 1.
+                return (nint)Methods.duckdb_vector_get_validity((_duckdb_vector*)vector);
+            }
         }
 
 
@@ -187,7 +193,7 @@ namespace DuckDbSharp
             if (ptr == 0) return true;
             var longIdx = index / 64;
             var bit = index % 64;
-            var val = ((ulong*)ptr)[longIdx];
+            var val = unsafe(((ulong*)ptr)[longIdx]);
             return (val & (1ul << index)) != 0;
         }
 
@@ -195,16 +201,16 @@ namespace DuckDbSharp
         {
             var longIdx = index / 64;
             var bit = index % 64;
-            ((ulong*)ptr)[longIdx] &= ~(1ul << index);
+            unsafe { ((ulong*)ptr)[longIdx] &= ~(1ul << index); }
         }
 
-        public static int GetSubObjectsCount(nint validityVector, int parentCount)
+        public unsafe static int GetSubObjectsCount(nint validityVector, int parentCount)
         {
             if (validityVector == 0) return parentCount;
             var num = 0;
             for (int i = 0; i < parentCount; i++)
             {
-                if (IsPresent(validityVector, i)) num++;
+                if (unsafe(IsPresent(validityVector, i))) num++;
             }
             return num;
         }
@@ -212,27 +218,30 @@ namespace DuckDbSharp
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public unsafe static nint GetStructureChildVector(nint parent, ulong index) => (nint)Methods.duckdb_struct_vector_get_child((_duckdb_vector*)parent, index);
+        public unsafe static nint GetStructureChildVector(nint parent, ulong index) => (nint)unsafe(Methods.duckdb_struct_vector_get_child((_duckdb_vector*)parent, index));
 
         [DebuggerStepThrough]
         public unsafe static nint GetSublistChildVector(nint parent)
         {
             var vector = (_duckdb_vector*)parent;
-            return (nint)Methods.duckdb_list_vector_get_child(vector);
+            return (nint)unsafe(Methods.duckdb_list_vector_get_child(vector));
         }
         [DebuggerStepThrough]
         public unsafe static nint GetSubarrayChildVector(nint parent)
         {
             var vector = (_duckdb_vector*)parent;
-            return (nint)Methods.duckdb_array_vector_get_child(vector);
+            return (nint)unsafe(Methods.duckdb_array_vector_get_child(vector));
         }
         [DebuggerStepThrough]
         public unsafe static nint GetSublistChildVectorAndReserve(nint parent, int totalCount)
         {
             var vector = (_duckdb_vector*)parent;
-            BindingUtils.CheckState(Methods.duckdb_list_vector_reserve(vector, (ulong)totalCount));
-            BindingUtils.CheckState(Methods.duckdb_list_vector_set_size(vector, (ulong)totalCount));
-            return (nint)Methods.duckdb_list_vector_get_child(vector);
+            unsafe
+            {
+                BindingUtils.CheckState(Methods.duckdb_list_vector_reserve(vector, (ulong)totalCount));
+                BindingUtils.CheckState(Methods.duckdb_list_vector_set_size(vector, (ulong)totalCount));
+                return (nint)Methods.duckdb_list_vector_get_child(vector);
+            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -250,7 +259,7 @@ namespace DuckDbSharp
         [DebuggerStepThrough]
         public unsafe static Span<T> GetVectorData<T>(nint vector, int size)
         {
-            return new Span<T>(Methods.duckdb_vector_get_data((_duckdb_vector*)vector), size);
+            return unsafe(new Span<T>(Methods.duckdb_vector_get_data((_duckdb_vector*)vector), size));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -269,29 +278,29 @@ namespace DuckDbSharp
         [DebuggerStepThrough]
         public static T NewSkipCtor<T>() where T : class
         {
-            return Unsafe.As<T>(RuntimeHelpers.GetUninitializedObject(typeof(T)));
+            return unsafe(Unsafe.As<T>(RuntimeHelpers.GetUninitializedObject(typeof(T))));
         }
 
         [DebuggerStepThrough]
-        public unsafe static int GetChunkSize(nint chunk) => checked((int)Methods.duckdb_data_chunk_get_size((_duckdb_data_chunk*)chunk));
+        public unsafe static int GetChunkSize(nint chunk) => checked((int)unsafe(Methods.duckdb_data_chunk_get_size((_duckdb_data_chunk*)chunk)));
 
-        public static int GetTotalItems(Span<OffsetAndCount> span, nint validityVector)
+        public unsafe static int GetTotalItems(Span<OffsetAndCount> span, nint validityVector)
         {
             ulong num = 0;
             for (int i = 0; i < span.Length; i++)
             {
                 // Ranges can overlap, e.g. DuckDB reuses the same list if it's identical.
-                if (IsPresent(validityVector, i))
+                if (unsafe(IsPresent(validityVector, i)))
                     num = Math.Max(num, span[i].End);
             }
             return checked((int)num);
         }
-        public static int GetArraysTotalItems(int objectsLength, nint validityVector, ulong fixedLength)
+        public unsafe static int GetArraysTotalItems(int objectsLength, nint validityVector, ulong fixedLength)
         {
             ulong num = 0;
             for (int i = 0; i < objectsLength; i++)
             {
-                if (IsPresent(validityVector, i))
+                if (unsafe(IsPresent(validityVector, i)))
                     num += fixedLength;
             }
             return checked((int)num);
@@ -338,7 +347,7 @@ namespace DuckDbSharp
                 }
             }
             var maxLength = Encoding.UTF8.GetMaxCharCount(str.Length);
-            Span<char> buffer = maxLength < 1024 ? stackalloc char[maxLength] : new char[maxLength];
+            Span<char> buffer = maxLength < 1024 ? unsafe(stackalloc char[maxLength]) : new char[maxLength];
             var succeeded = Utf8.ToUtf16(str.Span, buffer, out _, out var written);
             if (succeeded != System.Buffers.OperationStatus.Done) throw new Exception();
             return Enum.Parse<T>(buffer.Slice(0, written));
@@ -346,7 +355,7 @@ namespace DuckDbSharp
 
         public static ref T GetReferenceToNullableWrappedValue<T>(T?[] arr, int index) where T : struct
         {
-            return ref Unsafe.AsRef(in Nullable.GetValueRefOrDefaultRef<T>(in arr[index]));
+            return ref unsafe(Unsafe.AsRef(in Nullable.GetValueRefOrDefaultRef<T>(in arr[index])));
         }
 
         [DebuggerStepThrough]
@@ -373,13 +382,13 @@ namespace DuckDbSharp
         public static TBuffer CopyToFixedLengthArray<TBuffer, TItem>(TItem[] source, int offset, int length) where TBuffer : new()
         {
             var buffer = new TBuffer();
-            var bufferAsSpan = MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TItem>(ref buffer), length);
+            var bufferAsSpan = unsafe(MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TItem>(ref buffer), length));
             source.AsSpan(offset, length).CopyTo(bufferAsSpan);
             return buffer;
         }
         public static void CopyFromFixedLengthArray<TBuffer, TItem>(TBuffer buffer, TItem[] destination, int offset, int length) where TBuffer : new()
         {
-            var bufferAsSpan = MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TItem>(ref buffer), length);
+            var bufferAsSpan = unsafe(MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TItem>(ref buffer), length));
             bufferAsSpan.CopyTo(destination.AsSpan(offset));
         }
     }

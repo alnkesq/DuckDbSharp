@@ -4,6 +4,8 @@
     <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Features>$(Features);updated-memory-safety-rules</Features>
+    <LangVersion>preview</LangVersion>
     <SignAssembly>true</SignAssembly>
     <Description>Bidirectional interoperability layer between DuckDB and .NET.</Description>
     <RepositoryType>git</RepositoryType>

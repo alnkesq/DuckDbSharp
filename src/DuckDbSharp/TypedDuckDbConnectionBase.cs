@@ -85,12 +85,12 @@ namespace DuckDbSharp
         public abstract object? ExecuteScalar(string sql, params object?[]? parameters);
         public abstract void ExecuteNonQuery(string sql, params object?[]? parameters);
 
-        protected unsafe void CheckDisposed()
+        protected void CheckDisposed()
         {
             ObjectDisposedException.ThrowIf(conn.Pointer == null, this);
         }
 
-        public unsafe IReadOnlyList<FunctionInfo> RegisterFunctions(Assembly methodsInAssembly)
+        public IReadOnlyList<FunctionInfo> RegisterFunctions(Assembly methodsInAssembly)
         {
             lock (database)
             {
@@ -102,7 +102,7 @@ namespace DuckDbSharp
                 return fns;
             }
         }
-        public unsafe void RegisterFunctions(Type methodsInType)
+        public void RegisterFunctions(Type methodsInType)
         {
             lock (database)
             {
@@ -115,38 +115,38 @@ namespace DuckDbSharp
                 database.didRegisterFunctionsInTypes.Add(methodsInType);
             }
         }
-        public unsafe void RegisterTableFunction(string name, Delegate @delegate)
+        public void RegisterTableFunction(string name, Delegate @delegate)
         {
             lock (database)
             {
                 if (AddTableFunction(name, @delegate))
                 {
-                    var fn = FunctionUtils.RegisterTableFunction(conn, name, @delegate);
+                    var fn = unsafe(FunctionUtils.RegisterTableFunction(conn, name, @delegate));
                     EnqueueFunctionDisposal(fn);
                 }
             }
 
         }
-        public unsafe void RegisterScalarFunction(string name, Delegate @delegate)
+        public void RegisterScalarFunction(string name, Delegate @delegate)
         {
             lock (database)
             {
                 if (AddScalarFunction(name, @delegate))
                 {
-                    var fn = FunctionUtils.RegisterScalarFunction(conn, name, @delegate);
+                    var fn = unsafe(FunctionUtils.RegisterScalarFunction(conn, name, @delegate));
                     EnqueueFunctionDisposal(fn);
                 }
             }
 
         }
 
-        public unsafe void RegisterTableFunction(MethodInfo method)
+        public void RegisterTableFunction(MethodInfo method)
         {
             lock (database)
             {
                 if (AddTableFunction(FunctionUtils.GetRegistrationNameForMethod(method), method))
                 {
-                    var fn = FunctionUtils.RegisterTableFunction(conn, method);
+                    var fn = unsafe(FunctionUtils.RegisterTableFunction(conn, method));
                     EnqueueFunctionDisposal(fn);
                 }
 
@@ -154,13 +154,13 @@ namespace DuckDbSharp
 
         }
 
-        public unsafe void RegisterScalarFunction(MethodInfo method)
+        public void RegisterScalarFunction(MethodInfo method)
         {
             lock (database)
             {
                 if (AddScalarFunction(FunctionUtils.GetRegistrationNameForMethod(method), method))
                 {
-                    var fn = FunctionUtils.RegisterScalarFunction(conn, method);
+                    var fn = unsafe(FunctionUtils.RegisterScalarFunction(conn, method));
                     EnqueueFunctionDisposal(fn);
                 }
 
@@ -206,7 +206,7 @@ namespace DuckDbSharp
                 Console.Error.WriteLine("[DuckDB] " + DuckDbUtils.ToSingleLineSql(sql));
         }
 
-        public virtual unsafe void CreateTable<T>(string name, bool replaceIfExisting = false, string[]? primaryKey = null)
+        public virtual void CreateTable<T>(string name, bool replaceIfExisting = false, string[]? primaryKey = null)
         {
             var sb = new StringBuilder(replaceIfExisting ? "CREATE OR REPLACE TABLE " : "CREATE TABLE ");
             sb.Append(name);
@@ -236,10 +236,10 @@ namespace DuckDbSharp
             ExecuteNonQuery(sb.ToString());
         }
 
-        public virtual unsafe void CreateEnum(Type t)
+        public virtual void CreateEnum(Type t)
         {
             CheckDisposed();
-            DuckDbUtils.CreateEnumType(Handle, t);
+            unsafe { DuckDbUtils.CreateEnumType(Handle, t); }
         }
         public abstract OwnedDuckDbResult ExecuteUnsafeWithOptions(CommandOptions options, string sql, params object?[]? parameters);
         public OwnedDuckDbResult ExecuteUnsafe(string sql, params object?[]? parameters) => ExecuteUnsafeWithOptions(default, sql, parameters);

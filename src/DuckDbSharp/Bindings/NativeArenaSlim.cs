@@ -10,7 +10,7 @@ using System.Threading;
 namespace DuckDbSharp.Bindings
 {
 
-    public unsafe class NativeArenaSlim : IDisposable
+    public class NativeArenaSlim : IDisposable
     {
         [Obsolete("Only for ObjectPool<> compatibility.", error: true)]
         public NativeArenaSlim() => throw new InvalidOperationException();
@@ -43,7 +43,7 @@ namespace DuckDbSharp.Bindings
             return ptr;
         }
 
-        public Span<byte> GetRemaingSpaceInCurrentChunk() => new Span<byte>(nextAllocation, (int)(nextAllocationThreshold - nextAllocation));
+        public Span<byte> GetRemaingSpaceInCurrentChunk() => unsafe(new Span<byte>(nextAllocation, (int)(nextAllocationThreshold - nextAllocation)));
         public void AdvanceBy(int bytes) => nextAllocation += bytes;
 
 

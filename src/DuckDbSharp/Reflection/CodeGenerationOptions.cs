@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace DuckDbSharp.Reflection
 {
-    public unsafe class CodeGenerationOptions
+    public class CodeGenerationOptions
     {
         public string? DestinationPath;
         public string? Namespace;

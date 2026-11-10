@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace DuckDbSharp.Reflection
 {
-    internal unsafe class DuckDbStructuralType : IEquatable<DuckDbStructuralType>
+    internal class DuckDbStructuralType : IEquatable<DuckDbStructuralType>
     {
         [JsonConstructor]
         public DuckDbStructuralType(DUCKDB_TYPE Kind, List<string>? EnumMembers, DuckDbStructuralType? ElementType, List<StructuralTypeStructureField>? StructureFields, int? FixedSizeArrayLength)
@@ -55,16 +55,19 @@ namespace DuckDbSharp.Reflection
             return this == other;
         }
 
-        public static DuckDbStructuralType CreateStructuralType(Type clrType) => CreateStructuralType(DuckDbTypeCreator.CreateLogicalType(clrType, null));
+        public static DuckDbStructuralType CreateStructuralType(Type clrType) => unsafe(CreateStructuralType(DuckDbTypeCreator.CreateLogicalType(clrType, null)));
 
-        public static DuckDbStructuralType CreateStructuralType(_duckdb_logical_type* lt)
+        public unsafe static DuckDbStructuralType CreateStructuralType(_duckdb_logical_type* lt)
         {
-            var kind = Methods.duckdb_get_type_id(lt);
-            if (kind == DUCKDB_TYPE.DUCKDB_TYPE_ENUM) return CreateStructuralTypeForEnum(lt);
-            else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_STRUCT) return CreateStructuralTypeForStructure(lt);
-            else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_LIST) return CreateStructuralTypeForList(lt);
-            else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_ARRAY) return CreateStructuralTypeForFixedLengthArray(lt, (int)Methods.duckdb_array_type_array_size(lt));
-            else return CreateStructuralTypeForPrimitive(kind);
+            unsafe
+            {
+                var kind = Methods.duckdb_get_type_id(lt);
+                if (kind == DUCKDB_TYPE.DUCKDB_TYPE_ENUM) return CreateStructuralTypeForEnum(lt);
+                else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_STRUCT) return CreateStructuralTypeForStructure(lt);
+                else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_LIST) return CreateStructuralTypeForList(lt);
+                else if (kind == DUCKDB_TYPE.DUCKDB_TYPE_ARRAY) return CreateStructuralTypeForFixedLengthArray(lt, (int)Methods.duckdb_array_type_array_size(lt));
+                else return CreateStructuralTypeForPrimitive(kind);
+            }
         }
 
 
@@ -87,19 +90,22 @@ namespace DuckDbSharp.Reflection
         internal static DuckDbStructuralType CreateStructuralTypeForResult(duckdb_result* result, bool expectSingleColumn = false)
         {
 
-            var size = (int)Methods.duckdb_column_count(result);
+            var size = (int)unsafe(Methods.duckdb_column_count(result));
             var columns = new List<(OwnedDuckPtr<byte> Name, DuckDbStructuralType Type)>();
 
             using var buffer = new MemoryStream();
             for (int i = 0; i < size; i++)
             {
-                var ptrName = /*don't free*/ (OwnedDuckPtr<byte>)Methods.duckdb_column_name(result, (ulong)i);
-                using var fieldType = (OwnedDuckDbLogicalType)Methods.duckdb_column_logical_type(result, (ulong)i);
-                var fieldStructuralType = CreateStructuralType(fieldType);
-                columns.Add((ptrName, fieldStructuralType));
+                unsafe 
+                {
+                    var ptrName = /*don't free*/ (OwnedDuckPtr<byte>)Methods.duckdb_column_name(result, (ulong)i);
+                    using var fieldType = (OwnedDuckDbLogicalType)Methods.duckdb_column_logical_type(result, (ulong)i);
+                    var fieldStructuralType = CreateStructuralType(fieldType);
+                    columns.Add((ptrName, fieldStructuralType));
 
-                buffer.Write(new Span<byte>(ptrName, ptrName.StringLength() + 1));
-                buffer.Write(fieldStructuralType.Hash);
+                    buffer.Write(new Span<byte>(ptrName, ptrName.StringLength() + 1));
+                    buffer.Write(fieldStructuralType.Hash);
+                }
             }
             if (expectSingleColumn)
             {
@@ -123,25 +129,25 @@ namespace DuckDbSharp.Reflection
             // Column names must NOT be freed!
         }
 
-        private static DuckDbStructuralType CreateStructuralTypeForList(_duckdb_logical_type* lt)
+        private unsafe static DuckDbStructuralType CreateStructuralTypeForList(_duckdb_logical_type* lt)
         {
-            using var elementType = (OwnedDuckDbLogicalType)Methods.duckdb_list_type_child_type(lt);
-            var elementTypeStructuralType = CreateStructuralType(elementType);
+            using var elementType = unsafe((OwnedDuckDbLogicalType)Methods.duckdb_list_type_child_type(lt));
+            var elementTypeStructuralType = unsafe(CreateStructuralType(elementType));
             var hash = StructuralTypeHash.Hash(elementTypeStructuralType.Hash, DUCKDB_TYPE.DUCKDB_TYPE_LIST);
             return CreateOrReuseStructuralType(hash, () => new DuckDbStructuralType(hash, DUCKDB_TYPE.DUCKDB_TYPE_LIST) { ElementType = elementTypeStructuralType });
         }
-        private static DuckDbStructuralType CreateStructuralTypeForFixedLengthArray(_duckdb_logical_type* lt, int length)
+        private unsafe static DuckDbStructuralType CreateStructuralTypeForFixedLengthArray(_duckdb_logical_type* lt, int length)
         {
-            using var elementType = (OwnedDuckDbLogicalType)Methods.duckdb_array_type_child_type(lt);
-            var elementTypeStructuralType = CreateStructuralType(elementType);
+            using var elementType = unsafe((OwnedDuckDbLogicalType)Methods.duckdb_array_type_child_type(lt));
+            var elementTypeStructuralType = unsafe(CreateStructuralType(elementType));
             var hash = StructuralTypeHash.Hash(elementTypeStructuralType.Hash, length);
             return CreateOrReuseStructuralType(hash, () => new DuckDbStructuralType(hash, DUCKDB_TYPE.DUCKDB_TYPE_ARRAY) { ElementType = elementTypeStructuralType, FixedSizeArrayLength = length });
         }
 
-        private static DuckDbStructuralType CreateStructuralTypeForStructure(_duckdb_logical_type* lt)
+        private unsafe static DuckDbStructuralType CreateStructuralTypeForStructure(_duckdb_logical_type* lt)
         {
 
-            var size = (int)Methods.duckdb_struct_type_child_count(lt);
+            var size = unsafe((int)Methods.duckdb_struct_type_child_count(lt));
             var members = new List<(OwnedDuckPtr<byte> Name, DuckDbStructuralType Type)>();
             var memberTypes = new List<Type>();
             try
@@ -149,13 +155,16 @@ namespace DuckDbSharp.Reflection
                 using var buffer = new MemoryStream();
                 for (int i = 0; i < size; i++)
                 {
-                    var ptrName = (OwnedDuckPtr<byte>)Methods.duckdb_struct_type_child_name(lt, (ulong)i);
-                    using var fieldType = (OwnedDuckDbLogicalType)Methods.duckdb_struct_type_child_type(lt, (ulong)i);
-                    var structuralFieldType = CreateStructuralType(fieldType);
-                    members.Add((ptrName, structuralFieldType));
+                    unsafe
+                    {
+                        var ptrName = (OwnedDuckPtr<byte>)Methods.duckdb_struct_type_child_name(lt, (ulong)i);
+                        using var fieldType = (OwnedDuckDbLogicalType)Methods.duckdb_struct_type_child_type(lt, (ulong)i);
+                        var structuralFieldType = CreateStructuralType(fieldType);
+                        members.Add((ptrName, structuralFieldType));
 
-                    buffer.Write(new Span<byte>(ptrName, ptrName.StringLength() + 1));
-                    buffer.Write(structuralFieldType.Hash);
+                        buffer.Write(new Span<byte>(ptrName, ptrName.StringLength() + 1));
+                        buffer.Write(structuralFieldType.Hash);
+                    }
                 }
                 if (!buffer.TryGetBuffer(out var bufferSegment)) throw new Exception();
                 var hash = StructuralTypeHash.Hash(bufferSegment.AsSpan(), DUCKDB_TYPE.DUCKDB_TYPE_STRUCT);
@@ -181,19 +190,22 @@ namespace DuckDbSharp.Reflection
 
 
 
-        private static DuckDbStructuralType CreateStructuralTypeForEnum(_duckdb_logical_type* lt)
+        private unsafe static DuckDbStructuralType CreateStructuralTypeForEnum(_duckdb_logical_type* lt)
         {
-            var size = Methods.duckdb_enum_dictionary_size(lt);
+            var size = unsafe(Methods.duckdb_enum_dictionary_size(lt));
             var members = new List<OwnedDuckPtr<byte>>();
             try
             {
                 using var buffer = new MemoryStream();
                 for (int i = 0; i < size; i++)
                 {
-                    var ptr = (OwnedDuckPtr<byte>)Methods.duckdb_enum_dictionary_value(lt, (ulong)i);
-                    members.Add(ptr);
-                    var length = ptr.StringLength();
-                    buffer.Write(new Span<byte>(ptr, length + 1));
+                    unsafe 
+                    {
+                        var ptr = (OwnedDuckPtr<byte>)Methods.duckdb_enum_dictionary_value(lt, (ulong)i);
+                        members.Add(ptr);
+                        var length = ptr.StringLength();
+                        buffer.Write(new Span<byte>(ptr, length + 1));
+                    }
                 }
                 if (!buffer.TryGetBuffer(out var bufferSegment)) throw new Exception();
                 var hash = StructuralTypeHash.Hash(bufferSegment.AsSpan(), DUCKDB_TYPE.DUCKDB_TYPE_ENUM);

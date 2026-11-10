@@ -54,13 +54,13 @@ namespace DuckDbSharp
 
         }
 
-        public static unsafe OwnedDuckDbConnection Connect(DuckDbDatabase db)
+        public static OwnedDuckDbConnection Connect(DuckDbDatabase db)
         {
             lock (dbs)
             {
                 var connection = DuckDbUtils.ConnectCore(db.database);
                 db.usageCount++;
-                return new OwnedDuckDbConnection(connection.Pointer, () =>
+                return unsafe(new OwnedDuckDbConnection(connection.Pointer, () =>
                 {
                     lock (dbs)
                     {
@@ -90,7 +90,7 @@ namespace DuckDbSharp
                                 dbs.Remove(db.Path);
                         }
                     }
-                });
+                }));
             }
         }
     }

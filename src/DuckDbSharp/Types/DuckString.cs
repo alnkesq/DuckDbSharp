@@ -7,17 +7,17 @@ using System.Text;
 namespace DuckDbSharp.Types
 {
     [StructLayout(LayoutKind.Explicit)]
-    public unsafe struct DuckString
+    public struct DuckString
     {
-        [FieldOffset(0)] public int Length;
-        [FieldOffset(4)] public uint Inlined0;
-        [FieldOffset(8)] public uint Inlined1;
-        [FieldOffset(12)] public uint Inlined2;
-        [FieldOffset(8)] public byte* LongStringPointer;
+        [FieldOffset(0)] public safe int Length;
+        [FieldOffset(4)] public unsafe uint Inlined0;
+        [FieldOffset(8)] public unsafe uint Inlined1;
+        [FieldOffset(12)] public unsafe uint Inlined2;
+        [FieldOffset(8)] public unsafe byte* LongStringPointer;
 
 
-        [FieldOffset(0)] internal ulong Hi;
-        [FieldOffset(8)] internal ulong Lo;
+        [FieldOffset(0)] internal unsafe ulong Hi;
+        [FieldOffset(8)] internal unsafe ulong Lo;
 
         public const int TRUNCATED_STRING_INLINE_LENGTH = 4;
         public const int STRING_INLINE_LENGTH = 12;
@@ -39,23 +39,26 @@ namespace DuckDbSharp.Types
         }
         public static DuckString CreateWithPreallocatedAndPrepopulatedSpaceInArena(ReadOnlySpan<byte> source, NativeArenaSlim arena)
         {
-            DuckString d = default;
-            d.Length = source.Length;
-            var inlinePtr = &d.Inlined0;
-
-            var inline = new Span<byte>((byte*)inlinePtr, STRING_INLINE_LENGTH);
-
-            if (source.Length > STRING_INLINE_LENGTH)
+            unsafe
             {
-                d.LongStringPointer = arena.NextAllocation;
-                arena.AdvanceBy(source.Length);
-                source.Slice(0, TRUNCATED_STRING_INLINE_LENGTH).CopyTo(inline);
+                DuckString d = default;
+                d.Length = source.Length;
+                var inlinePtr = &d.Inlined0;
+
+                var inline = new Span<byte>((byte*)inlinePtr, STRING_INLINE_LENGTH);
+
+                if (source.Length > STRING_INLINE_LENGTH)
+                {
+                    d.LongStringPointer = arena.NextAllocation;
+                    arena.AdvanceBy(source.Length);
+                    source.Slice(0, TRUNCATED_STRING_INLINE_LENGTH).CopyTo(inline);
+                }
+                else
+                {
+                    source.CopyTo(inline);
+                }
+                return d;
             }
-            else
-            {
-                source.CopyTo(inline);
-            }
-            return d;
         }
 
         [UnscopedRef]
@@ -63,16 +66,16 @@ namespace DuckDbSharp.Types
         {
             get
             {
-                fixed (uint* ptr = &Inlined0)
+                fixed (uint* ptr = &unsafe(Inlined0))
                 {
                     if (Length <= STRING_INLINE_LENGTH)
                     {
-                        return new ReadOnlySpan<byte>((byte*)ptr, Length);
+                        return unsafe(new ReadOnlySpan<byte>((byte*)ptr, Length));
 
                     }
                     else
                     {
-                        return new ReadOnlySpan<byte>(LongStringPointer, Length);
+                        return unsafe(new ReadOnlySpan<byte>(LongStringPointer, Length));
                     }
                 }
             }

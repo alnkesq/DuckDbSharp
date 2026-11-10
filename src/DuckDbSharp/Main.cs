@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace DuckDbSharp
 {
-    public static unsafe class Program
+    public static class Program
     {
         public static void Main()
         {

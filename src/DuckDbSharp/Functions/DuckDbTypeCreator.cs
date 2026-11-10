@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace DuckDbSharp.Functions
 {
-    internal unsafe static class DuckDbTypeCreator
+    internal static class DuckDbTypeCreator
     {
 
         public static _duckdb_logical_type* CreateLogicalType(Type t, List<Type>? typesBeingCreated)
@@ -71,24 +71,24 @@ namespace DuckDbSharp.Functions
                     var enumInfo = primitiveType.EnumInfo;
                     fixed (byte** a = BindingUtils.ToPointerArray<ScopedString, byte>(enumInfo!.Members!, x => x.Pointer))
                     {
-                        return Methods.duckdb_create_enum_type(a, (ulong)enumInfo.Members!.Length);
+                        return unsafe(Methods.duckdb_create_enum_type(a, (ulong)enumInfo.Members!.Length));
                     }
                 }
                 else
                 {
-                    return Methods.duckdb_create_logical_type(primitiveType.Kind);
+                    return unsafe(Methods.duckdb_create_logical_type(primitiveType.Kind));
                 }
             }
 
 
             if (arrayFixedLength != null)
             {
-                return Methods.duckdb_create_array_type(CreateLogicalType(sublistElementType!, typesBeingCreated), (ulong)arrayFixedLength.Value);
+                return unsafe(Methods.duckdb_create_array_type(CreateLogicalType(sublistElementType!, typesBeingCreated), (ulong)arrayFixedLength.Value));
             }
 
             if (sublistElementType != null)
             {
-                return Methods.duckdb_create_list_type(CreateLogicalType(sublistElementType, typesBeingCreated));
+                return unsafe(Methods.duckdb_create_list_type(CreateLogicalType(sublistElementType, typesBeingCreated)));
             }
 
             var fields = structureFields!.Select(x =>
@@ -114,7 +114,7 @@ namespace DuckDbSharp.Functions
                 fixed (_duckdb_logical_type** pTypes = typesArray)
                 fixed (byte** namesPtr = namesPtrArray)
                 {
-                    return Methods.duckdb_create_struct_type(pTypes, namesPtr, (ulong)fields.Length);
+                    return unsafe(Methods.duckdb_create_struct_type(pTypes, namesPtr, (ulong)fields.Length));
                 }
             }
             finally

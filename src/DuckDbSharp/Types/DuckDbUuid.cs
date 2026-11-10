@@ -34,9 +34,9 @@ namespace DuckDbSharp.Types
 
 
         [FieldOffset(0)]
-        private readonly ulong lower;
+        private readonly safe ulong lower;
         [FieldOffset(8)]
-        private readonly long upper;
+        private readonly safe long upper;
 
         public override int GetHashCode()
         {
@@ -87,7 +87,7 @@ namespace DuckDbSharp.Types
         [SkipLocalsInit]
         public static implicit operator Guid(DuckDbUuid uuid)
         {
-            Span<byte> buffer = stackalloc byte[16];
+            Span<byte> buffer = unsafe(stackalloc byte[16]);
             uuid.WriteBytes(buffer);
             return new Guid(buffer, bigEndian: true);
         }
@@ -96,7 +96,7 @@ namespace DuckDbSharp.Types
         [SkipLocalsInit]
         public static implicit operator DuckDbUuid(Guid guid)
         {
-            Span<byte> buffer = stackalloc byte[16];
+            Span<byte> buffer = unsafe(stackalloc byte[16]);
 
             guid.TryWriteBytes(buffer, bigEndian: true, out _);
             return new DuckDbUuid(buffer);

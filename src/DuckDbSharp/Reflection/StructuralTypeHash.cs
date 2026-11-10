@@ -10,13 +10,13 @@ namespace DuckDbSharp.Reflection
     {
         internal static StructuralTypeHash Hash(StructuralTypeHash inner, DUCKDB_TYPE type)
         {
-            return Hash(MemoryMarshal.AsBytes(new ReadOnlySpan<StructuralTypeHash>(in inner)), type);
+            return Hash(unsafe(MemoryMarshal.AsBytes(new ReadOnlySpan<StructuralTypeHash>(in inner))), type);
         }
         internal static StructuralTypeHash Hash(StructuralTypeHash inner, int fixedLengthArray)
         {
             return Hash([
-                ..MemoryMarshal.AsBytes([inner]),
-                ..MemoryMarshal.AsBytes([fixedLengthArray])
+                ..unsafe(MemoryMarshal.AsBytes([inner])),
+                ..unsafe(MemoryMarshal.AsBytes([fixedLengthArray]))
                 ], DUCKDB_TYPE.DUCKDB_TYPE_ARRAY);
         }
 
@@ -48,19 +48,19 @@ namespace DuckDbSharp.Reflection
 
         internal static StructuralTypeHash Hash(ReadOnlySpan<byte> span, DUCKDB_TYPE type)
         {
-            var h = MemoryMarshal.Cast<byte, UInt128>(SHA256.HashData(span));
+            var h = unsafe(MemoryMarshal.Cast<byte, UInt128>(SHA256.HashData(span)));
             return new StructuralTypeHash(h[0], h[1] + (uint)DuckDbTypeToDuckDbStableType(type));
         }
 
         internal static StructuralTypeHash Parse(string hash)
         {
-            var s = MemoryMarshal.Cast<byte, UInt128>(Convert.FromHexString(hash));
+            var s = unsafe(MemoryMarshal.Cast<byte, UInt128>(Convert.FromHexString(hash)));
             return new StructuralTypeHash(s[0], s[1]);
         }
 
         public override readonly string ToString()
         {
-            return Convert.ToHexString(MemoryMarshal.Cast<UInt128, byte>([High, Low])).ToLowerInvariant();
+            return Convert.ToHexString(unsafe(MemoryMarshal.Cast<UInt128, byte>([High, Low]))).ToLowerInvariant();
         }
     }
 }

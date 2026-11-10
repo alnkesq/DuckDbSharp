@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace DuckDbSharp.Functions
 {
-    public unsafe static class FunctionUtils
+    public static class FunctionUtils
     {
         private static (Type FinalElementType, Func<object, object> FinalTransformer, object? Result) TryGetTransformer(Type methodReturnType, object? result, bool mandatory)
         {
@@ -89,25 +89,25 @@ namespace DuckDbSharp.Functions
 
         }
 
-        internal static FunctionInfo RegisterTableFunction(_duckdb_connection* conn, string name, Delegate deleg)
+        internal unsafe static FunctionInfo RegisterTableFunction(_duckdb_connection* conn, string name, Delegate deleg)
         {
             return RegisterTableFunctionCore(conn, deleg.Method, name, deleg.Target);
         }
-        internal static FunctionInfo RegisterTableFunction(_duckdb_connection* conn, MethodInfo method)
+        internal unsafe static FunctionInfo RegisterTableFunction(_duckdb_connection* conn, MethodInfo method)
         {
             return RegisterTableFunctionCore(conn, method, GetRegistrationNameForMethod(method), null);
         }
-        internal static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, string name, Delegate deleg)
+        internal unsafe static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, string name, Delegate deleg)
         {
-            return RegisterScalarFunctionCore(conn, deleg.Method, name, deleg.Target, false, false);
+            return unsafe(RegisterScalarFunctionCore(conn, deleg.Method, name, deleg.Target, false, false));
         }
-        internal static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, MethodInfo method)
+        internal unsafe static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, MethodInfo method)
         {
             var attr = method.GetCustomAttribute<DuckDbFunctionAttribute>();
-            return RegisterScalarFunctionCore(conn, method, GetRegistrationNameForMethod(method), null, batched: attr?.IsBatched == true, parallel: attr?.UseParallelism ?? true);
+            return unsafe(RegisterScalarFunctionCore(conn, method, GetRegistrationNameForMethod(method), null, batched: attr?.IsBatched == true, parallel: attr?.UseParallelism ?? true));
         }
         internal static string GetRegistrationNameForMethod(MethodInfo m) => DuckDbUtils.ToDuckCaseFunction(m.Name);
-        private static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget, bool batched, bool parallel)
+        private unsafe static FunctionInfo RegisterScalarFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget, bool batched, bool parallel)
         {
             using var scalarFunctionName = (ScopedString)name;
             var parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
@@ -130,35 +130,37 @@ namespace DuckDbSharp.Functions
 
             var nonNullClrReturnType = Nullable.GetUnderlyingType(clrReturnType) ?? clrReturnType;
 
-
-            var func = Methods.duckdb_create_scalar_function();
-            Methods.duckdb_scalar_function_set_name(func, scalarFunctionName);
-            Methods.duckdb_scalar_function_set_return_type(func, DuckDbTypeCreator.CreateLogicalType(nonNullClrReturnType, null));
-
-
-
-
-            for (int i = 0; i < parameters.Length; i++)
+            unsafe
             {
-                var param = parameters[i];
-                var lt = DuckDbTypeCreator.CreateLogicalType(param, null);
-                Methods.duckdb_scalar_function_add_parameter(func, lt);
-                //var structuralType = DuckDbStructuralType.CreateStructuralType(lt);
-                //colTypes[i] = DuckDbTypeCreator.CreateGetter(new FieldInfo2("Arg" + i, ))
+                var func = Methods.duckdb_create_scalar_function();
+                Methods.duckdb_scalar_function_set_name(func, scalarFunctionName);
+                Methods.duckdb_scalar_function_set_return_type(func, DuckDbTypeCreator.CreateLogicalType(nonNullClrReturnType, null));
+
+
+
+
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    var param = parameters[i];
+                    var lt = DuckDbTypeCreator.CreateLogicalType(param, null);
+                    Methods.duckdb_scalar_function_add_parameter(func, lt);
+                    //var structuralType = DuckDbStructuralType.CreateStructuralType(lt);
+                    //colTypes[i] = DuckDbTypeCreator.CreateGetter(new FieldInfo2("Arg" + i, ))
+                }
+                var argChunkClrType = typeof(ValueTuple).Assembly.GetType("System.ValueTuple`" + parameters.Length)?.MakeGenericType(parameters);
+                if (argChunkClrType == null) throw new Exception("Could not find a System.ValueTuple with the required number of type parameters.");
+                funcInfo.ScalarArgumentChunkType = DuckDbStructuralType.CreateStructuralType(argChunkClrType);
+                funcInfo.ScalarArgumentDeserializer = SerializerCreationContext.Global.CreateRootDeserializer(argChunkClrType, funcInfo.ScalarArgumentChunkType);
+
+                //funcInfo.ScalarArgumentDeserializer = DuckDbStructuralType.CreateStructuralType()
+                Methods.duckdb_scalar_function_set_extra_info(func, CreateGcHandle(funcInfo), &BindingUtils.FreeGcHandle);
+                Methods.duckdb_scalar_function_set_function(func, &ExecuteScalarFunction);
+
+                BindingUtils.CheckState(Methods.duckdb_register_scalar_function(conn, func));
+                funcInfo.PointerScalarFn = func;
+                funcInfo.ScalarReturnType = clrReturnType;
+                return funcInfo;
             }
-            var argChunkClrType = typeof(ValueTuple).Assembly.GetType("System.ValueTuple`" + parameters.Length)?.MakeGenericType(parameters);
-            if (argChunkClrType == null) throw new Exception("Could not find a System.ValueTuple with the required number of type parameters.");
-            funcInfo.ScalarArgumentChunkType = DuckDbStructuralType.CreateStructuralType(argChunkClrType);
-            funcInfo.ScalarArgumentDeserializer = SerializerCreationContext.Global.CreateRootDeserializer(argChunkClrType, funcInfo.ScalarArgumentChunkType);
-
-            //funcInfo.ScalarArgumentDeserializer = DuckDbStructuralType.CreateStructuralType()
-            Methods.duckdb_scalar_function_set_extra_info(func, CreateGcHandle(funcInfo), &BindingUtils.FreeGcHandle);
-            Methods.duckdb_scalar_function_set_function(func, &ExecuteScalarFunction);
-
-            BindingUtils.CheckState(Methods.duckdb_register_scalar_function(conn, func));
-            funcInfo.PointerScalarFn = func;
-            funcInfo.ScalarReturnType = clrReturnType;
-            return funcInfo;
         }
 
         private class ArgumentsAndException
@@ -177,9 +179,9 @@ namespace DuckDbSharp.Functions
             t_scalarFunctionRecursionLevel++;
             try
             {
-                funcInfo = BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_scalar_function_get_extra_info(p));
-                var itemCount = checked((int)Methods.duckdb_data_chunk_get_size(chunk));
-                var colcount = checked((int)Methods.duckdb_data_chunk_get_column_count(chunk));
+                funcInfo = unsafe(BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_scalar_function_get_extra_info(p)));
+                var itemCount = unsafe(checked((int)Methods.duckdb_data_chunk_get_size(chunk)));
+                var colcount = unsafe(checked((int)Methods.duckdb_data_chunk_get_column_count(chunk)));
 
                 var argumentTuples = funcInfo.ScalarArgumentDeserializer!((nint)chunk, new DuckDbDeserializationContext());
                 var returnClrType = funcInfo.ScalarReturnType!;
@@ -293,7 +295,7 @@ namespace DuckDbSharp.Functions
                 var errorText =
                     faultyArguments != null ? faultyArguments.Exception.ToString() + " when calling " + funcInfo?.Name + " with arguments " + TupleToStringForDebugging(faultyArguments.Arguments) : ex.ToString();
                 using var error = (ScopedString)errorText;
-                Methods.duckdb_scalar_function_set_error(p, error);
+                unsafe { Methods.duckdb_scalar_function_set_error(p, error); }
             }
             finally
             {
@@ -393,21 +395,23 @@ namespace DuckDbSharp.Functions
                 }
             }
 
-
-            var func = Methods.duckdb_create_table_function();
-            Methods.duckdb_table_function_set_name(func, tableFunctionName);
-            foreach (var param in parameters)
+            unsafe
             {
-                var lt = DuckDbTypeCreator.CreateLogicalType(param, null);
-                Methods.duckdb_table_function_add_parameter(func, lt);
+                var func = Methods.duckdb_create_table_function();
+                Methods.duckdb_table_function_set_name(func, tableFunctionName);
+                foreach (var param in parameters)
+                {
+                    var lt = DuckDbTypeCreator.CreateLogicalType(param, null);
+                    Methods.duckdb_table_function_add_parameter(func, lt);
+                }
+                Methods.duckdb_table_function_set_init(func, &TableFunctionInit);
+                Methods.duckdb_table_function_set_bind(func, &BindFunctionInit);
+                Methods.duckdb_table_function_set_local_init(func, &TableLocalInit);
+                Methods.duckdb_table_function_set_extra_info(func, CreateGcHandle(funcInfo), &BindingUtils.FreeGcHandle);
+                Methods.duckdb_table_function_set_function(func, &EnumerateFunction);
+                BindingUtils.CheckState(Methods.duckdb_register_table_function(conn, func));
+                funcInfo.PointerTableFn = func;
             }
-            Methods.duckdb_table_function_set_init(func, &TableFunctionInit);
-            Methods.duckdb_table_function_set_bind(func, &BindFunctionInit);
-            Methods.duckdb_table_function_set_local_init(func, &TableLocalInit);
-            Methods.duckdb_table_function_set_extra_info(func, CreateGcHandle(funcInfo), &BindingUtils.FreeGcHandle);
-            Methods.duckdb_table_function_set_function(func, &EnumerateFunction);
-            BindingUtils.CheckState(Methods.duckdb_register_table_function(conn, func));
-            funcInfo.PointerTableFn = func;
             return funcInfo;
         }
         private static Type? TryGetElementType(Type ienumerable)
@@ -435,7 +439,7 @@ namespace DuckDbSharp.Functions
             {
 
             });
-            Methods.duckdb_init_set_init_data(p, ptr, &BindingUtils.FreeGcHandle);
+            unsafe { Methods.duckdb_init_set_init_data(p, ptr, &BindingUtils.FreeGcHandle); }
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
@@ -446,64 +450,68 @@ namespace DuckDbSharp.Functions
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
         static void BindFunctionInit(duckdb_bind_info_ptr p)
         {
-            try
+            unsafe
             {
-                var funcinfo = BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_bind_get_extra_info(p));
-                var paramCount = (int)Methods.duckdb_bind_get_parameter_count(p);
-                var args = new object?[funcinfo.Parameters.Length];
-                for (var paramId = 0; paramId < paramCount; paramId++)
+                try
                 {
-                    var param = Methods.duckdb_bind_get_parameter(p, (ulong)paramId);
-                    var clrParam = funcinfo.Parameters[paramId];
-                    object? val;
-                    var paramType = clrParam;
-                    if (paramType == typeof(string))
-                    {
-                        val = BindingUtils.ToString(Methods.duckdb_get_varchar(param));
-                    }
-                    else if (paramType == typeof(int))
-                    {
-                        var num = Methods.duckdb_get_int64(param);
-                        val = Convert.ChangeType(num, paramType);
-                    }
-                    else if (paramType == typeof(long))
-                    {
-                        val = Methods.duckdb_get_int64(param);
-                    }
-                    else throw new NotSupportedException();
-                    args[(int)paramId] = val;
-                }
-                var bindctx = new BindContext
-                {
-                    Function = funcinfo,
-                    Args = args,
-                };
 
-                if (funcinfo.FinalElementType != null)
-                {
-                    bindctx.FinalElementType = funcinfo.FinalElementType;
-                    BindType(p, funcinfo.FinalElementType);
-                }
-                else
-                {
-                    var ret = funcinfo.Method.Invoke(funcinfo.DelegateTarget, args);
-                    var retType = ret?.GetType() ?? typeof(string);
-                    var transformer = TryGetTransformer(retType, ret, mandatory: true);
-                    ret = transformer.Result;
-                    BindType(p, transformer.FinalElementType);
-                    bindctx.FinalElementType = transformer.FinalElementType;
-                    bindctx.HasPrecomputedReturnValue = true;
-                    bindctx.PrecomputedReturnValue = ret;
-                    bindctx.LateTransformer = transformer.FinalTransformer;
-                }
+                    var funcinfo = BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_bind_get_extra_info(p));
+                    var paramCount = (int)Methods.duckdb_bind_get_parameter_count(p);
+                    var args = new object?[funcinfo.Parameters.Length];
+                    for (var paramId = 0; paramId < paramCount; paramId++)
+                    {
+                        var param = Methods.duckdb_bind_get_parameter(p, (ulong)paramId);
+                        var clrParam = funcinfo.Parameters[paramId];
+                        object? val;
+                        var paramType = clrParam;
+                        if (paramType == typeof(string))
+                        {
+                            val = BindingUtils.ToString(Methods.duckdb_get_varchar(param));
+                        }
+                        else if (paramType == typeof(int))
+                        {
+                            var num = Methods.duckdb_get_int64(param);
+                            val = Convert.ChangeType(num, paramType);
+                        }
+                        else if (paramType == typeof(long))
+                        {
+                            val = Methods.duckdb_get_int64(param);
+                        }
+                        else throw new NotSupportedException();
+                        args[(int)paramId] = val;
+                    }
+                    var bindctx = new BindContext
+                    {
+                        Function = funcinfo,
+                        Args = args,
+                    };
+
+                    if (funcinfo.FinalElementType != null)
+                    {
+                        bindctx.FinalElementType = funcinfo.FinalElementType;
+                        BindType(p, funcinfo.FinalElementType);
+                    }
+                    else
+                    {
+                        var ret = funcinfo.Method.Invoke(funcinfo.DelegateTarget, args);
+                        var retType = ret?.GetType() ?? typeof(string);
+                        var transformer = TryGetTransformer(retType, ret, mandatory: true);
+                        ret = transformer.Result;
+                        BindType(p, transformer.FinalElementType);
+                        bindctx.FinalElementType = transformer.FinalElementType;
+                        bindctx.HasPrecomputedReturnValue = true;
+                        bindctx.PrecomputedReturnValue = ret;
+                        bindctx.LateTransformer = transformer.FinalTransformer;
+                    }
 
 
-                Methods.duckdb_bind_set_bind_data(p, CreateGcHandle(bindctx), &BindingUtils.FreeGcHandle);
-            }
-            catch (Exception ex)
-            {
-                using var error = (ScopedString)ex.ToString();
-                Methods.duckdb_bind_set_error(p, error);
+                    Methods.duckdb_bind_set_bind_data(p, CreateGcHandle(bindctx), &BindingUtils.FreeGcHandle);
+                }
+                catch (Exception ex)
+                {
+                    using var error = (ScopedString)ex.ToString();
+                    Methods.duckdb_bind_set_error(p, error);
+                }
             }
         }
 
@@ -523,7 +531,7 @@ namespace DuckDbSharp.Functions
             {
                 var numType = DuckDbTypeCreator.CreateLogicalType(field.FieldType, null);
                 using var colName = (ScopedString)field.Name;
-                Methods.duckdb_bind_add_result_column(p, colName, numType);
+                unsafe { Methods.duckdb_bind_add_result_column(p, colName, numType); }
             }
         }
 
@@ -532,10 +540,10 @@ namespace DuckDbSharp.Functions
         {
             try
             {
-                var funcInfo = BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_function_get_extra_info(p));
+                var funcInfo = unsafe(BindingUtils.ReadGcHandle<FunctionInfo>(Methods.duckdb_function_get_extra_info(p)));
 
-                var bind = BindingUtils.ReadGcHandle<BindContext>(Methods.duckdb_function_get_bind_data(p));
-                var initCtx = BindingUtils.ReadGcHandle<FunctionInitContext>(Methods.duckdb_function_get_init_data(p));
+                var bind = unsafe (BindingUtils.ReadGcHandle<BindContext>(Methods.duckdb_function_get_bind_data(p)));
+                var initCtx = unsafe (BindingUtils.ReadGcHandle<FunctionInitContext>(Methods.duckdb_function_get_init_data(p)));
 
                 initCtx.Arena ??= new(DuckDbUtils.INITIAL_ARENA_SIZE);
                 initCtx.Arena.Reset();
@@ -576,13 +584,13 @@ namespace DuckDbSharp.Functions
                 var itemCount = initCtx.RootSerializer(initCtx.Enumerator, (nint)chunk, initCtx.Arena);
 
 
-                Methods.duckdb_data_chunk_set_size(chunk, (ulong)itemCount);
+                unsafe { Methods.duckdb_data_chunk_set_size(chunk, (ulong)itemCount); }
 
             }
             catch (Exception ex)
             {
                 using var error = (ScopedString)ex.ToString();
-                Methods.duckdb_function_set_error(p, error);
+                unsafe { Methods.duckdb_function_set_error(p, error); }
             }
 
         }
@@ -639,7 +647,7 @@ namespace DuckDbSharp.Functions
                 {
                     var isScalar = attr.IsScalar ?? TypeSniffedEnumerable.TryGetEnumerableElementType(method.ReturnType) == null;
 
-                    output.Add(isScalar ? RegisterScalarFunction(conn, method) : RegisterTableFunction(conn, method));
+                    output.Add(unsafe(isScalar ? RegisterScalarFunction(conn, method) : RegisterTableFunction(conn, method)));
                 }
             }
         }

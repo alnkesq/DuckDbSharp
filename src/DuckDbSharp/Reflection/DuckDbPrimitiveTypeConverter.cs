@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace DuckDbSharp.Reflection
 {
-    internal unsafe class DuckDbPrimitiveTypeConverter
+    internal class DuckDbPrimitiveTypeConverter
     {
 
         public DuckDbPrimitiveTypeConverter(Type clrType, DUCKDB_TYPE duckDbType)

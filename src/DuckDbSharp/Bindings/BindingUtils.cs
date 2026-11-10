@@ -5,14 +5,17 @@ using System.Runtime.InteropServices;
 
 namespace DuckDbSharp.Bindings
 {
-    public unsafe static class BindingUtils
+    public static class BindingUtils
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-        public static void FreeGcHandle(void* ptr)
+        public unsafe static void FreeGcHandle(void* ptr)
         {
-            var handle = GCHandle.FromIntPtr((nint)ptr);
-            (handle.Target as IDisposable)?.Dispose();
-            handle.Free();
+            unsafe
+            {
+                var handle = GCHandle.FromIntPtr((nint)ptr);
+                (handle.Target as IDisposable)?.Dispose();
+                handle.Free();
+            }
         }
 
 
@@ -32,9 +35,9 @@ namespace DuckDbSharp.Bindings
             return result;
         }
 
-        public static T ReadGcHandle<T>(void* ptr) where T : class
+        public unsafe static T ReadGcHandle<T>(void* ptr) where T : class
         {
-            var handle = GCHandle.FromIntPtr((nint)ptr);
+            var handle = unsafe(GCHandle.FromIntPtr((nint)ptr));
             var target = handle.Target;
             if (target == null) throw new Exception();
             return (T)target;
@@ -52,10 +55,10 @@ namespace DuckDbSharp.Bindings
             NativeMemory.Free(ptr);
         }
 
-        public static string? ToString(byte* v)
+        public unsafe static string? ToString(byte* v)
         {
             if (v == null) return null;
-            return Marshal.PtrToStringUTF8((nint)v);
+            return unsafe (Marshal.PtrToStringUTF8((nint)v));
         }
 
         internal static T Move<T>(ref T ownedPtr)
@@ -68,10 +71,10 @@ namespace DuckDbSharp.Bindings
         public static void CheckAppenderError(duckdb_state state, _duckdb_appender* appender)
         {
             if (state != duckdb_state.DuckDBSuccess)
-                throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_appender_error(appender)));
+                throw new DuckDbException(unsafe(DuckDbUtils.ToStringUtf8(Methods.duckdb_appender_error(appender))));
         }
     }
 
-    public unsafe delegate TPtr* PointerSelector<T, TPtr>(T input) where TPtr : unmanaged;
+    public delegate TPtr* PointerSelector<T, TPtr>(T input) where TPtr : unmanaged;
 }
 

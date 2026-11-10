@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace DuckDbSharp
 {
-    public unsafe class ThreadSafeTypedDuckDbConnection : TypedDuckDbConnectionBase
+    public class ThreadSafeTypedDuckDbConnection : TypedDuckDbConnectionBase
     {
         protected ThreadSafeTypedDuckDbConnection(OwnedDuckDbConnection conn, DuckDbDatabase database)
             : base(conn, database)
@@ -49,7 +49,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                enumerator = DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, options, this).GetEnumerator();
+                enumerator = unsafe(DuckDbUtils.ExecuteBatched<T>(Pointer, sql, parameters, EnumerableParameterSlots, options, this).GetEnumerator());
             }
             try
             {
@@ -82,7 +82,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                return DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options);
+                return unsafe(DuckDbUtils.ExecuteCore(Handle, sql, parameters, EnumerableParameterSlots, options));
             }
         }
 
@@ -139,7 +139,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                return DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots);
+                return unsafe(DuckDbUtils.ExecuteScalar<T>(conn, sql, parameters, EnumerableParameterSlots));
             }
         }
 
@@ -148,7 +148,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                return DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext);
+                return unsafe(DuckDbUtils.ExecuteScalar(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext));
             }
         }
         public override void ExecuteNonQuery(string sql, params object?[]? parameters)
@@ -156,7 +156,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                DuckDbUtils.ExecuteNonQuery(conn, sql, parameters, EnumerableParameterSlots);
+                unsafe { DuckDbUtils.ExecuteNonQuery(conn, sql, parameters, EnumerableParameterSlots); }
             }
         }
 

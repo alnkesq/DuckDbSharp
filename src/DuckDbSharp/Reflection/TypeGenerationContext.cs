@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace DuckDbSharp.Reflection
 {
-    public unsafe class TypeGenerationContext
+    public class TypeGenerationContext
     {
         public readonly ModuleBuilder ModuleBuilder;
         public readonly AssemblyBuilder AssemblyBuilder;

@@ -23,13 +23,13 @@ namespace DuckDbSharp.Functions
         internal bool IsBatched;
         internal bool UseParallelism;
         internal Type? ScalarReturnType;
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (PointerTableFn.ptr != null)
             {
                 fixed (duckdb_table_function_ptr* ptr = &PointerTableFn)
                 {
-                    Methods.duckdb_destroy_table_function(ptr);
+                    unsafe { Methods.duckdb_destroy_table_function(ptr); }
                 }
                 PointerTableFn = default;
             }
@@ -37,7 +37,7 @@ namespace DuckDbSharp.Functions
             {
                 fixed (duckdb_scalar_function_ptr* ptr = &PointerScalarFn)
                 {
-                    Methods.duckdb_destroy_scalar_function(ptr);
+                   unsafe { Methods.duckdb_destroy_scalar_function(ptr); }
                 }
                 PointerScalarFn = default;
             }

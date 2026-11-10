@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace DuckDbSharp.Bindings
 {
-    internal unsafe static class DuckDbExtensionUtils
+    internal static class DuckDbExtensionUtils
     {
         private static bool _resolverInitialized;
 
@@ -40,7 +40,7 @@ namespace DuckDbSharp.Bindings
             try
             {
                 InitializeDllResolver();
-                return Methods.duckdb_library_version();
+                return unsafe(Methods.duckdb_library_version());
             }
             catch (Exception ex)
             {

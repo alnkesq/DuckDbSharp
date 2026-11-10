@@ -22,7 +22,7 @@ using System.Threading;
 
 namespace DuckDbSharp
 {
-    public unsafe static class DuckDbUtils
+    public static class DuckDbUtils
     {
         public const int STANDARD_VECTOR_SIZE = 2048;
 
@@ -61,47 +61,53 @@ namespace DuckDbSharp
             _duckdb_database* db = default;
             using var pathUtf8 = (ScopedString)path;
             _duckdb_config* config = null;
-            BindingUtils.CheckState(Methods.duckdb_create_config(&config));
+            BindingUtils.CheckState(unsafe(Methods.duckdb_create_config(&config)));
             try
             {
-                byte* error = null;
-                if (Methods.duckdb_open_ext(pathUtf8, &db, config, &error) != duckdb_state.DuckDBSuccess)
-                    throw new DuckDbException(Marshal.PtrToStringUTF8((nint)error));
-                return (OwnedDuckDbDatabase)db;
+                unsafe
+                {
+                    byte* error = null;
+                    if (Methods.duckdb_open_ext(pathUtf8, &db, config, &error) != duckdb_state.DuckDBSuccess)
+                        throw new DuckDbException(Marshal.PtrToStringUTF8((nint)error));
+                    return (OwnedDuckDbDatabase)db;
+                }
             }
             finally
             {
-                Methods.duckdb_destroy_config(&config);
+                unsafe { Methods.duckdb_destroy_config(&config); }
             }
 
         }
 
         public static OwnedDuckDbConnection Connect(string? path, out DuckDbDatabase ownerDb)
         {
-            return DuckDbDatabase.AcquireConnection(path, out ownerDb);
+            return unsafe(DuckDbDatabase.AcquireConnection(path, out ownerDb));
         }
 
         internal static OwnedDuckDbConnection ConnectCore(_duckdb_database* db)
         {
             _duckdb_connection* conn = null;
-            BindingUtils.CheckState(Methods.duckdb_connect(db, &conn));
-            return new OwnedDuckDbConnection(conn);
+            BindingUtils.CheckState(unsafe(Methods.duckdb_connect(db, &conn)));
+            return unsafe(new OwnedDuckDbConnection(conn));
         }
 
         internal static OwnedDuckDbConnection ConnectCore(string? path)
         {
             var db = DuckDbUtils.OpenDatabase(path);
             _duckdb_connection* conn = null;
-            BindingUtils.CheckState(Methods.duckdb_connect(db, &conn));
-            return new(conn, () => db.Dispose());
+            BindingUtils.CheckState(unsafe(Methods.duckdb_connect(db, &conn)));
+            return unsafe(new(conn, () => db.Dispose()));
         }
 
         private static OwnedDuckDbPreparedStatement CreatePreparedStatement(_duckdb_connection* conn, string sql)
         {
             using var sqlBytes = (ScopedString)sql;
             using var prepared = OwnedDuckDbPreparedStatement.Allocate();
-            if (Methods.duckdb_prepare(conn, sqlBytes, &prepared.Pointer) != duckdb_state.DuckDBSuccess)
-                throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_prepare_error(prepared)));
+            unsafe
+            {
+                if (Methods.duckdb_prepare(conn, sqlBytes, &prepared.Pointer) != duckdb_state.DuckDBSuccess)
+                    throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_prepare_error(prepared)));
+            }
             return prepared.Move();
         }
 
@@ -133,7 +139,7 @@ namespace DuckDbSharp
                     }
                 }
                 using var prepared = CreatePreparedStatement(conn, sql);
-                var simpleParamCount = Methods.duckdb_nparams(prepared);
+                var simpleParamCount = unsafe(Methods.duckdb_nparams(prepared));
 
                 if (simpleParamCount != (ulong)simpleParameters.Count) throw new DuckDbException($"Expected {simpleParamCount} parameters, but {simpleParameters.Count} were provided.");
 
@@ -141,67 +147,70 @@ namespace DuckDbSharp
                 {
                     var j = (int)i - 1;
                     var val = simpleParameters[j];
-                    if (val == null) BindingUtils.CheckState(Methods.duckdb_bind_null(prepared, i));
-                    /* else
-                     {
-                         var clrType = val.GetType();
-                         var primitiveConverter = SerializerCreationContext.PrimitiveConverters.First(x => x.ClrType == clrType);
+                    unsafe
+                    {
+                        if (val == null) BindingUtils.CheckState(Methods.duckdb_bind_null(prepared, i));
+                        /* else
+                         {
+                             var clrType = val.GetType();
+                             var primitiveConverter = SerializerCreationContext.PrimitiveConverters.First(x => x.ClrType == clrType);
 
-                     }*/
-                    else if (val is bool b) BindingUtils.CheckState(Methods.duckdb_bind_boolean(prepared, i, b ? (byte)1 : (byte)0));
-                    else if (val is ulong u64) BindingUtils.CheckState(Methods.duckdb_bind_uint64(prepared, i, u64));
-                    else if (val is long i64) BindingUtils.CheckState(Methods.duckdb_bind_int64(prepared, i, i64));
-                    else if (val is uint u32) BindingUtils.CheckState(Methods.duckdb_bind_uint32(prepared, i, u32));
-                    else if (val is int i32) BindingUtils.CheckState(Methods.duckdb_bind_int32(prepared, i, i32));
-                    else if (val is ushort u16) BindingUtils.CheckState(Methods.duckdb_bind_uint16(prepared, i, u16));
-                    else if (val is short i16) BindingUtils.CheckState(Methods.duckdb_bind_int16(prepared, i, i16));
-                    else if (val is byte u8) BindingUtils.CheckState(Methods.duckdb_bind_uint8(prepared, i, u8));
-                    else if (val is sbyte i8) BindingUtils.CheckState(Methods.duckdb_bind_int8(prepared, i, i8));
-                    else if (val is float f) BindingUtils.CheckState(Methods.duckdb_bind_float(prepared, i, f));
-                    else if (val is double d) BindingUtils.CheckState(Methods.duckdb_bind_double(prepared, i, d));
-                    else if (val is DateTime dt) BindingUtils.CheckState(Methods.duckdb_bind_timestamp(prepared, i, SerializationHelpers.BitCast<DuckDbTimestampMicros, duckdb_timestamp>(DuckDbTimestampMicros.FromDateTime(dt))));
-                    else if (val is DateOnly don) BindingUtils.CheckState(Methods.duckdb_bind_date(prepared, i, SerializationHelpers.BitCast<int, duckdb_date>(SerializationHelpers.SerializeDateOnly(don))));
-                    else if (val is DuckDbTimestampMicros tsus) BindingUtils.CheckState(Methods.duckdb_bind_timestamp(prepared, i, SerializationHelpers.BitCast<DuckDbTimestampMicros, duckdb_timestamp>(tsus)));
-                    else if (val is DuckDbInterval iv) BindingUtils.CheckState(Methods.duckdb_bind_interval(prepared, i, SerializationHelpers.BitCast<DuckDbInterval, duckdb_interval>(iv)));
-                    else if (val is TimeSpan tspan) BindingUtils.CheckState(Methods.duckdb_bind_interval(prepared, i, SerializationHelpers.BitCast<DuckDbInterval, duckdb_interval>(DuckDbInterval.FromTimeSpan(tspan))));
-                    else if (val is Int128 i128) BindingUtils.CheckState(Methods.duckdb_bind_hugeint(prepared, i, SerializationHelpers.BitCast<Int128, duckdb_hugeint>(i128)));
-                    else if (val is string str)
-                    {
-                        using var s = (ScopedString)str;
-                        BindingUtils.CheckState(Methods.duckdb_bind_varchar_length(prepared, i, s, (ulong)s.Length));
-                    }
-                    else if (val is DuckDbUuid uuid)
-                    {
-                        using var s = (ScopedString)uuid.ToString();
-                        BindingUtils.CheckState(Methods.duckdb_bind_varchar_length(prepared, i, s, (ulong)s.Length));
-                    }
-                    else if (val is byte[] blob)
-                    {
-                        fixed (byte* ptr = blob)
+                         }*/
+                        else if (val is bool b) BindingUtils.CheckState(Methods.duckdb_bind_boolean(prepared, i, b ? (byte)1 : (byte)0));
+                        else if (val is ulong u64) BindingUtils.CheckState(Methods.duckdb_bind_uint64(prepared, i, u64));
+                        else if (val is long i64) BindingUtils.CheckState(Methods.duckdb_bind_int64(prepared, i, i64));
+                        else if (val is uint u32) BindingUtils.CheckState(Methods.duckdb_bind_uint32(prepared, i, u32));
+                        else if (val is int i32) BindingUtils.CheckState(Methods.duckdb_bind_int32(prepared, i, i32));
+                        else if (val is ushort u16) BindingUtils.CheckState(Methods.duckdb_bind_uint16(prepared, i, u16));
+                        else if (val is short i16) BindingUtils.CheckState(Methods.duckdb_bind_int16(prepared, i, i16));
+                        else if (val is byte u8) BindingUtils.CheckState(Methods.duckdb_bind_uint8(prepared, i, u8));
+                        else if (val is sbyte i8) BindingUtils.CheckState(Methods.duckdb_bind_int8(prepared, i, i8));
+                        else if (val is float f) BindingUtils.CheckState(Methods.duckdb_bind_float(prepared, i, f));
+                        else if (val is double d) BindingUtils.CheckState(Methods.duckdb_bind_double(prepared, i, d));
+                        else if (val is DateTime dt) BindingUtils.CheckState(Methods.duckdb_bind_timestamp(prepared, i, SerializationHelpers.BitCast<DuckDbTimestampMicros, duckdb_timestamp>(DuckDbTimestampMicros.FromDateTime(dt))));
+                        else if (val is DateOnly don) BindingUtils.CheckState(Methods.duckdb_bind_date(prepared, i, SerializationHelpers.BitCast<int, duckdb_date>(SerializationHelpers.SerializeDateOnly(don))));
+                        else if (val is DuckDbTimestampMicros tsus) BindingUtils.CheckState(Methods.duckdb_bind_timestamp(prepared, i, SerializationHelpers.BitCast<DuckDbTimestampMicros, duckdb_timestamp>(tsus)));
+                        else if (val is DuckDbInterval iv) BindingUtils.CheckState(Methods.duckdb_bind_interval(prepared, i, SerializationHelpers.BitCast<DuckDbInterval, duckdb_interval>(iv)));
+                        else if (val is TimeSpan tspan) BindingUtils.CheckState(Methods.duckdb_bind_interval(prepared, i, SerializationHelpers.BitCast<DuckDbInterval, duckdb_interval>(DuckDbInterval.FromTimeSpan(tspan))));
+                        else if (val is Int128 i128) BindingUtils.CheckState(Methods.duckdb_bind_hugeint(prepared, i, SerializationHelpers.BitCast<Int128, duckdb_hugeint>(i128)));
+                        else if (val is string str)
                         {
-                            BindingUtils.CheckState(Methods.duckdb_bind_blob(prepared, i, ptr, (ulong)blob.Length));
+                            using var s = (ScopedString)str;
+                            BindingUtils.CheckState(Methods.duckdb_bind_varchar_length(prepared, i, s, (ulong)s.Length));
                         }
-                    }
-                    else if (val is Memory<byte> m)
-                    {
-                        fixed (byte* ptr = m.Span)
+                        else if (val is DuckDbUuid uuid)
                         {
-                            BindingUtils.CheckState(Methods.duckdb_bind_blob(prepared, i, ptr, (ulong)m.Length));
+                            using var s = (ScopedString)uuid.ToString();
+                            BindingUtils.CheckState(Methods.duckdb_bind_varchar_length(prepared, i, s, (ulong)s.Length));
                         }
-                    }
-                    else if (val is ReadOnlyMemory<byte> rom)
-                    {
-                        fixed (byte* ptr = rom.Span)
+                        else if (val is byte[] blob)
                         {
-                            BindingUtils.CheckState(Methods.duckdb_bind_blob(prepared, i, ptr, (ulong)rom.Length));
+                            fixed (byte* ptr = blob)
+                            {
+                                BindingUtils.CheckState(Methods.duckdb_bind_blob(prepared, i, ptr, (ulong)blob.Length));
+                            }
                         }
+                        else if (val is Memory<byte> m)
+                        {
+                            fixed (byte* ptr = m.Span)
+                            {
+                                BindingUtils.CheckState(Methods.duckdb_bind_blob(prepared, i, ptr, (ulong)m.Length));
+                            }
+                        }
+                        else if (val is ReadOnlyMemory<byte> rom)
+                        {
+                            fixed (byte* ptr = rom.Span)
+                            {
+                                BindingUtils.CheckState(Methods.duckdb_bind_blob(prepared, i, ptr, (ulong)rom.Length));
+                            }
+                        }
+                        else if (IsEnum(val.GetType()))
+                        {
+                            using var s = (ScopedString)val.ToString();
+                            BindingUtils.CheckState(Methods.duckdb_bind_varchar_length(prepared, i, s, (ulong)s.Length));
+                        }
+                        else throw new DuckDbException($"Don't know how to bind parameter of type {val.GetType()}.");
                     }
-                    else if (IsEnum(val.GetType()))
-                    {
-                        using var s = (ScopedString)val.ToString();
-                        BindingUtils.CheckState(Methods.duckdb_bind_varchar_length(prepared, i, s, (ulong)s.Length));
-                    }
-                    else throw new DuckDbException($"Don't know how to bind parameter of type {val.GetType()}.");
                 }
 
                 var parameterCount = parameters != null ? (ulong)parameters.Length : 0;
@@ -218,15 +227,18 @@ namespace DuckDbSharp
                 }
                 : null);
 
-                if (commandOptions == CommandOptions.UseStreaming)
+                unsafe
                 {
-                    if (Methods.duckdb_execute_prepared_streaming(prepared, result.Pointer) != duckdb_state.DuckDBSuccess)
-                        throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_result_error(result)));
-                }
-                else
-                {
-                    if (Methods.duckdb_execute_prepared(prepared, result.Pointer) != duckdb_state.DuckDBSuccess)
-                        throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_result_error(result)));
+                    if (commandOptions == CommandOptions.UseStreaming)
+                    {
+                        if (Methods.duckdb_execute_prepared_streaming(prepared, result.Pointer) != duckdb_state.DuckDBSuccess)
+                            throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_result_error(result)));
+                    }
+                    else
+                    {
+                        if (Methods.duckdb_execute_prepared(prepared, result.Pointer) != duckdb_state.DuckDBSuccess)
+                            throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_result_error(result)));
+                    }
                 }
                 return result.Move();
             }
@@ -234,9 +246,12 @@ namespace DuckDbSharp
             {
                 using var result = OwnedDuckDbResult.Allocate(() => FunctionUtils.FreeScalarFunctionArenasForCurrentThreadAndRecursionLevel());
                 using var sqlBytes = (ScopedString)sql;
-                if (Methods.duckdb_query(conn, sqlBytes, result) != duckdb_state.DuckDBSuccess)
-                    throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_result_error(result)));
-                return result.Move();
+                unsafe
+                {
+                    if (Methods.duckdb_query(conn, sqlBytes, result) != duckdb_state.DuckDBSuccess)
+                        throw new DuckDbException(DuckDbUtils.ToStringUtf8(Methods.duckdb_result_error(result)));
+                    return result.Move();
+                }
             }
 
 
@@ -256,7 +271,7 @@ namespace DuckDbSharp
                 {
                     slot = new EnumerableParameterSlot { ParameterId = parameterId, Function = null! };
 
-                    slot.Function = FunctionUtils.RegisterTableFunction(conn, funcname, (long token) =>
+                    slot.Function = unsafe(FunctionUtils.RegisterTableFunction(conn, funcname, (long token) =>
                     {
                         lock (slots)
                         {
@@ -266,13 +281,16 @@ namespace DuckDbSharp
                             }
                             throw new ArgumentException("Invalid or null enumerable-valued parameter reference.");
                         }
-                    });
+                    }));
                     slots[i] = slot;
                 }
                 slot.ValueByQueryToken.Add(token, value);
             }
-            ExecuteCore(conn, $"create or replace temp macro table_parameter_{parameterId}() as table (select * from {funcname}({token.Id}))", null, null, CommandOptions.NoStreaming);
-            ExecuteCore(conn, $"create or replace temp macro array_parameter_{parameterId}() as (select array_agg(f) as array from {funcname}({token.Id}) f)", null, null, CommandOptions.NoStreaming);
+            unsafe
+            {
+                ExecuteCore(conn, $"create or replace temp macro table_parameter_{parameterId}() as table (select * from {funcname}({token.Id}))", null, null, CommandOptions.NoStreaming);
+                ExecuteCore(conn, $"create or replace temp macro array_parameter_{parameterId}() as (select array_agg(f) as array from {funcname}({token.Id}) f)", null, null, CommandOptions.NoStreaming);
+            }
         }
 
 
@@ -284,29 +302,35 @@ namespace DuckDbSharp
         }
 
         internal static IEnumerable Execute(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
-        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, commandOptions, ownerConnection);
+        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => unsafe(Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, commandOptions, ownerConnection));
 
-        internal static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal unsafe static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
-            PrepareExecute<T>(conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, commandOptions);
-            var enumerable = EnumerateResultsCore<T>(result, structuralType, ownerConnection);
-            result.Move();
-            return enumerable;
+            unsafe
+            {
+                PrepareExecute<T>(conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, commandOptions);
+                var enumerable = EnumerateResultsCore<T>(result, structuralType, ownerConnection);
+                result.Move();
+                return enumerable;
+            }
         }
 
-        internal static IEnumerable<T[]> ExecuteBatched<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal unsafe static IEnumerable<T[]> ExecuteBatched<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
-            PrepareExecute<T>((_duckdb_connection*)conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, commandOptions);
+            unsafe
+            {
+                PrepareExecute<T>((_duckdb_connection*)conn, sql, parameters, out var result, out var structuralType, enumerableParameterSlots, commandOptions);
 
-            SetUpDoubleStreamingCheck(ref result, ownerConnection);
-            var enumerable = EnumerateResultsBatchedCore<T>(result, structuralType, new StrongBox<bool>());
-            result.Move();
-            return enumerable;
+                SetUpDoubleStreamingCheck(ref result, ownerConnection);
+                var enumerable = EnumerateResultsBatchedCore<T>(result, structuralType, new StrongBox<bool>());
+                result.Move();
+                return enumerable;
+            }
         }
 
-        internal static void PrepareExecute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, out OwnedDuckDbResult result, out DuckDbStructuralType structuralType, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions)
+        internal unsafe static void PrepareExecute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, out OwnedDuckDbResult result, out DuckDbStructuralType structuralType, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions)
         {
-            result = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions);
+            result = unsafe(ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions));
             structuralType = DuckDbStructuralType.CreateStructuralTypeForResult(result, typeof(T));
         }
 
@@ -317,9 +341,9 @@ namespace DuckDbSharp
             return structuralType;
         }
 
-        internal static void ExecuteNonQuery(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
+        internal unsafe static void ExecuteNonQuery(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
         {
-            using var _ = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming);
+            using var _ = unsafe(ExecuteCore(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming));
         }
 
         internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
@@ -329,7 +353,7 @@ namespace DuckDbSharp
 
         internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object?[]? parameters, bool expectSingleColumn, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
-            using var result = ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions);
+            using var result = unsafe(ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions));
 
             var resultStructuralType = DuckDbStructuralType.CreateStructuralTypeForResult(result, expectSingleColumn);
             if (!SerializerCreationContext.StructuralHashToRegisteredClrType.TryGetValue(resultStructuralType.Hash, out var resultType))
@@ -364,7 +388,7 @@ namespace DuckDbSharp
 
         private static void SetUpDoubleStreamingCheck(ref OwnedDuckDbResult result, TypedDuckDbConnectionBase? ownerConnection)
         {
-            if (ownerConnection != null && Methods.duckdb_result_is_streaming(*result.Pointer) != 0)
+            if (ownerConnection != null && unsafe(Methods.duckdb_result_is_streaming(*result.Pointer)) != 0)
             {
                 Interlocked.Increment(ref ownerConnection.IsExecutingStreamingQuery);
                 result.Disposed += () =>
@@ -387,7 +411,7 @@ namespace DuckDbSharp
                 var isStreamed = IsStreamed(result);
                 while (true)
                 {
-                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++, isStreamed, deserializationContext);
+                    var array = unsafe(FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++, isStreamed, deserializationContext));
                     if (array == null) break;
                     foreach (var item in array)
                     {
@@ -401,9 +425,9 @@ namespace DuckDbSharp
             }
         }
 
-        private unsafe static bool IsStreamed(OwnedDuckDbResult result)
+        private static bool IsStreamed(OwnedDuckDbResult result)
         {
-            return Methods.duckdb_result_is_streaming(*result.Pointer) != 0;
+            return unsafe(Methods.duckdb_result_is_streaming(*result.Pointer)) != 0;
         }
 
         private static IEnumerable<T[]> EnumerateResultsBatchedCore<T>(OwnedDuckDbResult result, DuckDbStructuralType duckType, StrongBox<bool> used)
@@ -418,7 +442,7 @@ namespace DuckDbSharp
                 var isStreamed = IsStreamed(result);
                 while (true)
                 {
-                    var array = FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++, isStreamed, deserializationContext);
+                    var array = unsafe(FetchAndDeserializeChunk<T>(deserializer, result.PointerAsIntPtr, chunkIdx++, isStreamed, deserializationContext));
                     if (array == null) break;
                     yield return array;
                 }
@@ -444,13 +468,13 @@ namespace DuckDbSharp
 
         private unsafe static T[]? FetchAndDeserializeChunk<T>(RootDeserializer deserializer, nint result, ulong chunkIndex, bool isStreamed, DuckDbDeserializationContext deserializationContext)
         {
-            using var chunk =
+            using var chunk = unsafe(
                 isStreamed
                     ? (OwnedDuckDbDataChunk)Methods.duckdb_fetch_chunk(*(duckdb_result*)result)
-                    : (OwnedDuckDbDataChunk)Methods.duckdb_result_get_chunk(*(duckdb_result*)result, chunkIndex);
+                    : (OwnedDuckDbDataChunk)Methods.duckdb_result_get_chunk(*(duckdb_result*)result, chunkIndex));
             if (chunk.Pointer == null)
             {
-                var error = ToStringUtf8(Methods.duckdb_result_error((duckdb_result*)result));
+                var error = unsafe(ToStringUtf8(Methods.duckdb_result_error((duckdb_result*)result)));
                 if (error != null) throw new DuckDbException(error);
                 return null;
             }
@@ -555,7 +579,7 @@ namespace DuckDbSharp
                 foreach (var type in options.CreateNamedEnumTypes)
                 {
                     AddTypesToPossiblyReuse(type, typesToPossiblyReuseHashSet, typesToPossiblyReuseList);
-                    CreateEnumType(conn.Handle, type);
+                    unsafe { CreateEnumType(conn.Handle, type); }
                 }
             }
 
@@ -725,19 +749,19 @@ namespace DuckDbSharp
             return true;
         }
 
-        internal static void CreateEnumType(_duckdb_connection* conn, Type type)
+        internal unsafe static void CreateEnumType(_duckdb_connection* conn, Type type)
         {
             if (Attribute.IsDefined(type, typeof(FlagsAttribute))) throw new Exception("Enums marked with FlagsAttribute cannot be used in CREATE TYPE AS ENUM statements.");
             using var info = DuckDbPrimitiveTypeConverter.CreateEnumInfo(type);
             try
             {
 
-                using var unused = ExecuteCore(conn, $"DROP TYPE IF EXISTS {type.Name}", null, null, CommandOptions.NoStreaming);
+                using var unused = unsafe(ExecuteCore(conn, $"DROP TYPE IF EXISTS {type.Name}", null, null, CommandOptions.NoStreaming));
             }
             catch (Exception)
             {
             }
-            using var _ = ExecuteCore(conn, $"CREATE TYPE {type.Name} AS ENUM ({string.Join(", ", info.Members!.Select(x => $"'{x}'"))})", null, null, CommandOptions.NoStreaming);
+            using var _ = unsafe(ExecuteCore(conn, $"CREATE TYPE {type.Name} AS ENUM ({string.Join(", ", info.Members!.Select(x => $"'{x}'"))})", null, null, CommandOptions.NoStreaming));
 
         }
 
@@ -882,7 +906,7 @@ namespace DuckDbSharp
 
             using var destinationSchemaBytes = (ScopedString)destinationSchema;
             using var destinationTableOrViewBytes = (ScopedString)destinationTableOrView;
-            BindingUtils.CheckAppenderError(Methods.duckdb_appender_create(conn, destinationSchemaBytes, destinationTableOrViewBytes, &appender.Pointer), appender);
+            BindingUtils.CheckAppenderError(unsafe(Methods.duckdb_appender_create(conn, destinationSchemaBytes, destinationTableOrViewBytes, &appender.Pointer)), appender);
             RootSerializer rootSerializer;
             lock (SerializerCreationContext.Global)
             {
@@ -895,36 +919,39 @@ namespace DuckDbSharp
             long insertedItems = 0;
             fixed (_duckdb_logical_type** types = colTypes)
             {
-                using OwnedDuckDbDataChunk chunk = (OwnedDuckDbDataChunk)Methods.duckdb_create_data_chunk(types, (ulong)colTypes.Length);
+                using OwnedDuckDbDataChunk chunk = unsafe((OwnedDuckDbDataChunk)Methods.duckdb_create_data_chunk(types, (ulong)colTypes.Length));
 
                 while (true)
                 {
                     var writtenItems = rootSerializer(enumerator, (nint)chunk.Pointer, arena);
                     insertedItems += writtenItems;
-                    Methods.duckdb_data_chunk_set_size(chunk.Pointer, (ulong)writtenItems);
-                    BindingUtils.CheckAppenderError(Methods.duckdb_append_data_chunk(appender, chunk), appender);
-                    if (writtenItems != DuckDbUtils.STANDARD_VECTOR_SIZE) break;
-                    Methods.duckdb_data_chunk_reset(chunk);
+                    unsafe
+                    {
+                        Methods.duckdb_data_chunk_set_size(chunk.Pointer, (ulong)writtenItems);
+                        BindingUtils.CheckAppenderError(Methods.duckdb_append_data_chunk(appender, chunk), appender);
+                        if (writtenItems != DuckDbUtils.STANDARD_VECTOR_SIZE) break;
+                        Methods.duckdb_data_chunk_reset(chunk);
+                    }
                 }
 
             }
 
-            BindingUtils.CheckAppenderError(Methods.duckdb_appender_close(appender), appender);
+            BindingUtils.CheckAppenderError(unsafe(Methods.duckdb_appender_close(appender)), appender);
 
 
             return insertedItems;
         }
 
-        internal static object? ExecuteScalar(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
+        internal unsafe static object? ExecuteScalar(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
         {
             var box = DuckDbUtils.Execute(conn, sql, parameters, expectSingleColumn: true, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Cast<object>().Single();
             var fields = box.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
             if (fields.Length != 1) throw new Exception($"A scalar query returned {fields.Length} columns.");
             return fields[0].GetValue(box);
         }
-        internal static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
+        internal unsafe static T ExecuteScalar<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots)
         {
-            return Execute<T>(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming, null).Single();
+            return unsafe(Execute<T>(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming, null).Single());
         }
 
         public static void LoadDuckDbDll()
@@ -967,14 +994,14 @@ namespace DuckDbSharp
         private readonly static MethodInfo EnumerateResultsCoreMethod = typeof(DuckDbUtils).GetMethod(nameof(EnumerateResultsCore), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
 
-        internal static string? ToStringUtf8(byte* ptr) => Marshal.PtrToStringUTF8((nint)ptr);
-        internal static string? ToStringUtf8(this OwnedDuckPtr<byte> ptr) => Marshal.PtrToStringUTF8((nint)ptr.Pointer);
-        internal static int StringLength(this OwnedDuckPtr<byte> ptr) => StringLength(ptr.Pointer);
-        internal static int StringLength(byte* ptr)
+        internal unsafe static string? ToStringUtf8(byte* ptr) => unsafe(Marshal.PtrToStringUTF8((nint)ptr));
+        internal static string? ToStringUtf8(this OwnedDuckPtr<byte> ptr) => unsafe(Marshal.PtrToStringUTF8((nint)ptr.Pointer));
+        internal static int StringLength(this OwnedDuckPtr<byte> ptr) => unsafe(StringLength(ptr.Pointer));
+        internal unsafe static int StringLength(byte* ptr)
         {
             for (int i = 0; ; i++)
             {
-                if (ptr[i] == 0) return i;
+                if (unsafe(ptr[i]) == 0) return i;
             }
         }
         internal static void DisposeAll<T>(this List<OwnedDuckPtr<T>> items) where T : unmanaged
@@ -1061,7 +1088,7 @@ namespace DuckDbSharp
         internal static void Write(this Stream s, StructuralTypeHash hash)
         {
             Span<UInt128> span = [hash.High, hash.Low];
-            s.Write(MemoryMarshal.AsBytes(span));
+            s.Write(unsafe(MemoryMarshal.AsBytes(span)));
         }
 
         public static void WriteParquet<T>(string destinationFile, IEnumerable<T> rows, string? orderBy = null)

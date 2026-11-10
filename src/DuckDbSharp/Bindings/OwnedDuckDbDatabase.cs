@@ -2,13 +2,13 @@ using System;
 
 namespace DuckDbSharp.Bindings
 {
-    public unsafe struct OwnedDuckDbDatabase : IDisposable
+    public struct OwnedDuckDbDatabase : IDisposable
     {
-        public static explicit operator OwnedDuckDbDatabase(_duckdb_database* ptr) => new OwnedDuckDbDatabase(ptr);
+        public static unsafe explicit operator OwnedDuckDbDatabase(_duckdb_database* ptr) => unsafe(new OwnedDuckDbDatabase(ptr));
         public static implicit operator _duckdb_database*(OwnedDuckDbDatabase ptr) => ptr.Pointer;
         public _duckdb_database* Pointer;
 
-        public OwnedDuckDbDatabase(_duckdb_database* ptr)
+        public unsafe OwnedDuckDbDatabase(_duckdb_database* ptr)
         {
             this.Pointer = ptr;
         }
@@ -18,7 +18,7 @@ namespace DuckDbSharp.Bindings
             if (Pointer == null) return;
             fixed (_duckdb_database** ptr = &Pointer)
             {
-                Methods.duckdb_close(ptr);
+                unsafe { Methods.duckdb_close(ptr); }
             }
             Pointer = null;
         }
