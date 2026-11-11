@@ -16,11 +16,14 @@ namespace DuckDbSharp.Bindings
         public void Dispose()
         {
             if (Pointer == null) return;
-            fixed (_duckdb_appender** ptr = &Pointer)
+            unsafe
             {
-                unsafe { Methods.duckdb_appender_destroy(ptr); }
+                fixed (_duckdb_appender** ptr = &Pointer)
+                {
+                    Methods.duckdb_appender_destroy(ptr);
+                }
+                BindingUtils.Free(Pointer);
             }
-            BindingUtils.Free(Pointer);
             Pointer = null;
         }
         internal static OwnedDuckDbPreparedAppender Allocate()

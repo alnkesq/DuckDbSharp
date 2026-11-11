@@ -169,7 +169,7 @@ namespace DuckDbSharp.Reflection
                 {
                     var args = DuckDbUtils.GetExampleParameterValues(parameters, options, sql);
                     using var result = conn.ExecuteUnsafe($"select * from ({sql}) limit 0", args);
-                    structuralType = DuckDbStructuralType.CreateStructuralTypeForResult(result);
+                    structuralType = unsafe(DuckDbStructuralType.CreateStructuralTypeForResult(result));
                 }
                 catch (Exception ex)
                 {

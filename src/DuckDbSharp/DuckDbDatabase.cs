@@ -58,7 +58,7 @@ namespace DuckDbSharp
         {
             lock (dbs)
             {
-                var connection = DuckDbUtils.ConnectCore(db.database);
+                var connection = unsafe(DuckDbUtils.ConnectCore(db.database));
                 db.usageCount++;
                 return unsafe(new OwnedDuckDbConnection(connection.Pointer, () =>
                 {

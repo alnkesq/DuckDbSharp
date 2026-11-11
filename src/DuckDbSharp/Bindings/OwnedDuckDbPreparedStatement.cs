@@ -16,11 +16,14 @@ namespace DuckDbSharp.Bindings
         public void Dispose()
         {
             if (Pointer == null) return;
-            fixed (_duckdb_prepared_statement** ptr = &Pointer)
+            unsafe
             {
-                unsafe { Methods.duckdb_destroy_prepare(ptr); }
+                fixed (_duckdb_prepared_statement** ptr = &Pointer)
+                {
+                    Methods.duckdb_destroy_prepare(ptr);
+                }
+                BindingUtils.Free(Pointer);
             }
-            BindingUtils.Free(Pointer);
             Pointer = null;
         }
         internal static OwnedDuckDbPreparedStatement Allocate()

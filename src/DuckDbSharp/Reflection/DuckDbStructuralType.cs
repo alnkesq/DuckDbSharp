@@ -77,9 +77,9 @@ namespace DuckDbSharp.Reflection
             return CreateOrReuseStructuralType(hash, () => new DuckDbStructuralType(hash, k));
         }
 
-        internal static DuckDbStructuralType CreateStructuralTypeForResult(duckdb_result* result, Type type)
+        internal unsafe static DuckDbStructuralType CreateStructuralTypeForResult(duckdb_result* result, Type type)
         {
-            return CreateStructuralTypeForResult(CreateStructuralTypeForResult(result), type);
+            return CreateStructuralTypeForResult(unsafe(CreateStructuralTypeForResult(result)), type);
         }
         internal static DuckDbStructuralType CreateStructuralTypeForResult(DuckDbStructuralType structuralType, Type type)
         {
@@ -87,7 +87,7 @@ namespace DuckDbSharp.Reflection
             return structuralType;
         }
 
-        internal static DuckDbStructuralType CreateStructuralTypeForResult(duckdb_result* result, bool expectSingleColumn = false)
+        internal unsafe static DuckDbStructuralType CreateStructuralTypeForResult(duckdb_result* result, bool expectSingleColumn = false)
         {
 
             var size = (int)unsafe(Methods.duckdb_column_count(result));

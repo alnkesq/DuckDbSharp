@@ -94,7 +94,7 @@ namespace DuckDbSharp
         {
             lock (database)
             {
-                var fns = FunctionUtils.RegisterFunctions(conn, methodsInAssembly);
+                var fns = unsafe(FunctionUtils.RegisterFunctions(conn, methodsInAssembly));
                 foreach (var item in fns)
                 {
                     EnqueueFunctionDisposal(item);
@@ -107,7 +107,7 @@ namespace DuckDbSharp
             lock (database)
             {
                 if (database.didRegisterFunctionsInTypes.Contains(methodsInType)) return;
-                var fns = FunctionUtils.RegisterFunctions(conn, methodsInType);
+                var fns = unsafe(FunctionUtils.RegisterFunctions(conn, methodsInType));
                 foreach (var item in fns)
                 {
                     EnqueueFunctionDisposal(item);

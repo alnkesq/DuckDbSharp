@@ -17,8 +17,11 @@ namespace DuckDbSharp.Bindings
         public void Dispose()
         {
             if (Pointer == null) return;
-            unsafe { Methods.duckdb_destroy_result(Pointer); }
-            BindingUtils.Free(Pointer);
+            unsafe
+            {
+                Methods.duckdb_destroy_result(Pointer);
+                BindingUtils.Free(Pointer);
+            }
             Pointer = null;
             Disposed?.Invoke();
         }

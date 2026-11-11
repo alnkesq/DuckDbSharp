@@ -60,37 +60,40 @@ namespace DuckDbSharp.Bindings
             try
             {
                 InitializeDllResolver();
-                var conn = DuckDbUtils.ConnectCore(&db);
-                foreach (var item in registerFunctionsInAssemblies)
+                unsafe
                 {
-                    FunctionUtils.RegisterFunctions(conn, item);
-                }
-
-                var dlls = GetMandatoryEnvironmentVariable("DUCKDBSHARP_USER_ASSEMBLY_PATH").Split([';', ','], StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
-                /*
-                var folders = dlls.Select(x => Path.GetDirectoryName(Path.GetFullPath(x))).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-                AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
-                {
-                    var name = new AssemblyName(e.Name).Name + ".dll";
-                    //Console.WriteLine("Want to load: " + name);
-                    foreach (var folder in folders)
+                    var conn = DuckDbUtils.ConnectCore(&db);
+                    foreach (var item in registerFunctionsInAssemblies)
                     {
-                        var p = Path.Combine(folder, name);
-                        //Console.WriteLine("Try: " + p);
-                        if (File.Exists(p))
-                        {
-                            //Console.WriteLine("Found!");
-                            return Assembly.LoadFrom(p);
-                        }
+                        FunctionUtils.RegisterFunctions(conn, item);
                     }
-                    //Console.WriteLine("NOT FOUND: " + name);
-                    return null;
-                };
-                */
-                foreach (var asmpath in dlls)
-                {
-                    var asm = Assembly.LoadFrom(asmpath);
-                    FunctionUtils.RegisterFunctions(conn, asm);
+                
+                    var dlls = GetMandatoryEnvironmentVariable("DUCKDBSHARP_USER_ASSEMBLY_PATH").Split([';', ','], StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
+                    /*
+                    var folders = dlls.Select(x => Path.GetDirectoryName(Path.GetFullPath(x))).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                    AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+                    {
+                        var name = new AssemblyName(e.Name).Name + ".dll";
+                        //Console.WriteLine("Want to load: " + name);
+                        foreach (var folder in folders)
+                        {
+                            var p = Path.Combine(folder, name);
+                            //Console.WriteLine("Try: " + p);
+                            if (File.Exists(p))
+                            {
+                                //Console.WriteLine("Found!");
+                                return Assembly.LoadFrom(p);
+                            }
+                        }
+                        //Console.WriteLine("NOT FOUND: " + name);
+                        return null;
+                    };
+                    */
+                    foreach (var asmpath in dlls)
+                    {
+                        var asm = Assembly.LoadFrom(asmpath);
+                        FunctionUtils.RegisterFunctions(conn, asm);
+                    }
                 }
             }
             catch (Exception ex)

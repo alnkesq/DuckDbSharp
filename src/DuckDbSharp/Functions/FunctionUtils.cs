@@ -91,11 +91,11 @@ namespace DuckDbSharp.Functions
 
         internal unsafe static FunctionInfo RegisterTableFunction(_duckdb_connection* conn, string name, Delegate deleg)
         {
-            return RegisterTableFunctionCore(conn, deleg.Method, name, deleg.Target);
+            return unsafe(RegisterTableFunctionCore(conn, deleg.Method, name, deleg.Target));
         }
         internal unsafe static FunctionInfo RegisterTableFunction(_duckdb_connection* conn, MethodInfo method)
         {
-            return RegisterTableFunctionCore(conn, method, GetRegistrationNameForMethod(method), null);
+            return unsafe(RegisterTableFunctionCore(conn, method, GetRegistrationNameForMethod(method), null));
         }
         internal unsafe static FunctionInfo RegisterScalarFunction(_duckdb_connection* conn, string name, Delegate deleg)
         {
@@ -172,7 +172,7 @@ namespace DuckDbSharp.Functions
         private readonly static SemaphoreSlim ParallelismSemaphore = new SemaphoreSlim(2);
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-        private static void ExecuteScalarFunction(duckdb_function_info_ptr p, _duckdb_data_chunk* chunk, _duckdb_vector* vector)
+        private unsafe static void ExecuteScalarFunction(duckdb_function_info_ptr p, _duckdb_data_chunk* chunk, _duckdb_vector* vector)
         {
             ArgumentsAndException? faultyArguments = null;
             FunctionInfo? funcInfo = null;
@@ -372,7 +372,7 @@ namespace DuckDbSharp.Functions
         [ThreadStatic]
         private static Dictionary<nint, NativeArenaSlim>?[]? t_scalarFunctionArenaForRecursionLevel;
 
-        private static FunctionInfo RegisterTableFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget)
+        private unsafe static FunctionInfo RegisterTableFunctionCore(_duckdb_connection* conn, MethodInfo method, string name, object? delegateTarget)
         {
             using var tableFunctionName = (ScopedString)name;
             var parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
@@ -536,7 +536,7 @@ namespace DuckDbSharp.Functions
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-        static void EnumerateFunction(duckdb_function_info_ptr p, _duckdb_data_chunk* chunk)
+        unsafe static void EnumerateFunction(duckdb_function_info_ptr p, _duckdb_data_chunk* chunk)
         {
             try
             {
@@ -598,19 +598,19 @@ namespace DuckDbSharp.Functions
         private readonly static MethodInfo EnumerateArrayGenericMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.EnumerateArrayGeneric), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         private readonly static MethodInfo EnumerateObjectArrayAsGenericMethod = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.EnumerateObjectArrayAsGeneric), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        internal static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Type type)
+        internal unsafe static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Type type)
         {
             var registered = new List<FunctionInfo>();
-            RegisterFunctions(conn, type, registered);
+            unsafe { RegisterFunctions(conn, type, registered); }
             return registered;
         }
-        internal static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Assembly assembly)
+        internal unsafe static List<FunctionInfo> RegisterFunctions(_duckdb_connection* conn, Assembly assembly)
         {
             var registered = new List<FunctionInfo>();
             Type[] types = GetTypesBestEffort(assembly);
             foreach (var type in types)
             {
-                RegisterFunctions(conn, type, registered);
+                unsafe { RegisterFunctions(conn, type, registered); }
             }
             return registered;
         }
@@ -631,7 +631,7 @@ namespace DuckDbSharp.Functions
             return types;
         }
 
-        private static void RegisterFunctions(_duckdb_connection* conn, Type type, List<FunctionInfo> output)
+        private unsafe static void RegisterFunctions(_duckdb_connection* conn, Type type, List<FunctionInfo> output)
         {
             //if (!type.Name.Contains("DuckDbFunctions")) return;
             foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))

@@ -37,7 +37,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 CheckDisposed();
-                return DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
+                return unsafe(DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items));
             }
         }
 
@@ -95,7 +95,7 @@ namespace DuckDbSharp
             lock (this)
             {
                 OnBeforeExecute(sql);
-                var enumerable = DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this);
+                var enumerable = unsafe(DuckDbUtils.Execute(Pointer, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this));
                 elementType = TypeSniffedEnumerable.TryGetEnumerableElementType(enumerable.GetType())!;
                 enumerator = enumerable.GetEnumerator();
             }

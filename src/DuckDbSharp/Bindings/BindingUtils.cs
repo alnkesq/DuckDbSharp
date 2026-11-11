@@ -50,7 +50,7 @@ namespace DuckDbSharp.Bindings
             var mem = NativeMemory.AllocZeroed((nuint)sizeof(T));
             return (T*)mem;
         }
-        public static void Free<T>(T* ptr) where T : unmanaged
+        public unsafe static void Free<T>(T* ptr) where T : unmanaged
         {
             NativeMemory.Free(ptr);
         }
@@ -68,7 +68,7 @@ namespace DuckDbSharp.Bindings
             return copy;
         }
 
-        public static void CheckAppenderError(duckdb_state state, _duckdb_appender* appender)
+        public unsafe static void CheckAppenderError(duckdb_state state, _duckdb_appender* appender)
         {
             if (state != duckdb_state.DuckDBSuccess)
                 throw new DuckDbException(unsafe(DuckDbUtils.ToStringUtf8(Methods.duckdb_appender_error(appender))));

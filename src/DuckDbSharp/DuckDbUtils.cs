@@ -84,7 +84,7 @@ namespace DuckDbSharp
             return unsafe(DuckDbDatabase.AcquireConnection(path, out ownerDb));
         }
 
-        internal static OwnedDuckDbConnection ConnectCore(_duckdb_database* db)
+        internal unsafe static OwnedDuckDbConnection ConnectCore(_duckdb_database* db)
         {
             _duckdb_connection* conn = null;
             BindingUtils.CheckState(unsafe(Methods.duckdb_connect(db, &conn)));
@@ -99,7 +99,7 @@ namespace DuckDbSharp
             return unsafe(new(conn, () => db.Dispose()));
         }
 
-        private static OwnedDuckDbPreparedStatement CreatePreparedStatement(_duckdb_connection* conn, string sql)
+        private static unsafe OwnedDuckDbPreparedStatement CreatePreparedStatement(_duckdb_connection* conn, string sql)
         {
             using var sqlBytes = (ScopedString)sql;
             using var prepared = OwnedDuckDbPreparedStatement.Allocate();
@@ -133,12 +133,12 @@ namespace DuckDbSharp
                         var p = parameters[i];
                         if (IsEnumerableParameter(p))
                         {
-                            RegisterQueryParameterFunction(conn, token, i - simpleParameters.Count, enumerableParameterSlots!, p);
+                            unsafe { RegisterQueryParameterFunction(conn, token, i - simpleParameters.Count, enumerableParameterSlots!, p); }
                         }
                         else simpleParameters.Add(p);
                     }
                 }
-                using var prepared = CreatePreparedStatement(conn, sql);
+                using var prepared = unsafe(CreatePreparedStatement(conn, sql));
                 var simpleParamCount = unsafe(Methods.duckdb_nparams(prepared));
 
                 if (simpleParamCount != (ulong)simpleParameters.Count) throw new DuckDbException($"Expected {simpleParamCount} parameters, but {simpleParameters.Count} were provided.");
@@ -257,7 +257,7 @@ namespace DuckDbSharp
 
         }
 
-        private static void RegisterQueryParameterFunction(_duckdb_connection* conn, EnumerableParametersInvocationToken token, int i, List<EnumerableParameterSlot?> slots, object value)
+        private unsafe static void RegisterQueryParameterFunction(_duckdb_connection* conn, EnumerableParametersInvocationToken token, int i, List<EnumerableParameterSlot?> slots, object value)
         {
             var parameterId = i + 1;
             var funcname = "enumerable_parameter_internal_" + parameterId;
@@ -301,8 +301,8 @@ namespace DuckDbSharp
             return TypeSniffedEnumerable.TryGetEnumerableElementType(type) != null;
         }
 
-        internal static IEnumerable Execute(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
-        internal static IEnumerable<T> Execute<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => unsafe(Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, commandOptions, ownerConnection));
+        internal unsafe static IEnumerable Execute(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => unsafe(Execute((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection));
+        internal unsafe static IEnumerable<T> Execute<T>(nint conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection) => unsafe(Execute<T>((_duckdb_connection*)conn, sql, parameters, enumerableParameterSlots, commandOptions, ownerConnection));
 
         internal unsafe static IEnumerable<T> Execute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
@@ -331,7 +331,7 @@ namespace DuckDbSharp
         internal unsafe static void PrepareExecute<T>(_duckdb_connection* conn, string sql, object?[]? parameters, out OwnedDuckDbResult result, out DuckDbStructuralType structuralType, List<EnumerableParameterSlot?>? enumerableParameterSlots, CommandOptions commandOptions)
         {
             result = unsafe(ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions));
-            structuralType = DuckDbStructuralType.CreateStructuralTypeForResult(result, typeof(T));
+            structuralType = unsafe(DuckDbStructuralType.CreateStructuralTypeForResult(result, typeof(T)));
         }
 
         internal static DuckDbStructuralType GetSingleWrappedColumnType(DuckDbStructuralType structuralType)
@@ -346,16 +346,16 @@ namespace DuckDbSharp
             using var _ = unsafe(ExecuteCore(conn, sql, parameters, enumerableParameterSlots, CommandOptions.NoStreaming));
         }
 
-        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal unsafe static IEnumerable Execute(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
-            return Execute(conn, sql, parameters, expectSingleColumn: false, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection);
+            return unsafe(Execute(conn, sql, parameters, expectSingleColumn: false, enumerableParameterSlots, typeGenerationContext, commandOptions, ownerConnection));
         }
 
-        internal static IEnumerable Execute(_duckdb_connection* conn, string sql, object?[]? parameters, bool expectSingleColumn, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
+        internal unsafe static IEnumerable Execute(_duckdb_connection* conn, string sql, object?[]? parameters, bool expectSingleColumn, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext, CommandOptions commandOptions, TypedDuckDbConnectionBase? ownerConnection)
         {
             using var result = unsafe(ExecuteCore(conn, sql, parameters, enumerableParameterSlots, commandOptions));
 
-            var resultStructuralType = DuckDbStructuralType.CreateStructuralTypeForResult(result, expectSingleColumn);
+            var resultStructuralType = unsafe(DuckDbStructuralType.CreateStructuralTypeForResult(result, expectSingleColumn));
             if (!SerializerCreationContext.StructuralHashToRegisteredClrType.TryGetValue(resultStructuralType.Hash, out var resultType))
             {
                 lock (typeGenerationContext)
@@ -892,11 +892,11 @@ namespace DuckDbSharp
         private readonly static MethodInfo InsertRangeBoxedMethod = typeof(DuckDbUtils).GetMethod(nameof(InsertRangeBoxed), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
 
-        private static void InsertRangeBoxed<T>(nint conn, string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
+        private unsafe static void InsertRangeBoxed<T>(nint conn, string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
         {
-            InsertRange((_duckdb_connection*)conn, destinationSchema, destinationTableOrView, items.Select(x => new Box<T>() { Value = x }));
+            unsafe { InsertRange((_duckdb_connection*)conn, destinationSchema, destinationTableOrView, items.Select(x => new Box<T>() { Value = x })); }
         }
-        public static long InsertRange<T>(_duckdb_connection* conn, string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
+        public unsafe static long InsertRange<T>(_duckdb_connection* conn, string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
         {
             if (SerializerCreationContext.IsWrappedSingleColumn(typeof(T)))
             {
@@ -906,7 +906,7 @@ namespace DuckDbSharp
 
             using var destinationSchemaBytes = (ScopedString)destinationSchema;
             using var destinationTableOrViewBytes = (ScopedString)destinationTableOrView;
-            BindingUtils.CheckAppenderError(unsafe(Methods.duckdb_appender_create(conn, destinationSchemaBytes, destinationTableOrViewBytes, &appender.Pointer)), appender);
+            unsafe { BindingUtils.CheckAppenderError(Methods.duckdb_appender_create(conn, destinationSchemaBytes, destinationTableOrViewBytes, &appender.Pointer), appender); }
             RootSerializer rootSerializer;
             lock (SerializerCreationContext.Global)
             {
@@ -936,7 +936,7 @@ namespace DuckDbSharp
 
             }
 
-            BindingUtils.CheckAppenderError(unsafe(Methods.duckdb_appender_close(appender)), appender);
+            unsafe { BindingUtils.CheckAppenderError(Methods.duckdb_appender_close(appender), appender); }
 
 
             return insertedItems;
@@ -944,7 +944,7 @@ namespace DuckDbSharp
 
         internal unsafe static object? ExecuteScalar(_duckdb_connection* conn, string sql, object?[]? parameters, List<EnumerableParameterSlot?>? enumerableParameterSlots, TypeGenerationContext typeGenerationContext)
         {
-            var box = DuckDbUtils.Execute(conn, sql, parameters, expectSingleColumn: true, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Cast<object>().Single();
+            var box = unsafe(DuckDbUtils.Execute(conn, sql, parameters, expectSingleColumn: true, enumerableParameterSlots, typeGenerationContext, CommandOptions.NoStreaming, null).Cast<object>().Single());
             var fields = box.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
             if (fields.Length != 1) throw new Exception($"A scalar query returned {fields.Length} columns.");
             return fields[0].GetValue(box);

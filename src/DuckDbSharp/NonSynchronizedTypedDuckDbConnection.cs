@@ -29,7 +29,7 @@ namespace DuckDbSharp
         public override long InsertRange<T>(string? destinationSchema, string destinationTableOrView, IEnumerable<T> items)
         {
             OnBeforeExecute(null);
-            return DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items);
+            return unsafe(DuckDbUtils.InsertRange(conn, destinationSchema, destinationTableOrView, items));
         }
 
         public override IEnumerable<T> ExecuteWithOptions<T>(CommandOptions options, string sql, params object?[]? parameters)
@@ -43,7 +43,7 @@ namespace DuckDbSharp
         {
             InitOptions(ref options);
             OnBeforeExecute(sql);
-            return DuckDbUtils.Execute(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this);
+            return unsafe(DuckDbUtils.Execute(conn, sql, parameters, EnumerableParameterSlots, TypeGenerationContext, options, this));
         }
 
         public override T ExecuteScalar<T>(string sql, params object?[]? parameters)
