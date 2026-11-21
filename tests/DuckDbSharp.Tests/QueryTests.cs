@@ -141,7 +141,7 @@ namespace DuckDbSharp.Tests
         [Fact]
         public void ListParameterAsArray()
         {
-            Assert.Equal([1, 2, 3], db.ExecuteScalar<int[]>("select array_transform(array_parameter_1(), x -> x.Value)", [new int[] { 1, 2, 3 }]));
+            Assert.Equal([1, 2, 3], db.ExecuteScalar<int[]>("select array_transform(array_parameter_1(), lambda x: x.Value)", [new int[] { 1, 2, 3 }]));
         }
 
 

@@ -25,7 +25,7 @@
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <None Include="DuckDB.jpg" Pack="true" PackagePath="\" />
-    <PackageReference Include="DuckDB.NET.Bindings.Full" Version="1.5.0" />
+    <PackageReference Include="DuckDB.NET.Bindings.Full" Version="2.0.1-preview.1" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AgileObjects.ReadableExpressions" Version="4.1.3" />

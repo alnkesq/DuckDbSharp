@@ -51,6 +51,7 @@ namespace DuckDbSharp.Bindings
         DUCKDB_TYPE_TIME_NS,
         DUCKDB_TYPE_GEOMETRY,
         DUCKDB_TYPE_VARIANT,
+        DUCKDB_TYPE_TIMESTAMP_TZ_NS,
     }
 }
 
